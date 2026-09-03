@@ -1,6 +1,7 @@
 'use client';
 
-/* Heart toggle - add/remove a product from favorites. */
+/* Heart toggle - add/remove a product from favorites.
+   Glyph: approved heart.svg asset, colored via currentColor. */
 
 import { usePrefs } from './prefs-context';
 
@@ -10,7 +11,7 @@ interface Props {
   className?: string;
 }
 
-export default function FavButton({ slug, size = 20, className }: Props) {
+export default function FavButton({ slug, size = 17, className }: Props) {
   const { isFavorite, toggleFavorite } = usePrefs();
   const on = isFavorite(slug);
 
@@ -21,13 +22,17 @@ export default function FavButton({ slug, size = 20, className }: Props) {
       aria-pressed={on}
       onClick={(e) => { e.stopPropagation(); e.preventDefault(); toggleFavorite(slug); }}
     >
-      <svg viewBox="0 0 24 24" width={size} height={size} aria-hidden="true">
+      <svg viewBox="0 0 24 24" width={size} height={size} fill="none" aria-hidden="true">
+        {/* solid fill layer - fades in when active */}
         <path
-          d="M12 21s-7.1-4.4-9.5-8.2C.7 9.9 1.6 6.4 4.7 5.3c2-.7 4 .1 5.8 2 .5.6 1 .6 1.5 0 1.8-1.9 3.8-2.7 5.8-2 3.1 1.1 4 4.6 2.2 7.5C17.1 16.6 12 21 12 21z"
-          fill={on ? 'currentColor' : 'none'}
-          stroke="currentColor"
-          strokeWidth="1.8"
-          strokeLinejoin="round"
+          className="fav-fill"
+          d="M12 5.5C9.5 3 6.8 2.8 4.9 3.7 2.9 4.6 1.5 6.7 1.5 9.14c0 2.4 1 4.2 2.3 5.7 1.4 1.5 3.1 2.7 4.6 3.9.5.4 1 .8 1.6 1.1.6.4 1.3.66 2 .66s1.4-.26 2-.66c.6-.3 1.1-.7 1.6-1.1 1.5-1.2 3.2-2.4 4.6-3.9 1.3-1.5 2.3-3.3 2.3-5.7 0-2.44-1.4-4.54-3.4-5.44-1.9-.9-4.6-.7-7.1 1.8z"
+          fill="currentColor"
+        />
+        {/* outline layer - the approved heart.svg path */}
+        <path
+          d="M8.96173 18.9109L9.42605 18.3219L8.96173 18.9109ZM12 5.50063L11.4596 6.02073C11.601 6.16763 11.7961 6.25063 12 6.25063C12.2039 6.25063 12.399 6.16763 12.5404 6.02073L12 5.50063ZM15.0383 18.9109L15.5026 19.4999L15.0383 18.9109ZM9.42605 18.3219C7.91039 17.1271 6.25307 15.9603 4.93829 14.4798C3.64922 13.0282 2.75 11.3345 2.75 9.1371H1.25C1.25 11.8026 2.3605 13.8361 3.81672 15.4758C5.24723 17.0866 7.07077 18.3752 8.49742 19.4999L9.42605 18.3219ZM2.75 9.1371C2.75 6.98623 3.96537 5.18252 5.62436 4.42419C7.23607 3.68748 9.40166 3.88258 11.4596 6.02073L12.5404 4.98053C10.0985 2.44352 7.26409 2.02539 5.00076 3.05996C2.78471 4.07292 1.25 6.42503 1.25 9.1371H2.75ZM8.49742 19.4999C9.00965 19.9037 9.55954 20.3343 10.1168 20.6599C10.6739 20.9854 11.3096 21.25 12 21.25V19.75C11.6904 19.75 11.3261 19.6293 10.8736 19.3648C10.4213 19.1005 9.95208 18.7366 9.42605 18.3219L8.49742 19.4999ZM15.5026 19.4999C16.9292 18.3752 18.7528 17.0866 20.1833 15.4758C21.6395 13.8361 22.75 11.8026 22.75 9.1371H21.25C21.25 11.3345 20.3508 13.0282 19.0617 14.4798C17.7469 15.9603 16.0896 17.1271 14.574 18.3219L15.5026 19.4999ZM22.75 9.1371C22.75 6.42503 21.2153 4.07292 18.9992 3.05996C16.7359 2.02539 13.9015 2.44352 11.4596 4.98053L12.5404 6.02073C14.5983 3.88258 16.7639 3.68748 18.3756 4.42419C20.0346 5.18252 21.25 6.98623 21.25 9.1371H22.75ZM14.574 18.3219C14.0479 18.7366 13.5787 19.1005 13.1264 19.3648C12.6739 19.6293 12.3096 19.75 12 19.75V21.25C12.6904 21.25 13.3261 20.9854 13.8832 20.6599C14.4405 20.3343 14.9903 19.9037 15.5026 19.4999L14.574 18.3219Z"
+          fill="currentColor"
         />
       </svg>
     </button>
