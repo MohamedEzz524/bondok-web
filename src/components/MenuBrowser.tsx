@@ -76,6 +76,7 @@ export default function MenuBrowser({ categories }: Props) {
   const [sort, setSort] = useState<'default' | 'name-asc' | 'name-desc' | 'price-asc' | 'price-desc'>('default');
   const [activeSection, setActiveSection] = useState<string>(categories[0]?.slug ?? '');
   const [selected, setSelected] = useState<{ cat: string; slug: string } | null>(null);
+  const promoRef = useRef<HTMLDivElement>(null);
 
   /* ---------- deep links: ?q= ?cat= ?item= ---------- */
   useEffect(() => {
@@ -301,33 +302,53 @@ export default function MenuBrowser({ categories }: Props) {
       {/* full-bleed branch banner (reference pattern) */}
       <div className="branch-banner">
         <div className="branch-banner-inner">
-          <div className="branch-banner-text">
+          <button className="branch-banner-text" onClick={() => openOrder('pickup')}>
             <strong>
               <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><path fill="currentColor" d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5z" /></svg>
               Choose a Location
             </strong>
             <span>For availability and prices</span>
-          </div>
+          </button>
           <button className="branch-banner-link" onClick={() => openOrder('pickup')}>See Branches</button>
         </div>
       </div>
 
       {view === 'launcher' ? (
         <>
-          {/* promo cards row (reference launcher structure) */}
-          <div className="promo-row">
-            {heroSlides.map((s) => (
-              <Link key={s.title} href={s.href} className="promo-mini">
-                <div className="promo-mini-text">
-                  <h3>{s.title}</h3>
-                  <p>{s.text}</p>
-                </div>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={s.image} alt={s.alt} loading="lazy" />
-              </Link>
-            ))}
+          {/* promo cards row (reference launcher structure);
+              becomes a carousel only when more than 3 promos exist */}
+          <div className="promo-wrap">
+            {heroSlides.length > 3 && (
+              <button
+                className="promo-arrow promo-arrow-prev"
+                aria-label="Previous promotions"
+                onClick={() => promoRef.current?.scrollBy({ left: -promoRef.current.clientWidth / 3, behavior: 'smooth' })}
+              >
+                <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M15.4 7.4 14 6l-6 6 6 6 1.4-1.4L10.8 12z" /></svg>
+              </button>
+            )}
+            <div className={`promo-row${heroSlides.length > 3 ? ' is-carousel' : ''}`} ref={promoRef}>
+              {heroSlides.map((s) => (
+                <Link key={s.title} href={s.href} className="promo-mini">
+                  <div className="promo-mini-text">
+                    <h3>{s.title}</h3>
+                    <p>{s.text}</p>
+                  </div>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={s.image} alt={s.alt} loading="lazy" />
+                </Link>
+              ))}
+            </div>
+            {heroSlides.length > 3 && (
+              <button
+                className="promo-arrow promo-arrow-next"
+                aria-label="More promotions"
+                onClick={() => promoRef.current?.scrollBy({ left: promoRef.current.clientWidth / 3, behavior: 'smooth' })}
+              >
+                <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8.6 7.4 10 6l6 6-6 6-1.4-1.4L13.2 12z" /></svg>
+              </button>
+            )}
           </div>
-          {searchBar}
           {/* launcher: one tile per category (reference /menu structure) */}
           <div className="cat-tiles">
             {categories.map((c) => (

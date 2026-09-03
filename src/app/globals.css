@@ -372,7 +372,7 @@ ul { list-style: none; margin: 0; padding: 0; }
 /* Layout rule: page content lives in a 1320px container with 32px gutters.
    Full-width tracks (category bar, carousels) break OUT of the container and
    get edge padding equal to the container gutter instead. */
-.menu-page { width: 100%; max-width: 1320px; margin: 0 auto; padding-inline: 32px; }
+.menu-page { width: 100%; max-width: 1320px; margin: 0 auto; padding-inline: 32px; padding-bottom: 64px; }
 .menu-head { text-align: center; padding: 48px 0 20px; }
 .menu-head h1 { font-size: 42px; font-weight: 800; color: var(--text); letter-spacing: -.5px; }
 .menu-head p { color: var(--text-muted); font-size: 16px; margin-top: 6px; }
@@ -385,11 +385,14 @@ ul { list-style: none; margin: 0; padding: 0; }
 }
 .branch-banner-inner {
   max-width: 1320px; margin: 0 auto;
-  padding: 14px max(calc(50vw - 628px), 32px);
-  padding-block: 14px;
+  padding: 14px 32px;                 /* same container + gutters as menu content */
   display: flex; align-items: center; justify-content: space-between; gap: 12px;
 }
-.branch-banner-text { display: flex; flex-direction: column; line-height: 1.35; }
+.branch-banner-text {
+  display: flex; flex-direction: column; line-height: 1.35;
+  color: #fff; text-align: left; padding: 0; cursor: pointer;
+}
+.branch-banner-text:hover strong { text-decoration: underline; }
 .branch-banner-text strong { font-size: 17px; font-weight: 800; display: inline-flex; align-items: center; gap: 7px; }
 .branch-banner-text span { font-size: 13.5px; opacity: .92; }
 .branch-banner-link {
@@ -496,6 +499,25 @@ ul { list-style: none; margin: 0; padding: 0; }
 .pmodal-add { flex: 1; padding: 13px; font-size: 16px; }
 
 /* promo cards row above the tiles (reference launcher structure) */
+.promo-wrap { position: relative; }
+.promo-row.is-carousel {
+  display: flex; overflow-x: auto;
+  scroll-snap-type: x mandatory; scrollbar-width: none;
+}
+.promo-row.is-carousel::-webkit-scrollbar { display: none; }
+.promo-row.is-carousel .promo-mini { flex: 0 0 calc((100% - 32px) / 3); scroll-snap-align: start; }
+.promo-arrow {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  width: 38px; height: 38px; border-radius: 999px;
+  background: var(--white); color: var(--text);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 0 5px rgba(26,26,26,.22);
+  z-index: 5;
+}
+.promo-arrow:hover { background: #f2f2f2; }
+.promo-arrow-prev { left: -14px; }
+.promo-arrow-next { right: -14px; }
+
 .promo-row {
   display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
   margin-bottom: 24px;
