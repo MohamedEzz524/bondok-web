@@ -512,6 +512,8 @@ ul { list-style: none; margin: 0; padding: 0; }
 
 .promo-row {
   display: flex; overflow-x: auto; gap: 16px;
+  /* centered when cards fit (like the hero); 'safe' start-aligns when overflowing */
+  justify-content: safe center;
   scroll-snap-type: x mandatory; scrollbar-width: none;
   margin-bottom: 24px;
 }
