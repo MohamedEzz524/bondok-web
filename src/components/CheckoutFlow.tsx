@@ -10,6 +10,7 @@ import Link from 'next/link';
 import { AnimatePresence, motion } from 'motion/react';
 import { useCart } from './cart-context';
 import { EVENTS, publish } from '@/lib/pubsub';
+import OtpInput from './OtpInput';
 
 type Step = 'phone' | 'otp' | 'address' | 'payment' | 'confirm' | 'done';
 
@@ -42,6 +43,8 @@ export default function CheckoutFlow() {
   const [otp, setOtp] = useState('');
   const [address, setAddress] = useState<Address>({ area: '', street: '', building: '', floor: '', apartment: '', notes: '' });
   const [payMethod, setPayMethod] = useState<'cod' | 'card'>('cod');
+  const [savedAddr, setSavedAddr] = useState<Address | null>(null);
+  const [useNewAddr, setUseNewAddr] = useState(false);
   const [error, setError] = useState('');
   const orderIdRef = useRef('');
 
@@ -71,8 +74,15 @@ export default function CheckoutFlow() {
     go('otp');   // live build: SMS gateway sends the code here
   };
 
-  const submitOtp = () => {
-    if (otp.trim() !== DEMO_OTP) { setError(`Wrong code. Demo build: use ${DEMO_OTP}.`); return; }
+  const submitOtp = (code?: string) => {
+    const v = (code ?? otp).trim();
+    if (v !== DEMO_OTP) { setError(`Wrong code. Demo build: use ${DEMO_OTP}.`); return; }
+    /* returning customer: load saved address for this phone (CRM-backed at launch) */
+    try {
+      const raw = localStorage.getItem(`bondok-addr-${phone}`);
+      if (raw) setSavedAddr(JSON.parse(raw));
+    } catch { /* ignore */ }
+    setUseNewAddr(false);
     go('address');
   };
 
@@ -80,6 +90,13 @@ export default function CheckoutFlow() {
     if (!address.area.trim() || !address.street.trim() || !address.building.trim()) {
       setError('Area, street, and building are required.'); return;
     }
+    try { localStorage.setItem(`bondok-addr-${phone}`, JSON.stringify(address)); } catch { /* ignore */ }
+    go('payment');
+  };
+
+  const useSaved = () => {
+    if (!savedAddr) return;
+    setAddress(savedAddr);
     go('payment');
   };
 
@@ -127,22 +144,28 @@ export default function CheckoutFlow() {
               Sent to <strong>{phone}</strong> · <button className="step-link" onClick={() => go('phone')}>change</button>
               <br /><span className="step-demo">Demo build: the code is {DEMO_OTP}. Live SMS arrives with the gateway.</span>
             </p>
-            <input
-              className="field field-otp"
-              type="text" inputMode="numeric" placeholder="• • • •" maxLength={4}
-              value={otp}
-              onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
-              onKeyDown={(e) => e.key === 'Enter' && submitOtp()}
-              autoFocus
-            />
+            <OtpInput value={otp} onChange={setOtp} onComplete={(v) => submitOtp(v)} />
             {error && <p className="step-error" role="alert">{error}</p>}
-            <button className="btn btn-solid step-next" onClick={submitOtp}>Verify</button>
+            <button className="btn btn-solid step-next" onClick={() => submitOtp()}>Verify</button>
           </motion.div>
         )}
 
         {step === 'address' && (
           <motion.div key="address" className="step-card" {...slide}>
             <h2>Delivery address</h2>
+            {savedAddr && !useNewAddr && (
+              <div className="saved-addr">
+                <div className="saved-addr-text">
+                  <strong>Use your saved address</strong>
+                  <span>{savedAddr.building} {savedAddr.street}, {savedAddr.area}{savedAddr.floor && `, floor ${savedAddr.floor}`}{savedAddr.apartment && `, apt ${savedAddr.apartment}`}</span>
+                </div>
+                <div className="saved-addr-actions">
+                  <button className="btn btn-solid" onClick={useSaved}>Deliver Here</button>
+                  <button className="btn btn-outline" onClick={() => setUseNewAddr(true)}>New Address</button>
+                </div>
+              </div>
+            )}
+            {(!savedAddr || useNewAddr) && (
             <div className="field-grid">
               <input className="field" placeholder="Area / District *" value={address.area} onChange={(e) => setAddress({ ...address, area: e.target.value })} />
               <input className="field" placeholder="Street *" value={address.street} onChange={(e) => setAddress({ ...address, street: e.target.value })} />
@@ -151,11 +174,14 @@ export default function CheckoutFlow() {
               <input className="field" placeholder="Apartment" value={address.apartment} onChange={(e) => setAddress({ ...address, apartment: e.target.value })} />
               <input className="field" placeholder="Delivery notes (optional)" value={address.notes} onChange={(e) => setAddress({ ...address, notes: e.target.value })} />
             </div>
+            )}
             <p className="step-demo">Coverage check &amp; delivery fees activate with branch data / POS API.</p>
             {error && <p className="step-error" role="alert">{error}</p>}
             <div className="step-nav">
               <button className="btn btn-outline" onClick={() => go('otp')}>Back</button>
-              <button className="btn btn-solid step-next" onClick={submitAddress}>Continue</button>
+              {(!savedAddr || useNewAddr) && (
+                <button className="btn btn-solid step-next" onClick={submitAddress}>Continue</button>
+              )}
             </div>
           </motion.div>
         )}
@@ -186,7 +212,9 @@ export default function CheckoutFlow() {
             <ul className="confirm-list">
               {items.map((i) => (
                 <li key={i.slug}>
-                  <span>{i.qty}× {i.name}</span>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={i.image} alt="" className="confirm-thumb" />
+                  <span className="confirm-name">{i.qty}× {i.name}</span>
                   <strong>{i.price !== undefined ? `EGP ${i.price * i.qty}` : '—'}</strong>
                 </li>
               ))}
@@ -194,11 +222,21 @@ export default function CheckoutFlow() {
             <div className="confirm-meta">
               <p><strong>Deliver to:</strong> {address.building} {address.street}, {address.area}{address.floor && `, floor ${address.floor}`}{address.apartment && `, apt ${address.apartment}`}</p>
               <p><strong>Phone:</strong> {phone} · <strong>Payment:</strong> Cash on Delivery</p>
-              <p className="confirm-total">
-                <span>Subtotal</span>
-                <strong>{subtotal === null ? 'Prices arrive with menu data' : `EGP ${subtotal}`}</strong>
-              </p>
-              <p className="step-demo">+ delivery fee (calculated per branch at launch)</p>
+              {(() => {
+                const discount = 0;              /* offers engine plugs in here */
+                const deliveryFee: number | null = null;   /* per-branch fee via POS API */
+                const total = subtotal === null ? null : subtotal - discount + (deliveryFee ?? 0);
+                return (
+                  <div className="totals">
+                    <p className="totals-row"><span>Subtotal</span><strong>{subtotal === null ? '—' : `EGP ${subtotal}`}</strong></p>
+                    {discount > 0 && (
+                      <p className="totals-row totals-discount"><span>Discount</span><strong>− EGP {discount}</strong></p>
+                    )}
+                    <p className="totals-row"><span>Delivery fee</span><strong>{deliveryFee === null ? 'at launch' : `EGP ${deliveryFee}`}</strong></p>
+                    <p className="totals-row totals-total"><span>Total</span><strong>{total === null ? 'Prices arrive with menu data' : `EGP ${total}`}</strong></p>
+                  </div>
+                );
+              })()}
             </div>
             <div className="step-nav">
               <button className="btn btn-outline" onClick={() => go('payment')}>Back</button>

@@ -34,7 +34,7 @@ export const heroSlides: HeroSlide[] = [
     cta: 'Order Now',
     image: '/bondok/hero-12pcs.png',
     alt: '12 Pcs Meal',
-    href: '/menu',
+    href: '/menu/meals/12-pcs-meal',
   },
   {
     title: 'NEW Shrimp Roll',
@@ -42,7 +42,7 @@ export const heroSlides: HeroSlide[] = [
     cta: 'Order Now',
     image: '/bondok/hero-shrimp-roll.png',
     alt: 'Shrimp Roll',
-    href: '/menu',
+    href: '/menu/rolls/shrimp-roll',
   },
   {
     title: '12 Tenders Feast',
@@ -50,7 +50,7 @@ export const heroSlides: HeroSlide[] = [
     cta: 'Order Now',
     image: '/bondok/hero-tenders.png',
     alt: '12 Pcs Tenders',
-    href: '/menu',
+    href: '/menu/kids-tenders/12-pcs-tenders',
   },
 ];
 
