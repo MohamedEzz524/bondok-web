@@ -21,6 +21,7 @@ export interface MenuCategory {
   slug: string;
   name: string;
   blurb: string;
+  cover: string;         // representative photo for the category tile
   products: Product[];
 }
 
@@ -30,6 +31,7 @@ const baseCategories: MenuCategory[] = [
   {
     slug: 'sandwiches',
     name: 'Specialty Sandwiches',
+    cover: img('sandwiches', 'chicken-cheddar-jalapeno'),
     blurb: 'Bold flavors stacked on crispy chicken.',
     products: [
       { slug: 'chicken-cheddar-jalapeno', name: 'Chicken Cheddar Jalapeno', image: img('sandwiches', 'chicken-cheddar-jalapeno') },
@@ -43,6 +45,7 @@ const baseCategories: MenuCategory[] = [
   {
     slug: 'fillet',
     name: 'Chicken Fillet',
+    cover: img('fillet', 'chicken-fillet'),
     blurb: 'Our signature fillet - single, double, or triple.',
     products: [
       { slug: 'chicken-fillet', name: 'Chicken Fillet', image: img('fillet', 'chicken-fillet') },
@@ -53,6 +56,7 @@ const baseCategories: MenuCategory[] = [
   {
     slug: 'grilled',
     name: 'Grilled & Turkey',
+    cover: img('grilled', 'grilled-chicken'),
     blurb: 'Grilled to perfection, lighter but loaded.',
     products: [
       { slug: 'grilled-chicken', name: 'Grilled Chicken', image: img('grilled', 'grilled-chicken') },
@@ -66,6 +70,7 @@ const baseCategories: MenuCategory[] = [
   {
     slug: 'burgers',
     name: 'Burgers',
+    cover: img('burgers', 'texas-and-beef-burger'),
     blurb: 'Beef done the Bondok way.',
     products: [
       { slug: 'mushroom-burger', name: 'Mushroom Burger', image: img('burgers', 'mushroom-burger') },
@@ -82,6 +87,7 @@ const baseCategories: MenuCategory[] = [
   {
     slug: 'rolls',
     name: 'Rolls & More',
+    cover: img('rolls', 'shrimp-roll'),
     blurb: 'Wrapped tight, loaded with sauce.',
     products: [
       { slug: 'chicken-fillet-roll', name: 'Chicken Fillet Roll', image: img('rolls', 'chicken-fillet-roll') },
@@ -96,6 +102,7 @@ const baseCategories: MenuCategory[] = [
   {
     slug: 'meals',
     name: 'Fried Chicken Meals',
+    cover: img('meals', 'bondok-meal'),
     blurb: 'Golden buckets and meals made for sharing.',
     products: [
       { slug: 'bondok-meal', name: 'Bondok Meal', image: img('meals', 'bondok-meal') },
@@ -111,6 +118,7 @@ const baseCategories: MenuCategory[] = [
   {
     slug: 'kids-tenders',
     name: 'Kids, Rizo & Tenders',
+    cover: img('kids-tenders', '6-pcs-tenders'),
     blurb: 'Little meals, rice bowls, and crispy tenders.',
     products: [
       { slug: 'fried-chicken-kids-meal', name: 'Fried Chicken Kids Meal', image: img('kids-tenders', 'fried-chicken-kids-meal') },
@@ -129,6 +137,7 @@ const baseCategories: MenuCategory[] = [
   {
     slug: 'sides',
     name: 'Sides & Sauces',
+    cover: img('sides', 'cheese-fries'),
     blurb: 'The perfect partners for every meal.',
     products: [
       { slug: 'french-fries', name: 'French Fries', image: img('sides', 'french-fries') },

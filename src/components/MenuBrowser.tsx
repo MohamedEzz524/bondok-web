@@ -1,12 +1,14 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { flushSync } from 'react-dom';
 import { useSearchParams } from 'next/navigation';
 import { useCart } from './cart-context';
+import { useUI } from './ui-context';
 import { EVENTS, publish } from '@/lib/pubsub';
 import type { MenuCategory, Product, Protein, Size } from '@/lib/menu-data';
 import CloseIcon from './CloseIcon';
+import ProductModal from './ProductModal';
 
 interface Props {
   categories: MenuCategory[];
@@ -34,11 +36,7 @@ interface Filters {
 }
 
 const emptyFilters = (): Filters => ({
-  sizes: new Set(),
-  proteins: new Set(),
-  spicy: false,
-  cheesy: false,
-  priceMax: null,
+  sizes: new Set(), proteins: new Set(), spicy: false, cheesy: false, priceMax: null,
 });
 
 function matches(p: Product, f: Filters, q: string): boolean {
@@ -51,19 +49,51 @@ function matches(p: Product, f: Filters, q: string): boolean {
   return true;
 }
 
+/* size-variant siblings (single/double/triple) inside the same category */
+function variantsOf(cat: MenuCategory, p: Product): Product[] | null {
+  if (!p.size) return null;
+  const base = p.slug.replace(/-(double|triple)$/, '');
+  const sibs = cat.products.filter(
+    (x) => x.slug === base || x.slug === `${base}-double` || x.slug === `${base}-triple`,
+  );
+  return sibs.length > 1 ? sibs : null;
+}
+
 export default function MenuBrowser({ categories }: Props) {
   const { add } = useCart();
+  const { openOrder } = useUI();
   const searchParams = useSearchParams();
-  const [query, setQuery] = useState(() => searchParams.get('q') ?? '');
 
-  /* header search navigates to /menu?q=... - apply it as the live search */
+  const [view, setView] = useState<'launcher' | 'browse'>(() =>
+    searchParams.get('q') || searchParams.get('cat') || searchParams.get('item') ? 'browse' : 'launcher',
+  );
+  const [query, setQuery] = useState(() => searchParams.get('q') ?? '');
+  const [filters, setFilters] = useState<Filters>(emptyFilters);
+  const [sheetOpen, setSheetOpen] = useState(false);          // mobile filters sheet
+  const [sort, setSort] = useState<'default' | 'name-asc' | 'name-desc' | 'price-asc' | 'price-desc'>('default');
+  const [activeSection, setActiveSection] = useState<string>(categories[0]?.slug ?? '');
+  const [selected, setSelected] = useState<{ cat: string; slug: string } | null>(null);
+
+  /* ---------- deep links: ?q= ?cat= ?item= ---------- */
   useEffect(() => {
     const qp = searchParams.get('q');
-    if (qp !== null) setQuery(qp);
-  }, [searchParams]);
-  const [catFilter, setCatFilter] = useState<string | null>(null);
-  const [filters, setFilters] = useState<Filters>(emptyFilters);
-  const [drawerOpen, setDrawerOpen] = useState(false);
+    if (qp !== null) { setQuery(qp); if (qp) setView('browse'); }
+    const item = searchParams.get('item');
+    if (item) {
+      for (const c of categories) {
+        if (c.products.some((p) => p.slug === item)) {
+          setView('browse');
+          setSelected({ cat: c.slug, slug: item });
+          break;
+        }
+      }
+    }
+    const cat = searchParams.get('cat');
+    if (cat && categories.some((c) => c.slug === cat)) {
+      setView('browse');
+      setTimeout(() => document.getElementById(`sec-${cat}`)?.scrollIntoView({ behavior: 'smooth' }), 120);
+    }
+  }, [searchParams, categories]);
 
   /* FLIP reordering via the View Transitions API (native FLIP); no-op fallback */
   const withFlip = (fn: () => void) => {
@@ -72,41 +102,8 @@ export default function MenuBrowser({ categories }: Props) {
     else fn();
   };
 
-  /* desktop mouse drag-to-scroll for the category bar */
-  const navRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const el = navRef.current;
-    if (!el) return;
-    let down = false, startX = 0, startScroll = 0, moved = 0;
-    const onDown = (e: PointerEvent) => {
-      if (e.pointerType !== 'mouse') return;         // touch keeps native scrolling
-      down = true; moved = 0; startX = e.clientX; startScroll = el.scrollLeft;
-    };
-    const onMove = (e: PointerEvent) => {
-      if (!down) return;
-      const dx = e.clientX - startX;
-      if (Math.abs(dx) > moved) moved = Math.abs(dx);
-      el.scrollLeft = startScroll - dx;
-    };
-    const onUp = () => { down = false; };
-    const onClick = (e: MouseEvent) => {
-      if (moved > 5) { e.stopPropagation(); e.preventDefault(); moved = 0; }  // drag, not click
-    };
-    el.addEventListener('pointerdown', onDown);
-    window.addEventListener('pointermove', onMove);
-    window.addEventListener('pointerup', onUp);
-    el.addEventListener('click', onClick, true);
-    return () => {
-      el.removeEventListener('pointerdown', onDown);
-      window.removeEventListener('pointermove', onMove);
-      window.removeEventListener('pointerup', onUp);
-      el.removeEventListener('click', onClick, true);
-    };
-  }, []);
-
   const q = query.trim().toLowerCase();
 
-  /* price filter appears only once real prices exist in the data */
   const priceCeiling = useMemo(() => {
     const prices = categories.flatMap((c) => c.products).map((p) => p.price).filter((v): v is number => v !== undefined);
     return prices.length > 0 ? Math.max(...prices) : null;
@@ -117,24 +114,60 @@ export default function MenuBrowser({ categories }: Props) {
     (filters.spicy ? 1 : 0) + (filters.cheesy ? 1 : 0) +
     (filters.priceMax !== null ? 1 : 0);
 
-  const filtering = q.length > 0 || catFilter !== null || activeCount > 0;
+  const filtering = q.length > 0 || activeCount > 0;
 
   const visible = useMemo(() => {
+    const sorters: Record<string, (a: Product, b: Product) => number> = {
+      'name-asc': (a, b) => a.name.localeCompare(b.name),
+      'name-desc': (a, b) => b.name.localeCompare(a.name),
+      'price-asc': (a, b) => (a.price ?? Infinity) - (b.price ?? Infinity),
+      'price-desc': (a, b) => (b.price ?? -Infinity) - (a.price ?? -Infinity),
+    };
     return categories
-      .filter((c) => catFilter === null || c.slug === catFilter)
-      .map((c) => ({ ...c, products: c.products.filter((p) => matches(p, filters, q)) }))
+      .map((c) => {
+        const products = c.products.filter((p) => matches(p, filters, q));
+        if (sort !== 'default') products.sort(sorters[sort]);
+        return { ...c, products };
+      })
       .filter((c) => c.products.length > 0);
-  }, [categories, catFilter, filters, q]);
+  }, [categories, filters, q, sort]);
 
   const resultCount = visible.reduce((sum, c) => sum + c.products.length, 0);
 
   useEffect(() => {
     if (q) publish(EVENTS.search, { source: 'menu-page', query: q, results: resultCount });
   }, [q, resultCount]);
-
   useEffect(() => {
     publish(EVENTS.filterChange, { source: 'menu-page', active: activeCount });
   }, [activeCount]);
+
+  /* ---------- scrollspy: highlight the section in view (reference sidebar behavior) ---------- */
+  useEffect(() => {
+    if (view !== 'browse') return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) setActiveSection(e.target.id.replace('sec-', ''));
+        }
+      },
+      { rootMargin: '-140px 0px -55% 0px' },
+    );
+    visible.forEach((c) => {
+      const el = document.getElementById(`sec-${c.slug}`);
+      if (el) observer.observe(el);
+    });
+    return () => observer.disconnect();
+  }, [view, visible]);
+
+  const scrollToSection = useCallback((slug: string) => {
+    document.getElementById(`sec-${slug}`)?.scrollIntoView({ behavior: 'smooth' });
+  }, []);
+
+  const openCategory = (slug: string) => {
+    setView('browse');
+    setActiveSection(slug);
+    setTimeout(() => scrollToSection(slug), 120);
+  };
 
   const toggleSize = (v: Size) =>
     withFlip(() => setFilters((f) => {
@@ -146,16 +179,25 @@ export default function MenuBrowser({ categories }: Props) {
       const s = new Set(f.proteins); if (s.has(v)) s.delete(v); else s.add(v);
       return { ...f, proteins: s };
     }));
-  const clearAll = () => withFlip(() => { setFilters(emptyFilters()); setCatFilter(null); setQuery(''); });
+  const clearAll = () => withFlip(() => { setFilters(emptyFilters()); setQuery(''); });
 
-  /* Esc closes the mobile drawer; lock scroll while open */
+  /* Esc closes the mobile filters sheet; lock scroll while open */
   useEffect(() => {
-    if (!drawerOpen) return;
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setDrawerOpen(false); };
+    if (!sheetOpen) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setSheetOpen(false); };
     document.addEventListener('keydown', onKey);
     document.body.style.overflow = 'hidden';
     return () => { document.removeEventListener('keydown', onKey); document.body.style.overflow = ''; };
-  }, [drawerOpen]);
+  }, [sheetOpen]);
+
+  /* selected product + its variants for the popup */
+  const selectedData = useMemo(() => {
+    if (!selected) return null;
+    const cat = categories.find((c) => c.slug === selected.cat);
+    const product = cat?.products.find((p) => p.slug === selected.slug);
+    if (!cat || !product) return null;
+    return { cat, product, variants: variantsOf(cat, product) };
+  }, [selected, categories]);
 
   const filterGroups = (
     <>
@@ -183,7 +225,7 @@ export default function MenuBrowser({ categories }: Props) {
         <h4>Taste</h4>
         <div className="fchips">
           <button className={`fchip${filters.spicy ? ' is-on' : ''}`} onClick={() => withFlip(() => setFilters((f) => ({ ...f, spicy: !f.spicy })))}>
-            Spicy 🌶
+            Spicy
           </button>
           <button className={`fchip${filters.cheesy ? ' is-on' : ''}`} onClick={() => withFlip(() => setFilters((f) => ({ ...f, cheesy: !f.cheesy })))}>
             Cheesy
@@ -194,9 +236,7 @@ export default function MenuBrowser({ categories }: Props) {
         <div className="fgroup">
           <h4>Max price: {filters.priceMax ?? priceCeiling} EGP</h4>
           <input
-            type="range"
-            min={0}
-            max={priceCeiling}
+            type="range" min={0} max={priceCeiling}
             value={filters.priceMax ?? priceCeiling}
             onChange={(e) => setFilters((f) => ({ ...f, priceMax: Number(e.target.value) }))}
           />
@@ -208,126 +248,195 @@ export default function MenuBrowser({ categories }: Props) {
     </>
   );
 
-  return (
-    <>
-      {/* search + mobile filters button */}
-      <div className="menu-toolbar">
-        <div className="menu-search">
-          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-            <path fill="currentColor" d="M15.5 14h-.8l-.3-.3a6.5 6.5 0 1 0-.7.7l.3.3v.8l5 5 1.5-1.5zm-6 0a4.5 4.5 0 1 1 0-9 4.5 4.5 0 0 1 0 9z" />
-          </svg>
-          <input
-            type="search"
-            placeholder="Search the menu..."
-            aria-label="Search the menu"
-            value={query}
-            onChange={(e) => { const v = e.target.value; withFlip(() => setQuery(v)); }}
-          />
-          {query && (
-            <button className="menu-search-clear" aria-label="Clear search" onClick={() => withFlip(() => setQuery(''))}>
-              <CloseIcon size={16} />
-            </button>
-          )}
-        </div>
-        <button className="filters-btn" onClick={() => setDrawerOpen(true)}>
+  const searchBar = (
+    <div className="menu-toolbar">
+      <div className="menu-search">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+          <path fill="currentColor" d="M15.5 14h-.8l-.3-.3a6.5 6.5 0 1 0-.7.7l.3.3v.8l5 5 1.5-1.5zm-6 0a4.5 4.5 0 1 1 0-9 4.5 4.5 0 0 1 0 9z" />
+        </svg>
+        <input
+          type="search" placeholder="Search the menu..." aria-label="Search the menu"
+          value={query}
+          onChange={(e) => { const v = e.target.value; if (v) setView('browse'); withFlip(() => setQuery(v)); }}
+        />
+        {query && (
+          <button className="menu-search-clear" aria-label="Clear search" onClick={() => withFlip(() => setQuery(''))}>
+            <CloseIcon size={16} />
+          </button>
+        )}
+      </div>
+      {view === 'browse' && (
+        <select
+          className="sort-select"
+          aria-label="Sort products"
+          value={sort}
+          onChange={(e) => withFlip(() => setSort(e.target.value as typeof sort))}
+        >
+          <option value="default">Sort: Featured</option>
+          <option value="name-asc">Name A-Z</option>
+          <option value="name-desc">Name Z-A</option>
+          {priceCeiling !== null && <option value="price-asc">Price: Low to High</option>}
+          {priceCeiling !== null && <option value="price-desc">Price: High to Low</option>}
+        </select>
+      )}
+      {view === 'browse' && (
+        <button className="filters-btn" onClick={() => setSheetOpen(true)}>
           <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M3 5h18v2l-7 7v5l-4 2v-7L3 7z" /></svg>
           Filters
           {activeCount > 0 && <span className="filters-badge">{activeCount}</span>}
         </button>
+      )}
+    </div>
+  );
+
+  return (
+    <>
+      {/* full-bleed branch banner (reference pattern) */}
+      <div className="branch-banner">
+        <div className="branch-banner-inner">
+          <div className="branch-banner-text">
+            <strong>
+              <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><path fill="currentColor" d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5z" /></svg>
+              Choose a Location
+            </strong>
+            <span>For availability and prices</span>
+          </div>
+          <button className="branch-banner-link" onClick={() => openOrder('pickup')}>See Branches</button>
+        </div>
       </div>
 
-      {/* sticky category chips: click = show only that category */}
-      <nav className="cat-nav" aria-label="Filter by category">
-        <div className="cat-nav-inner" ref={navRef}>
-          <button className={`cat-chip${catFilter === null ? ' is-active' : ''}`} onClick={() => withFlip(() => setCatFilter(null))}>All</button>
-          {categories.map((c) => (
-            <button
-              key={c.slug}
-              className={`cat-chip${catFilter === c.slug ? ' is-active' : ''}`}
-              onClick={() => withFlip(() => setCatFilter(catFilter === c.slug ? null : c.slug))}
-            >
-              {c.name}
+      {view === 'launcher' ? (
+        <>
+          {searchBar}
+          {/* launcher: one tile per category (reference /menu structure) */}
+          <div className="cat-tiles">
+            {categories.map((c) => (
+              <button key={c.slug} className="cat-tile" onClick={() => openCategory(c.slug)}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={c.cover} alt={c.name} loading="lazy" />
+                <div className="cat-tile-body">
+                  <h3>{c.name}</h3>
+                  <span>{c.products.length} item{c.products.length === 1 ? '' : 's'}</span>
+                </div>
+              </button>
+            ))}
+          </div>
+        </>
+      ) : (
+        <div className="menu-layout">
+          {/* sidebar: category scrollspy list (reference) + our filters */}
+          <aside className="menu-side">
+            <button className="side-row side-row-top" onClick={() => { setView('launcher'); window.scrollTo({ top: 0 }); }}>
+              <span className="side-thumb side-thumb-logo">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/bondok/logo.jpg" alt="" />
+              </span>
+              Full Menu
             </button>
-          ))}
-        </div>
-      </nav>
-
-      <div className="menu-layout">
-        {/* desktop filter sidebar */}
-        <aside className="filter-sidebar" aria-label="Product filters">
-          <h3>Filters</h3>
-          {filterGroups}
-        </aside>
-
-        <div className="menu-content">
-          {filtering && (
-            <p className="menu-result-count" role="status">
-              {resultCount === 0 ? 'No items match your search.' : `${resultCount} item${resultCount === 1 ? '' : 's'} found`}
-            </p>
-          )}
-
-          {resultCount === 0 && filtering ? (
-            <div className="menu-empty">
-              <svg viewBox="0 0 24 24" width="44" height="44" aria-hidden="true">
-                <path fill="none" stroke="#e09344" strokeWidth="1.6" d="M15.5 14h-.8l-.3-.3a6.5 6.5 0 1 0-.7.7l.3.3v.8l5 5 1.5-1.5zm-6 0a4.5 4.5 0 1 1 0-9 4.5 4.5 0 0 1 0 9z" />
-              </svg>
-              <h3>Nothing found</h3>
-              <p>Try different filters, or clear everything to browse the full menu.</p>
-              <button className="btn btn-solid" onClick={clearAll}>Show Full Menu</button>
+            {categories.map((c) => (
+              <button
+                key={c.slug}
+                className={`side-row${activeSection === c.slug ? ' is-active' : ''}`}
+                onClick={() => scrollToSection(c.slug)}
+              >
+                <span className="side-thumb">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={c.cover} alt="" loading="lazy" />
+                </span>
+                {c.name}
+              </button>
+            ))}
+            <div className="side-filters">
+              <h3>Filters</h3>
+              {filterGroups}
             </div>
-          ) : (
-            visible.map((cat) => (
-              <section key={cat.slug} id={cat.slug} className="menu-section">
-                <div className="menu-section-head">
-                  <h2>{cat.name}</h2>
-                  <p>{cat.blurb}</p>
-                </div>
-                <div className="menu-grid">
-                  {cat.products.map((p) => (
-                    <article key={p.slug} className="product-card" style={{ viewTransitionName: `p-${cat.slug}-${p.slug}` }}>
-                      <div className="product-imgwrap">
+          </aside>
+
+          <div className="menu-content">
+            {searchBar}
+            {filtering && (
+              <p className="menu-result-count" role="status">
+                {resultCount === 0 ? 'No items match your search.' : `${resultCount} item${resultCount === 1 ? '' : 's'} found`}
+              </p>
+            )}
+
+            {resultCount === 0 && filtering ? (
+              <div className="menu-empty">
+                <svg viewBox="0 0 24 24" width="44" height="44" aria-hidden="true">
+                  <path fill="none" stroke="#e09344" strokeWidth="1.6" d="M15.5 14h-.8l-.3-.3a6.5 6.5 0 1 0-.7.7l.3.3v.8l5 5 1.5-1.5zm-6 0a4.5 4.5 0 1 1 0-9 4.5 4.5 0 0 1 0 9z" />
+                </svg>
+                <h3>Nothing found</h3>
+                <p>Try different filters, or clear everything to browse the full menu.</p>
+                <button className="btn btn-solid" onClick={clearAll}>Show Full Menu</button>
+              </div>
+            ) : (
+              visible.map((cat) => (
+                <section key={cat.slug} id={`sec-${cat.slug}`} className="menu-section">
+                  <h2 className="menu-section-title">{cat.name}</h2>
+                  <div className="pcard-grid">
+                    {cat.products.map((p) => (
+                      <article
+                        key={p.slug}
+                        className="pcard"
+                        style={{ viewTransitionName: `p-${cat.slug}-${p.slug}` }}
+                        onClick={() => setSelected({ cat: cat.slug, slug: p.slug })}
+                      >
+                        <div className="pcard-info">
+                          <h3>{p.name}</h3>
+                          <p>{p.description ?? cat.blurb}</p>
+                          {p.price !== undefined && <span className="product-price">EGP {p.price}</span>}
+                          <button
+                            className="btn btn-outline pcard-add"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              add({ slug: p.slug, name: p.name, image: p.image, price: p.price }, 'menu-page');
+                            }}
+                          >
+                            Add to Bag
+                          </button>
+                        </div>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={p.image} alt={p.name} loading="lazy" />
-                      </div>
-                      <div className="product-body">
-                        <h3>{p.name}</h3>
-                        {p.price !== undefined && <span className="product-price">EGP {p.price}</span>}
-                        <button
-                          className="btn btn-outline product-add"
-                          onClick={() => add({ slug: p.slug, name: p.name, image: p.image, price: p.price }, 'menu-page')}
-                        >
-                          Add to Bag
-                        </button>
-                      </div>
-                    </article>
-                  ))}
-                </div>
-              </section>
-            ))
-          )}
+                        <img className="pcard-img" src={p.image} alt={p.name} loading="lazy" />
+                      </article>
+                    ))}
+                  </div>
+                </section>
+              ))
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* mobile filters bottom sheet */}
-      {drawerOpen && (
-        <div className="fdrawer-overlay" onClick={(e) => { if (e.target === e.currentTarget) setDrawerOpen(false); }}>
+      {sheetOpen && (
+        <div className="fdrawer-overlay" onClick={(e) => { if (e.target === e.currentTarget) setSheetOpen(false); }}>
           <div className="fdrawer" role="dialog" aria-label="Filters">
             <span className="omodal-grabber" />
             <div className="fdrawer-head">
               <h3>Filters</h3>
-              <button className="icon-btn" aria-label="Close filters" onClick={() => setDrawerOpen(false)}>
+              <button className="icon-btn" aria-label="Close filters" onClick={() => setSheetOpen(false)}>
                 <CloseIcon size={22} />
               </button>
             </div>
             <div className="fdrawer-body">{filterGroups}</div>
             <div className="fdrawer-actions">
               <button className="btn btn-outline" onClick={() => withFlip(() => setFilters(emptyFilters()))}>Clear</button>
-              <button className="btn btn-solid" onClick={() => setDrawerOpen(false)}>
+              <button className="btn btn-solid" onClick={() => setSheetOpen(false)}>
                 Show {resultCount} item{resultCount === 1 ? '' : 's'}
               </button>
             </div>
           </div>
         </div>
+      )}
+
+      {/* product detail popup (reference pattern + our variants/qty/cart) */}
+      {selectedData && (
+        <ProductModal
+          product={selectedData.product}
+          variants={selectedData.variants}
+          onSelectVariant={(p) => setSelected({ cat: selectedData.cat.slug, slug: p.slug })}
+          onClose={() => setSelected(null)}
+        />
       )}
     </>
   );
