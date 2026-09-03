@@ -31,8 +31,9 @@ export const EVENTS = {
   /* ui surfaces */
   modalOpen: 'modal-open',              // order modal / drawers
   modalClose: 'modal-close',
-  /* checkout (wired when the flow is built) */
+  /* checkout */
   checkoutStart: 'checkout-start',
+  orderPlaced: 'order-placed',
 } as const;
 
 export type EventName = (typeof EVENTS)[keyof typeof EVENTS];
@@ -52,6 +53,7 @@ export interface EventPayloads {
   [EVENTS.modalOpen]: Base & { name: string };
   [EVENTS.modalClose]: Base & { name: string };
   [EVENTS.checkoutStart]: Base & { count: number };
+  [EVENTS.orderPlaced]: Base & { orderId: string; count: number; subtotal: number | null };
 }
 
 type Callback<E extends EventName> = (data: EventPayloads[E]) => void;
