@@ -2,12 +2,19 @@
    Prices/descriptions arrive with the client's menu data sheet;
    in Phase 3 this file becomes the Cloud-Kitchen API adapter. */
 
+export type Size = 'single' | 'double' | 'triple';
+export type Protein = 'chicken' | 'beef' | 'shrimp' | 'turkey';
+
 export interface Product {
   slug: string;
   name: string;
   image: string;
-  price?: number;        // EGP — pending client menu data
+  price?: number;        // EGP — pending client menu data (price filter auto-enables when set)
   description?: string;  // pending client menu data
+  size?: Size;           // sandwiches/burgers variants
+  protein?: Protein;
+  spicy?: boolean;
+  cheesy?: boolean;
 }
 
 export interface MenuCategory {
@@ -19,7 +26,7 @@ export interface MenuCategory {
 
 const img = (cat: string, slug: string) => `/bondok/menu/${cat}/${slug}.jpg`;
 
-export const menuCategories: MenuCategory[] = [
+const baseCategories: MenuCategory[] = [
   {
     slug: 'sandwiches',
     name: 'Specialty Sandwiches',
@@ -139,3 +146,37 @@ export const menuCategories: MenuCategory[] = [
     ],
   },
 ];
+
+/* ---- attribute enrichment: derive size / protein / taste from product data.
+   Explicit values in the arrays above always win; client data can override later. */
+const SIZED_CATEGORIES = new Set(['sandwiches', 'fillet', 'grilled', 'burgers']);
+
+function enrich(p: Product, catSlug: string): Product {
+  const n = p.name.toLowerCase();
+
+  let size = p.size;
+  if (!size && SIZED_CATEGORIES.has(catSlug)) {
+    size = n.includes('triple') ? 'triple' : n.includes('double') ? 'double' : 'single';
+  }
+
+  let protein = p.protein;
+  if (!protein && catSlug !== 'sides') {
+    if (n.includes('shrimp')) protein = 'shrimp';
+    else if (n.includes('turkey')) protein = 'turkey';
+    else if (n.includes('beef') || catSlug === 'burgers' || n.includes('burger')) protein = 'beef';
+    else if (n.includes('chicken') || n.includes('tenders') || n.includes('nuggets') || catSlug === 'fillet' || catSlug === 'meals') protein = 'chicken';
+  }
+
+  return {
+    ...p,
+    size,
+    protein,
+    spicy: p.spicy ?? /jalapeno|chili|fire/.test(n),
+    cheesy: p.cheesy ?? /cheddar|mozzarella|cheese|cheezy/.test(n),
+  };
+}
+
+export const menuCategories: MenuCategory[] = baseCategories.map((c) => ({
+  ...c,
+  products: c.products.map((p) => enrich(p, c.slug)),
+}));

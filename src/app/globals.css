@@ -350,16 +350,22 @@ ul { list-style: none; margin: 0; padding: 0; }
 .drawer-legaltext a { color: var(--orange); text-decoration: underline; }
 
 /* ============ MENU PAGE ============ */
-.menu-page { width: 100%; max-width: 1136px; margin: 0 auto; padding-inline: 16px; }
-.menu-head { text-align: center; padding: 28px 0 8px; }
-.menu-head h1 { font-size: 34px; font-weight: 800; color: var(--text); }
-.menu-head p { color: var(--text-muted); font-size: 15px; margin-top: 4px; }
+/* Layout rule: page content lives in a 1320px container with 32px gutters.
+   Full-width tracks (category bar, carousels) break OUT of the container and
+   get edge padding equal to the container gutter instead. */
+.menu-page { width: 100%; max-width: 1320px; margin: 0 auto; padding-inline: 32px; }
+.menu-head { text-align: center; padding: 48px 0 20px; }
+.menu-head h1 { font-size: 42px; font-weight: 800; color: var(--text); letter-spacing: -.5px; }
+.menu-head p { color: var(--text-muted); font-size: 16px; margin-top: 6px; }
 
-/* search + filter row */
-.menu-search-row { display: flex; flex-direction: column; gap: 10px; margin: 10px 0 6px; }
+/* toolbar: search + (mobile) filters button */
+.menu-toolbar {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  margin: 10px 0 6px;
+}
 .menu-search {
   position: relative; display: flex; align-items: center;
-  max-width: 560px; margin: 0 auto; width: 100%;
+  max-width: 560px; width: 100%;
 }
 .menu-search svg { position: absolute; left: 16px; color: var(--text-muted); pointer-events: none; }
 .menu-search input {
@@ -378,12 +384,82 @@ ul { list-style: none; margin: 0; padding: 0; }
   color: var(--text-muted);
 }
 .menu-search-clear:hover { color: var(--text); background: var(--bg); }
-.menu-filter-chips {
-  display: flex; gap: 8px; overflow-x: auto; justify-content: safe center;
-  scrollbar-width: none; -webkit-overflow-scrolling: touch;
-  padding-bottom: 2px;
+/* mobile filters button (hidden on desktop) */
+.filters-btn {
+  display: none;
+  position: relative;
+  align-items: center; gap: 6px;
+  padding: 11px 16px; border-radius: 999px;
+  background: var(--white); border: 1px solid var(--border-strong);
+  color: var(--text); font-size: 14px; font-weight: 700;
+  min-height: 44px; white-space: nowrap;
 }
-.menu-filter-chips::-webkit-scrollbar { display: none; }
+.filters-badge {
+  position: absolute; top: -6px; right: -6px;
+  min-width: 20px; height: 20px; border-radius: 999px;
+  background: var(--orange); color: #fff;
+  font-size: 12px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  padding-inline: 5px;
+}
+
+/* two-column layout: sidebar + content (desktop) */
+.menu-layout { display: grid; grid-template-columns: 264px 1fr; gap: 32px; align-items: start; margin-top: 16px; }
+.menu-content { min-width: 0; }
+
+.filter-sidebar {
+  position: sticky; top: 164px;
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: 14px; box-shadow: var(--shadow-card);
+  padding: 20px 20px 22px;
+  display: flex; flex-direction: column; gap: 18px;
+}
+.filter-sidebar > h3 { font-size: 18px; font-weight: 800; color: var(--text); }
+
+.fgroup h4 { font-size: 13px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 8px; }
+.fchips { display: flex; flex-wrap: wrap; gap: 8px; }   /* wrap, never clip */
+.fchip {
+  padding: 8px 14px; border-radius: 999px;
+  background: var(--bg); border: 1px solid var(--border);
+  color: var(--text); font-size: 13.5px; font-weight: 700;
+  min-height: 38px;
+  transition: background-color .15s ease, color .15s ease, border-color .15s ease;
+}
+.fchip:hover { border-color: var(--orange); color: var(--orange); }
+.fchip.is-on { background: var(--orange); border-color: var(--orange); color: #fff; }
+.fgroup input[type="range"] { width: 100%; accent-color: var(--orange); }
+.fclear {
+  align-self: flex-start;
+  color: var(--orange); font-size: 13.5px; font-weight: 700;
+  text-decoration: underline; padding: 4px 0;
+}
+
+/* mobile filters bottom sheet */
+.fdrawer-overlay {
+  position: fixed; inset: 0; z-index: 300;
+  background: rgba(0,0,0,.45);
+  display: flex; align-items: flex-end; justify-content: center;
+  animation: om-fade .22s ease;
+}
+.fdrawer {
+  position: relative;
+  width: 100%; max-height: 82vh;
+  background: var(--bg);
+  border-radius: 1rem 1rem 0 0;
+  padding: 22px 18px 16px;
+  display: flex; flex-direction: column; gap: 14px;
+  animation: om-rise .28s ease-out;
+  overflow-y: auto;
+}
+.fdrawer-head { display: flex; align-items: center; justify-content: space-between; }
+.fdrawer-head h3 { font-size: 19px; font-weight: 800; color: var(--text); }
+.fdrawer-body { display: flex; flex-direction: column; gap: 16px; }
+.fdrawer-actions {
+  display: flex; gap: 10px; margin-top: 4px;
+  position: sticky; bottom: 0; background: var(--bg); padding-top: 8px;
+}
+.fdrawer-actions .btn { flex: 1; padding: 12px; font-size: 15px; }
+
 .menu-result-count { text-align: center; color: var(--text-muted); font-size: 14px; margin: 6px 0 2px; }
 .menu-empty {
   display: flex; flex-direction: column; align-items: center; gap: 8px;
@@ -393,38 +469,50 @@ ul { list-style: none; margin: 0; padding: 0; }
 .menu-empty p { color: var(--text-muted); font-size: 14px; }
 .menu-empty .btn { margin-top: 8px; }
 
+/* full-bleed sticky category bar: breaks out of the container; its edge
+   padding tracks the container gutter so chips align with page content */
 .cat-nav {
   position: sticky; top: 80px; z-index: 50;
+  margin-inline: calc(50% - 50vw);                    /* breakout */
+  padding-inline: max(calc(50vw - 628px), 32px);      /* 1320/2 - 32 = 628 */
   background: var(--bg);
-  padding: 12px 0;
-  margin: 8px -16px 8px; padding-inline: 16px;
+  padding-block: 14px;
   box-shadow: 0 6px 8px -8px rgba(26,26,26,.15);
 }
 .cat-nav-inner {
-  display: flex; gap: 8px; overflow-x: auto;
+  display: flex; gap: 10px; overflow-x: auto;
   scrollbar-width: none; -webkit-overflow-scrolling: touch;
+  cursor: grab; user-select: none;                     /* desktop drag-to-scroll */
 }
+.cat-nav-inner:active { cursor: grabbing; }
 .cat-nav-inner::-webkit-scrollbar { display: none; }
 .cat-chip {
   flex: 0 0 auto;
-  padding: 8px 18px; border-radius: 999px;
+  padding: 10px 22px; border-radius: 999px;
   background: var(--white); color: var(--text);
   border: 1px solid var(--border);
-  font-size: 14px; font-weight: 700; white-space: nowrap;
+  font-size: 14.5px; font-weight: 700; white-space: nowrap;
+  min-height: 44px;
   transition: background-color .15s ease, color .15s ease;
 }
 .cat-chip:hover { border-color: var(--orange); color: var(--orange); }
 .cat-chip.is-active { background: var(--orange); border-color: var(--orange); color: #fff; }
 
-.menu-section { padding-top: 12px; margin-bottom: 34px; scroll-margin-top: 150px; }
-.menu-section-head { margin: 10px 0 14px; }
-.menu-section-head h2 { font-size: 24px; font-weight: 800; color: var(--text); }
-.menu-section-head p { color: var(--text-muted); font-size: 14px; }
+.menu-section { padding-top: 16px; margin-bottom: 56px; scroll-margin-top: 160px; }
+.menu-section-head { margin: 10px 0 20px; }
+.menu-section-head h2 { font-size: 28px; font-weight: 800; color: var(--text); }
+.menu-section-head p { color: var(--text-muted); font-size: 15px; margin-top: 2px; }
 
 .menu-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 20px;
+}
+
+/* FLIP (View Transitions) timing + reduced-motion respect */
+::view-transition-group(*) { animation-duration: .28s; animation-timing-function: cubic-bezier(.3,.9,.4,1); }
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
 }
 .product-card {
   background: var(--white); border-radius: 12px;
@@ -530,10 +618,17 @@ ul { list-style: none; margin: 0; padding: 0; }
   .omodal-overlay { align-items: flex-end; }
 
   /* menu page on mobile */
-  .cat-nav { top: 56px; }
-  .menu-head h1 { font-size: 26px; }
+  .menu-page { padding-inline: 16px; }
+  .cat-nav { top: 56px; padding-inline: 16px; padding-block: 10px; }
+  .menu-head { padding: 28px 0 12px; }
+  .menu-head h1 { font-size: 28px; }
   .menu-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
   .menu-section { scroll-margin-top: 120px; }
   .product-body h3 { font-size: 14px; }
   .product-add { font-size: 12px; }
+
+  /* filters: sidebar -> bottom sheet */
+  .menu-layout { grid-template-columns: 1fr; gap: 0; }
+  .filter-sidebar { display: none; }
+  .filters-btn { display: inline-flex; }
 }
