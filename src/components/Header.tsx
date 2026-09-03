@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useRef, useState } from 'react';
 import { useUI } from './ui-context';
 import { useCart } from './cart-context';
@@ -10,6 +10,7 @@ export default function Header() {
   const { openDrawer } = useUI();
   const { count } = useCart();
   const router = useRouter();
+  const pathname = usePathname();
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchValue, setSearchValue] = useState('');
   const searchRef = useRef<HTMLInputElement>(null);
@@ -20,6 +21,9 @@ export default function Header() {
     setSearchValue('');
     router.push(q ? `/menu?q=${encodeURIComponent(q)}` : '/menu');
   };
+
+  /* /catering is a standalone landing with its own chrome (reference behavior) */
+  if (pathname === '/catering') return null;
 
   return (
     <header className="site-header">

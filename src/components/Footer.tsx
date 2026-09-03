@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { footerLinks } from '@/lib/data';
 import { useUI } from './ui-context';
 
@@ -15,6 +16,9 @@ const DOC_KEYS: Record<string, string> = {
 
 export default function Footer() {
   const { openDoc } = useUI();
+  const pathname = usePathname();
+  /* /catering is a standalone landing with its own chrome (reference behavior) */
+  if (pathname === '/catering') return null;
   return (
     <footer className="site-footer">
       <div className="footer-inner">
