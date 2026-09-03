@@ -43,6 +43,12 @@ export default function MenuDrawer() {
           </span>
           Find a Branch
         </Link>
+        <Link className="drawer-row" href="/menu?fav=1" onClick={closeDrawer}>
+          <span className="drawer-ic">
+            <svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M12 21s-7.1-4.4-9.5-8.2C.7 9.9 1.6 6.4 4.7 5.3c2-.7 4 .1 5.8 2 .5.6 1 .6 1.5 0 1.8-1.9 3.8-2.7 5.8-2 3.1 1.1 4 4.6 2.2 7.5C17.1 16.6 12 21 12 21z" /></svg>
+          </span>
+          My Favorites
+        </Link>
         <Link className="drawer-row" href="/support" onClick={closeDrawer}>
           <span className="drawer-ic">
             <svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M6.6 10.8a15 15 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.24 11 11 0 0 0 3.5.56 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1 11 11 0 0 0 .56 3.5 1 1 0 0 1-.25 1z" /></svg>

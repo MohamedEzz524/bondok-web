@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useCart } from './cart-context';
 import { EVENTS, publish } from '@/lib/pubsub';
 import CloseIcon from './CloseIcon';
+import RecentlyViewed from './RecentlyViewed';
 
 export default function BagView() {
   const { items, count, subtotal, setQty, remove, clear } = useCart();
@@ -69,6 +70,7 @@ export default function BagView() {
           </button>
         </div>
       </div>
+      <RecentlyViewed title="You recently viewed" />
     </div>
   );
 }

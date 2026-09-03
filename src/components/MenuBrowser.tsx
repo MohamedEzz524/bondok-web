@@ -12,6 +12,9 @@ import type { MenuCategory, Product, Protein, Size } from '@/lib/menu-data';
 import { heroSlides } from '@/lib/data';
 import CloseIcon from './CloseIcon';
 import ProductModal from './ProductModal';
+import FavButton from './FavButton';
+import RecentlyViewed from './RecentlyViewed';
+import { usePrefs } from './prefs-context';
 import Select from './Select';
 
 interface Props {
@@ -66,6 +69,7 @@ function variantsOf(cat: MenuCategory, p: Product): Product[] | null {
 export default function MenuBrowser({ categories }: Props) {
   const { add } = useCart();
   const { openOrder } = useUI();
+  const { favorites, recordView } = usePrefs();
   const searchParams = useSearchParams();
 
   const [view, setView] = useState<'launcher' | 'browse'>(() =>
@@ -77,6 +81,7 @@ export default function MenuBrowser({ categories }: Props) {
   const [sort, setSort] = useState<'default' | 'name-asc' | 'name-desc' | 'price-asc' | 'price-desc'>('default');
   const [activeSection, setActiveSection] = useState<string>(categories[0]?.slug ?? '');
   const [selected, setSelected] = useState<{ cat: string; slug: string } | null>(null);
+  const [favOnly, setFavOnly] = useState(() => searchParams.get('fav') === '1');
   const promoRef = useRef<HTMLDivElement>(null);
 
   /* ---------- deep links: ?q= ?cat= ?item= ---------- */
@@ -93,6 +98,7 @@ export default function MenuBrowser({ categories }: Props) {
         }
       }
     }
+    if (searchParams.get('fav') === '1') { setFavOnly(true); setView('browse'); }
     const cat = searchParams.get('cat');
     if (cat && categories.some((c) => c.slug === cat)) {
       setView('browse');
@@ -119,7 +125,7 @@ export default function MenuBrowser({ categories }: Props) {
     (filters.spicy ? 1 : 0) + (filters.cheesy ? 1 : 0) +
     (filters.priceMax !== null ? 1 : 0);
 
-  const filtering = q.length > 0 || activeCount > 0;
+  const filtering = q.length > 0 || activeCount > 0 || favOnly;
 
   const visible = useMemo(() => {
     const sorters: Record<string, (a: Product, b: Product) => number> = {
@@ -130,12 +136,12 @@ export default function MenuBrowser({ categories }: Props) {
     };
     return categories
       .map((c) => {
-        const products = c.products.filter((p) => matches(p, filters, q));
+        const products = c.products.filter((p) => matches(p, filters, q) && (!favOnly || favorites.includes(p.slug)));
         if (sort !== 'default') products.sort(sorters[sort]);
         return { ...c, products };
       })
       .filter((c) => c.products.length > 0);
-  }, [categories, filters, q, sort]);
+  }, [categories, filters, q, sort, favOnly, favorites]);
 
   const resultCount = visible.reduce((sum, c) => sum + c.products.length, 0);
 
@@ -184,7 +190,7 @@ export default function MenuBrowser({ categories }: Props) {
       const s = new Set(f.proteins); if (s.has(v)) s.delete(v); else s.add(v);
       return { ...f, proteins: s };
     }));
-  const clearAll = () => withFlip(() => { setFilters(emptyFilters()); setQuery(''); });
+  const clearAll = () => withFlip(() => { setFilters(emptyFilters()); setQuery(''); setFavOnly(false); });
 
   /* Esc closes the mobile filters sheet; lock scroll while open */
   useEffect(() => {
@@ -369,6 +375,7 @@ export default function MenuBrowser({ categories }: Props) {
               </button>
             ))}
           </div>
+          <RecentlyViewed />
         </motion.div>
       ) : (
         <motion.div
@@ -386,6 +393,17 @@ export default function MenuBrowser({ categories }: Props) {
                 <path fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" d="M15 6l-6 6 6 6" />
               </svg>
               <span className="side-label">Full Menu</span>
+            </button>
+            <button
+              className={`side-row side-fav${favOnly ? ' is-active' : ''}`}
+              onClick={() => withFlip(() => setFavOnly(!favOnly))}
+            >
+              <span className="side-thumb side-fav-ic">
+                <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+                  <path d="M12 21s-7.1-4.4-9.5-8.2C.7 9.9 1.6 6.4 4.7 5.3c2-.7 4 .1 5.8 2 .5.6 1 .6 1.5 0 1.8-1.9 3.8-2.7 5.8-2 3.1 1.1 4 4.6 2.2 7.5C17.1 16.6 12 21 12 21z" fill="currentColor" />
+                </svg>
+              </span>
+              <span className="side-label">My Favorites{favorites.length > 0 ? ` (${favorites.length})` : ''}</span>
             </button>
             {categories.map((c) => (
               <button
@@ -419,8 +437,8 @@ export default function MenuBrowser({ categories }: Props) {
                 <svg viewBox="0 0 24 24" width="44" height="44" aria-hidden="true">
                   <path fill="none" stroke="#e09344" strokeWidth="1.6" d="M15.5 14h-.8l-.3-.3a6.5 6.5 0 1 0-.7.7l.3.3v.8l5 5 1.5-1.5zm-6 0a4.5 4.5 0 1 1 0-9 4.5 4.5 0 0 1 0 9z" />
                 </svg>
-                <h3>Nothing found</h3>
-                <p>Try different filters, or clear everything to browse the full menu.</p>
+                <h3>{favOnly && favorites.length === 0 ? 'No favorites yet' : 'Nothing found'}</h3>
+                <p>{favOnly && favorites.length === 0 ? 'Tap the heart on any product to save it here.' : 'Try different filters, or clear everything to browse the full menu.'}</p>
                 <button className="btn btn-solid" onClick={clearAll}>Show Full Menu</button>
               </div>
             ) : (
@@ -433,8 +451,9 @@ export default function MenuBrowser({ categories }: Props) {
                         key={p.slug}
                         className="pcard"
                         style={{ viewTransitionName: `p-${cat.slug}-${p.slug}` }}
-                        onClick={() => setSelected({ cat: cat.slug, slug: p.slug })}
+                        onClick={() => { recordView(p.slug); setSelected({ cat: cat.slug, slug: p.slug }); }}
                       >
+                        <FavButton slug={p.slug} className="pcard-fav" />
                         <div className="pcard-info">
                           <h3>{p.name}</h3>
                           <p>{p.description ?? cat.blurb}</p>

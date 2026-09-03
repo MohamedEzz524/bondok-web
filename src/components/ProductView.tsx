@@ -4,9 +4,11 @@
    Same content structure as the in-menu popup, laid out as a page. */
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { MenuCategory, Product } from '@/lib/menu-data';
 import { useCart } from './cart-context';
+import { usePrefs } from './prefs-context';
+import FavButton from './FavButton';
 
 interface Props {
   category: MenuCategory;
@@ -18,7 +20,10 @@ const sizeLabel = { single: 'Single', double: 'Double', triple: 'Triple' } as co
 
 export default function ProductView({ category, product, variants }: Props) {
   const { add } = useCart();
+  const { recordView } = usePrefs();
   const [qty, setQty] = useState(1);
+
+  useEffect(() => { recordView(product.slug); }, [product.slug, recordView]);
 
   const addToBag = () => {
     for (let i = 0; i < qty; i++) {
@@ -40,7 +45,10 @@ export default function ProductView({ category, product, variants }: Props) {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img className="product-hero-img" src={product.image} alt={product.name} />
         <div className="product-hero-info">
-          <h1>{product.name}</h1>
+          <div className="pmodal-titlerow product-titlerow">
+            <h1>{product.name}</h1>
+            <FavButton slug={product.slug} size={24} />
+          </div>
           {product.price !== undefined && <p className="pmodal-price">EGP {product.price}</p>}
           <p className="product-hero-desc">
             {product.description ?? category.blurb}

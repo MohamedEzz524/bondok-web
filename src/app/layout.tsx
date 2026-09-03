@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { UIProvider } from '@/components/ui-context';
 import { CartProvider } from '@/components/cart-context';
+import { PrefsProvider } from '@/components/prefs-context';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import BottomTabs from '@/components/BottomTabs';
@@ -21,6 +22,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <UIProvider>
           <CartProvider>
+          <PrefsProvider>
             <Header />
             <main className="page">{children}</main>
             <Footer />
@@ -29,6 +31,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <OrderModal />
             <StickyCart />
             <Toaster />
+          </PrefsProvider>
           </CartProvider>
         </UIProvider>
       </body>

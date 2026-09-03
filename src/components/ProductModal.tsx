@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import type { Product } from '@/lib/menu-data';
 import { useCart } from './cart-context';
 import CloseIcon from './CloseIcon';
+import FavButton from './FavButton';
 
 interface Props {
   product: Product;
@@ -50,7 +51,10 @@ export default function ProductModal({ product, variants, onSelectVariant, onClo
         <div className="pmodal-scroll">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img className="pmodal-img" src={product.image} alt={product.name} />
-          <h2 className="pmodal-title">{product.name}</h2>
+          <div className="pmodal-titlerow">
+            <h2 className="pmodal-title">{product.name}</h2>
+            <FavButton slug={product.slug} size={22} />
+          </div>
           {product.price !== undefined && <p className="pmodal-price">EGP {product.price}</p>}
 
           {variants && (
