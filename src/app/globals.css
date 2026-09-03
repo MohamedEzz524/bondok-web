@@ -1166,6 +1166,81 @@ main.page { flex: 1 0 auto; }
   .float-btn { width: 46px; height: 46px; }
 }
 
+/* ============ CONTENT PAGES (legal / faq / support / offers / reviews) ============ */
+.legal-page { width: 100%; max-width: 760px; margin: 0 auto; padding: 40px 20px 72px; }
+.legal-page h1 { font-family: var(--font-display); font-size: 32px; font-weight: 800; color: var(--text); margin-bottom: 10px; }
+.legal-updated { color: var(--text-muted); font-size: 13px; margin-bottom: 14px; }
+.legal-section { margin-top: 18px; }
+.legal-section h2 { font-size: 19px; font-weight: 800; color: var(--text); margin-bottom: 6px; }
+.legal-section p { font-size: 15px; line-height: 1.65; color: var(--text); }
+
+.field-area { resize: vertical; min-height: 120px; font-family: var(--font); }
+
+.faq-page { width: 100%; max-width: 760px; margin: 0 auto; padding: 0 20px 72px; }
+.faq-list { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
+.faq-item { background: var(--white); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+.faq-item.is-open { border-color: var(--orange); }
+.faq-q {
+  width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 16px 18px; text-align: left;
+  font-size: 15.5px; font-weight: 700; color: var(--text);
+}
+.faq-q:hover { color: var(--orange); }
+.faq-chev { transition: transform .18s ease; flex: 0 0 auto; }
+.faq-item.is-open .faq-chev { transform: rotate(180deg); }
+.faq-a { padding: 0 18px 16px; font-size: 14.5px; line-height: 1.6; color: var(--text-muted); }
+
+.support-page { width: 100%; max-width: 900px; margin: 0 auto; padding: 0 20px 72px; }
+.support-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+.support-card {
+  background: var(--white); border-radius: 14px; box-shadow: var(--shadow-card);
+  padding: 20px 22px; display: flex; flex-direction: column; gap: 8px;
+}
+.support-card h2 { font-family: var(--font-display); font-size: 18px; font-weight: 800; color: var(--text); }
+.support-card p { font-size: 14px; color: var(--text-muted); line-height: 1.5; flex: 1; }
+.support-card .btn { align-self: flex-start; font-size: 13.5px; }
+.support-faq { text-align: center; margin-top: 22px; font-size: 14.5px; color: var(--text-muted); }
+.support-faq a { color: var(--orange); font-weight: 700; text-decoration: underline; }
+
+.offers-page { width: 100%; max-width: 1100px; margin: 0 auto; padding: 0 20px 72px; }
+.offers-empty { min-height: auto; padding: 36px 20px 20px; }
+.offers-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 18px; }
+.offer-card { background: var(--white); border-radius: 14px; box-shadow: var(--shadow-card); overflow: hidden; display: flex; flex-direction: column; }
+.offer-card img { width: 100%; aspect-ratio: 2 / 1; object-fit: contain; background: #fff; }
+.offer-body { padding: 14px 18px 18px; }
+.offer-body h2 { font-size: 18px; font-weight: 800; color: var(--text); }
+.offer-body p { font-size: 13.5px; color: var(--text-muted); margin-top: 4px; }
+.offer-card:hover .offer-body h2 { color: var(--orange); }
+
+.reviews-page { width: 100%; max-width: 900px; margin: 0 auto; padding: 0 20px 72px; }
+.reviews-summary {
+  display: flex; align-items: center; gap: 20px;
+  background: var(--white); border-radius: 14px; box-shadow: var(--shadow-card);
+  padding: 20px 24px; margin-bottom: 20px;
+}
+.reviews-score { display: flex; flex-direction: column; align-items: center; }
+.reviews-score strong { font-size: 34px; font-weight: 800; color: var(--text); line-height: 1; }
+.reviews-score span { font-size: 12px; color: var(--text-muted); }
+.reviews-summary > p { font-size: 14px; color: var(--text-muted); }
+.reviews-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; }
+.review-card {
+  background: var(--white); border-radius: 12px; box-shadow: var(--shadow-card);
+  padding: 16px 18px; display: flex; flex-direction: column; gap: 6px;
+}
+.review-card.is-placeholder { opacity: .65; }
+.review-stars { color: var(--brand-orange); font-size: 15px; letter-spacing: 2px; }
+.review-card p { font-size: 13.5px; color: var(--text); line-height: 1.5; }
+.review-card span { font-size: 12.5px; color: var(--text-muted); }
+.reviews-videos { margin-top: 28px; }
+.reviews-videos h2 { font-family: var(--font-display); font-size: 22px; font-weight: 800; color: var(--text); margin-bottom: 12px; }
+.reviews-video-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
+.review-video {
+  aspect-ratio: 16 / 9; border-radius: 12px; background: var(--white);
+  border: 1px dashed var(--border-strong);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+  color: var(--text-muted); font-size: 13px;
+}
+
 /* ============ STUB / COMING SOON PAGES ============ */
 .stub-page {
   min-height: 46vh;

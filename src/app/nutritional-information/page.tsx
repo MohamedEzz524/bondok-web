@@ -1,7 +1,8 @@
-import ComingSoon from '@/components/ComingSoon';
+import type { Metadata } from 'next';
+import LegalPage from '@/components/LegalPage';
 
-export const metadata = { title: 'Nutrition & Allergen — Bondok Fried Chicken' };
+export const metadata: Metadata = { title: 'Nutrition & Allergen' + ' — Bondok Fried Chicken' };
 
 export default function Page() {
-  return <ComingSoon title={`Nutrition & Allergen`} text={`Nutrition and allergen information will be published here.`} />;
+  return <LegalPage docKey='nutritional-information' />;
 }

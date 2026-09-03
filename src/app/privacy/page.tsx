@@ -1,7 +1,8 @@
-import ComingSoon from '@/components/ComingSoon';
+import type { Metadata } from 'next';
+import LegalPage from '@/components/LegalPage';
 
-export const metadata = { title: 'Privacy Policy — Bondok Fried Chicken' };
+export const metadata: Metadata = { title: 'Privacy Policy' + ' — Bondok Fried Chicken' };
 
 export default function Page() {
-  return <ComingSoon title={`Privacy Policy`} text={`Our privacy policy will be published here.`} />;
+  return <LegalPage docKey='privacy' />;
 }

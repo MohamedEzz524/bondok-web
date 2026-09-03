@@ -104,6 +104,7 @@ export const footerLinks: { label: string; href: string }[] = [
   { label: 'Our Branches', href: '/branches' },
   { label: 'Catering', href: '/catering' },
   { label: 'Rewards', href: '/rewards' },
+  { label: 'Reviews', href: '/reviews' },
   { label: 'Terms of Service', href: '/terms' },
   { label: 'Privacy Policy', href: '/privacy' },
   { label: 'Delivery Terms', href: '/delivery-terms' },
