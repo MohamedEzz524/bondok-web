@@ -916,6 +916,45 @@ main.page { flex: 1 0 auto; }
 .recent-card span { font-size: 13px; font-weight: 700; color: var(--text); line-height: 1.25; }
 .recent-card:hover span { color: var(--orange); }
 
+/* ============ UPSELL / AOV ============ */
+.upsell { margin-top: 22px; }
+.upsell h3 { font-family: var(--font-display); font-size: 18px; font-weight: 800; color: var(--text); margin-bottom: 10px; }
+.upsell-row {
+  display: flex; gap: 10px; overflow-x: auto;
+  scrollbar-width: none; -webkit-overflow-scrolling: touch;
+  padding-bottom: 4px;
+}
+.upsell-row::-webkit-scrollbar { display: none; }
+.upsell-card {
+  position: relative;
+  flex: 0 0 128px;
+  background: var(--white); border: 1px solid var(--border); border-radius: 12px;
+  padding: 10px 10px 12px;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  text-align: center;
+}
+.upsell-card img { width: 100%; aspect-ratio: 3 / 2; object-fit: contain; }
+.upsell-name { font-size: 12.5px; font-weight: 700; color: var(--text); line-height: 1.2; }
+.upsell-price { font-size: 12px; font-weight: 800; color: var(--orange); }
+.upsell-add {
+  position: absolute; top: 8px; right: 8px;
+  width: 28px; height: 28px; border-radius: 999px;
+  background: var(--orange); color: #fff;
+  font-size: 18px; font-weight: 800; line-height: 1;
+  display: flex; align-items: center; justify-content: center;
+}
+.upsell-add:hover { background: var(--orange-hover); }
+
+.fdbar {
+  background: var(--white); border: 1px solid var(--border); border-radius: 12px;
+  padding: 12px 16px; margin-bottom: 14px;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.fdbar p { font-size: 14px; color: var(--text); }
+.fdbar strong { color: var(--orange); }
+.fdbar-track { height: 8px; border-radius: 999px; background: var(--bg); overflow: hidden; }
+.fdbar-fill { display: block; height: 100%; border-radius: 999px; background: var(--orange); transition: width .35s ease; }
+
 /* ============ PRODUCT PAGE (canonical ad/SEO landing) ============ */
 .product-page { width: 100%; max-width: 1100px; margin: 0 auto; padding: 24px 24px 72px; }
 .crumbs { display: flex; align-items: center; gap: 8px; font-size: 13.5px; color: var(--text-muted); margin-bottom: 20px; flex-wrap: wrap; }

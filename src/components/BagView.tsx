@@ -6,6 +6,9 @@ import { useCart } from './cart-context';
 import { EVENTS, publish } from '@/lib/pubsub';
 import CloseIcon from './CloseIcon';
 import RecentlyViewed from './RecentlyViewed';
+import UpsellRow from './UpsellRow';
+import FreeDeliveryBar from './FreeDeliveryBar';
+import { suggestForCart } from '@/lib/upsell';
 
 export default function BagView() {
   const { items, count, subtotal, setQty, remove, clear } = useCart();
@@ -27,6 +30,8 @@ export default function BagView() {
         <h1>Your Bag</h1>
         <p>{count} item{count === 1 ? '' : 's'}</p>
       </div>
+
+      <FreeDeliveryBar />
 
       <ul className="bag-list">
         {items.map((i) => (
@@ -70,6 +75,7 @@ export default function BagView() {
           </button>
         </div>
       </div>
+      <UpsellRow title="Complete your meal" products={suggestForCart(items.map((i) => i.slug))} source="upsell-bag" />
       <RecentlyViewed title="You recently viewed" />
     </div>
   );

@@ -5,6 +5,8 @@ import type { Product } from '@/lib/menu-data';
 import { useCart } from './cart-context';
 import CloseIcon from './CloseIcon';
 import FavButton from './FavButton';
+import UpsellRow from './UpsellRow';
+import { suggestFor } from '@/lib/upsell';
 
 interface Props {
   product: Product;
@@ -75,6 +77,8 @@ export default function ProductModal({ product, variants, onSelectVariant, onClo
             <h3>Description</h3>
             <p>{product.description ?? 'Full product description arrives with the final menu data.'}</p>
           </div>
+
+          <UpsellRow title="Frequently bought together" products={suggestFor(product.slug)} source="upsell-popup" />
 
           <div className="pmodal-section">
             <h3>Additional Information</h3>

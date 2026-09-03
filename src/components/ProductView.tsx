@@ -9,6 +9,8 @@ import type { MenuCategory, Product } from '@/lib/menu-data';
 import { useCart } from './cart-context';
 import { usePrefs } from './prefs-context';
 import FavButton from './FavButton';
+import UpsellRow from './UpsellRow';
+import { suggestFor } from '@/lib/upsell';
 
 interface Props {
   category: MenuCategory;
@@ -86,6 +88,8 @@ export default function ProductView({ category, product, variants }: Props) {
           </div>
         </div>
       </div>
+
+      <UpsellRow title="Frequently bought together" products={suggestFor(product.slug)} source="upsell-product-page" />
 
       <div className="product-more">
         <h2>More from {category.name}</h2>
