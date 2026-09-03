@@ -105,6 +105,22 @@ ul { list-style: none; margin: 0; padding: 0; }
 .logo { display: flex; align-items: center; }
 .logo-img { height: 64px; width: auto; }
 
+/* header search: icon expands an inline input; Enter deep-links to /menu?q= */
+.header-search { display: flex; align-items: center; }
+.header-search input {
+  width: 0; opacity: 0; padding: 0; border: none;
+  border-radius: 999px; background: var(--bg);
+  font-family: var(--font); font-size: 14px; color: var(--text);
+  transition: width .25s ease, opacity .2s ease, padding .25s ease;
+}
+.header-search.is-open input {
+  width: 210px; opacity: 1; padding: 9px 14px;
+  border: 1px solid var(--border-strong);
+}
+.header-search input:focus { outline: 2px solid var(--orange); }
+.header-search input::-webkit-search-cancel-button { display: none; }
+.header-search-btn { min-width: 40px; min-height: 40px; }
+
 .rewards-link { display: inline-flex; align-items: center; }
 .rewards-word { color: var(--brand-orange); font-size: 16px; font-weight: 700; font-style: italic; }
 .btn-signup { font-size: 12px; }
@@ -474,13 +490,15 @@ ul { list-style: none; margin: 0; padding: 0; }
 .cat-nav {
   position: sticky; top: 80px; z-index: 50;
   margin-inline: calc(50% - 50vw);                    /* breakout */
-  padding-inline: max(calc(50vw - 628px), 32px);      /* 1320/2 - 32 = 628 */
   background: var(--bg);
   padding-block: 14px;
   box-shadow: 0 6px 8px -8px rgba(26,26,26,.15);
 }
 .cat-nav-inner {
   display: flex; gap: 10px; overflow-x: auto;
+  /* edge padding lives on the scrollable track itself: chips scroll to the
+     viewport edge, and start/end align with the 1320px container gutters */
+  padding-inline: max(calc(50vw - 628px), 32px);      /* 1320/2 - 32 = 628 */
   scrollbar-width: none; -webkit-overflow-scrolling: touch;
   cursor: grab; user-select: none;                     /* desktop drag-to-scroll */
 }
@@ -619,7 +637,8 @@ ul { list-style: none; margin: 0; padding: 0; }
 
   /* menu page on mobile */
   .menu-page { padding-inline: 16px; }
-  .cat-nav { top: 56px; padding-inline: 16px; padding-block: 10px; }
+  .cat-nav { top: 56px; padding-block: 10px; }
+  .cat-nav-inner { padding-inline: 16px; }   /* track padding follows mobile gutter */
   .menu-head { padding: 28px 0 12px; }
   .menu-head h1 { font-size: 28px; }
   .menu-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }

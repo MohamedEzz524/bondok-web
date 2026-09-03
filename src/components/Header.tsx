@@ -1,10 +1,23 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useRef, useState } from 'react';
 import { useUI } from './ui-context';
 
 export default function Header() {
   const { openDrawer } = useUI();
+  const router = useRouter();
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchValue, setSearchValue] = useState('');
+  const searchRef = useRef<HTMLInputElement>(null);
+
+  const submitSearch = () => {
+    const q = searchValue.trim();
+    setSearchOpen(false);
+    setSearchValue('');
+    router.push(q ? `/menu?q=${encodeURIComponent(q)}` : '/menu');
+  };
 
   return (
     <header className="site-header">
@@ -31,6 +44,32 @@ export default function Header() {
         </div>
 
         <div className="header-right">
+          <div className={`header-search${searchOpen ? ' is-open' : ''}`}>
+            <input
+              ref={searchRef}
+              type="search"
+              placeholder="Search the menu..."
+              aria-label="Search the menu"
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') submitSearch();
+                if (e.key === 'Escape') { setSearchOpen(false); setSearchValue(''); }
+              }}
+            />
+            <button
+              className="icon-btn header-search-btn"
+              aria-label={searchOpen ? 'Submit search' : 'Search the menu'}
+              onClick={() => {
+                if (searchOpen) submitSearch();
+                else { setSearchOpen(true); setTimeout(() => searchRef.current?.focus(), 60); }
+              }}
+            >
+              <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+                <path fill="currentColor" d="M15.5 14h-.8l-.3-.3a6.5 6.5 0 1 0-.7.7l.3.3v.8l5 5 1.5-1.5zm-6 0a4.5 4.5 0 1 1 0-9 4.5 4.5 0 0 1 0 9z" />
+              </svg>
+            </button>
+          </div>
           <Link href="/rewards" className="rewards-link">
             <span className="rewards-word">Rewards</span>
           </Link>

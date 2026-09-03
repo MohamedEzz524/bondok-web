@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { flushSync } from 'react-dom';
+import { useSearchParams } from 'next/navigation';
 import type { MenuCategory, Product, Protein, Size } from '@/lib/menu-data';
 
 interface Props {
@@ -48,7 +49,14 @@ function matches(p: Product, f: Filters, q: string): boolean {
 }
 
 export default function MenuBrowser({ categories }: Props) {
-  const [query, setQuery] = useState('');
+  const searchParams = useSearchParams();
+  const [query, setQuery] = useState(() => searchParams.get('q') ?? '');
+
+  /* header search navigates to /menu?q=... - apply it as the live search */
+  useEffect(() => {
+    const qp = searchParams.get('q');
+    if (qp !== null) setQuery(qp);
+  }, [searchParams]);
   const [catFilter, setCatFilter] = useState<string | null>(null);
   const [filters, setFilters] = useState<Filters>(emptyFilters);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -201,10 +209,10 @@ export default function MenuBrowser({ categories }: Props) {
             placeholder="Search the menu..."
             aria-label="Search the menu"
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => { const v = e.target.value; withFlip(() => setQuery(v)); }}
           />
           {query && (
-            <button className="menu-search-clear" aria-label="Clear search" onClick={() => setQuery('')}>
+            <button className="menu-search-clear" aria-label="Clear search" onClick={() => withFlip(() => setQuery(''))}>
               <svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M18.3 5.7 12 12l6.3 6.3-1.4 1.4L10.6 13.4 5.7 18.3l-1.4-1.4L10.6 12 4.3 5.7l1.4-1.4L12 10.6l4.9-4.9z" /></svg>
             </button>
           )}
