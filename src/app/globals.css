@@ -1117,6 +1117,55 @@ main.page { flex: 1 0 auto; }
   .field-grid .field { grid-column: auto !important; }
 }
 
+/* ============ BRANCHES PAGE ============ */
+.branches-page { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 24px 72px; }
+.branches-note {
+  background: #fdf6ec; border: 1px solid var(--orange); border-radius: 12px;
+  color: var(--text); font-size: 14px; padding: 12px 18px; margin-bottom: 22px;
+  text-align: center;
+}
+.branches-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 18px; }
+.branch-card {
+  background: var(--white); border-radius: 14px; box-shadow: var(--shadow-card);
+  padding: 20px 22px; display: flex; flex-direction: column; gap: 14px;
+}
+.branch-card header { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.branch-card h2 { font-family: var(--font-display); font-size: 19px; font-weight: 800; color: var(--text); }
+.branch-area {
+  background: var(--bg); color: var(--text-muted);
+  border-radius: 999px; padding: 4px 12px;
+  font-size: 12px; font-weight: 700; white-space: nowrap;
+}
+.branch-info { display: flex; flex-direction: column; gap: 8px; }
+.branch-info li { display: flex; align-items: center; gap: 9px; font-size: 13.5px; color: var(--text); }
+.branch-info svg { color: var(--orange); flex: 0 0 auto; }
+.branch-pending { color: var(--text-muted); font-style: italic; }
+.branch-actions { display: flex; gap: 8px; margin-top: auto; flex-wrap: wrap; }
+.branch-actions .btn { font-size: 13px; padding: 8px 14px; flex: 1; min-width: 0; }
+.btn.is-disabled { opacity: .5; cursor: not-allowed; }
+.btn.is-disabled:hover { background: inherit; color: inherit; }
+.btn-solid.is-disabled:hover { background: var(--orange); color: #fff; }
+.btn-outline.is-disabled:hover { background: transparent; color: var(--orange); }
+
+/* ============ FLOATING CONTACT (sticky call + WhatsApp) ============ */
+.float-contact {
+  position: fixed; right: 18px; bottom: 84px; z-index: 140;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.float-btn {
+  width: 52px; height: 52px; border-radius: 999px;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; box-shadow: 0 4px 14px rgba(26,26,26,.25);
+}
+.float-wa { background: #25d366; }
+.float-wa:hover { background: #1fb658; }
+.float-call { background: var(--orange); }
+.float-call:hover { background: var(--orange-hover); }
+@media (max-width: 768px) {
+  .float-contact { bottom: 120px; right: 12px; }
+  .float-btn { width: 46px; height: 46px; }
+}
+
 /* ============ STUB / COMING SOON PAGES ============ */
 .stub-page {
   min-height: 46vh;
