@@ -4,37 +4,66 @@ import { offers } from '@/lib/offers';
 
 export const metadata: Metadata = { title: 'Offers — Bondok Fried Chicken' };
 
-/* data-driven: client offers drop into lib/offers.ts and render here */
+/* structure follows the reference offers page; data-driven from lib/offers.ts */
 export default function Page() {
+  const hasSamples = offers.some((o) => o.sample);
+
   return (
     <div className="offers-page">
-      <div className="menu-head">
-        <h1>Offers</h1>
-        <p>Hot deals and limited-time offers.</p>
-      </div>
-      {offers.length === 0 ? (
-        <div className="stub-page offers-empty">
-          <svg viewBox="0 0 24 24" width="52" height="52" aria-hidden="true">
-            <path fill="#e09344" d="M20.6 11 13 3.4A2 2 0 0 0 11.6 3H5a2 2 0 0 0-2 2v6.6a2 2 0 0 0 .6 1.4L11.2 20.6a2 2 0 0 0 2.8 0l6.6-6.6a2 2 0 0 0 0-2.8zM7.5 8A1.5 1.5 0 1 1 7.5 5a1.5 1.5 0 0 1 0 3z" />
-          </svg>
-          <h2>Offers are cooking</h2>
-          <p>The first Bondok offers land here soon. Meanwhile, the menu is always a good idea.</p>
-          <Link href="/menu" className="btn btn-solid">Explore the Menu</Link>
+      {/* sign-up promo banner */}
+      <div className="offers-signup">
+        <div className="offers-signup-top">
+          <p>Want tasty deals? <strong>Sign up!</strong></p>
+          <Link href="/rewards" className="offers-learn">Learn More</Link>
         </div>
-      ) : (
-        <div className="offers-grid">
-          {offers.map((o) => (
-            <Link key={o.id} href={o.href} className="offer-card">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={o.image} alt={o.title} loading="lazy" />
-              <div className="offer-body">
-                <h2>{o.title}</h2>
-                <p>{o.text}</p>
-              </div>
-            </Link>
-          ))}
+        <div className="offers-signup-card">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/bondok/fav-tenders.webp" alt="" />
+          <div className="offers-signup-text">
+            <strong>Your first deal is on us</strong>
+            <span>Members get exclusive offers and early access to new meals.</span>
+          </div>
+          <button className="btn btn-solid">Sign Up</button>
+        </div>
+      </div>
+
+      {/* heading row */}
+      <div className="offers-headrow">
+        <div>
+          <h1>Offers</h1>
+          <p>Prices and availability vary by branch.</p>
+        </div>
+        <button className="offers-promo-link">Have a Promo Code?</button>
+      </div>
+
+      {hasSamples && (
+        <div className="branches-note">
+          Sample offers showing the page structure - real Bondok campaigns replace these.
         </div>
       )}
+
+      {/* offers grid */}
+      <div className="offers-grid">
+        {offers.map((o) => (
+          <Link key={o.id} href={o.href} className="offer-card">
+            {o.badge && <span className="offer-badge">{o.badge}</span>}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={o.image} alt={o.title} loading="lazy" />
+            <div className="offer-body">
+              <h2>{o.title}</h2>
+              <p>{o.text}</p>
+            </div>
+            <div className="offer-foot">
+              <span className="offer-price">{o.fromPrice !== undefined ? `from EGP ${o.fromPrice}` : ''}</span>
+              {o.mode && (
+                <span className={`offer-mode${o.mode === 'pickup' ? ' is-pickup' : ''}`}>
+                  {o.mode === 'pickup' ? 'Pick Up' : 'Delivery'}
+                </span>
+              )}
+            </div>
+          </Link>
+        ))}
+      </div>
     </div>
   );
 }

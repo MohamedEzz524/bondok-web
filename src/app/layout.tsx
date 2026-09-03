@@ -11,6 +11,7 @@ import OrderModal from '@/components/OrderModal';
 import StickyCart from '@/components/StickyCart';
 import Toaster from '@/components/Toaster';
 import FloatingContact from '@/components/FloatingContact';
+import DocModal from '@/components/DocModal';
 
 export const metadata: Metadata = {
   title: 'Bondok Fried Chicken',
@@ -33,6 +34,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <StickyCart />
             <Toaster />
             <FloatingContact />
+            <DocModal />
           </PrefsProvider>
           </CartProvider>
         </UIProvider>

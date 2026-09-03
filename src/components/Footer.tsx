@@ -1,13 +1,32 @@
+'use client';
+
 import Link from 'next/link';
 import { footerLinks } from '@/lib/data';
+import { useUI } from './ui-context';
+
+/* these footer entries open the doc popup instead of navigating */
+const DOC_KEYS: Record<string, string> = {
+  '/faq': 'faq',
+  '/terms': 'terms',
+  '/privacy': 'privacy',
+  '/delivery-terms': 'delivery-terms',
+  '/offer-terms': 'offer-terms',
+};
 
 export default function Footer() {
+  const { openDoc } = useUI();
   return (
     <footer className="site-footer">
       <div className="footer-inner">
         <ul className="footer-links">
           {footerLinks.map((l) => (
-            <li key={l.label}><Link href={l.href}>{l.label}</Link></li>
+            <li key={l.label}>
+              {DOC_KEYS[l.href] ? (
+                <button className="footer-linkbtn" onClick={() => openDoc(DOC_KEYS[l.href])}>{l.label}</button>
+              ) : (
+                <Link href={l.href}>{l.label}</Link>
+              )}
+            </li>
           ))}
         </ul>
 
