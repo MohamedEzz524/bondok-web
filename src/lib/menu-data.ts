@@ -25,7 +25,7 @@ export interface MenuCategory {
   products: Product[];
 }
 
-const img = (cat: string, slug: string) => `/bondok/menu/${cat}/${slug}.jpg`;
+const img = (cat: string, slug: string) => `/bondok/menu/${cat}/${slug}.webp`;
 
 const baseCategories: MenuCategory[] = [
   {

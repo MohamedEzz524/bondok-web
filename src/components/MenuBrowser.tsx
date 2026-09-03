@@ -145,6 +145,13 @@ export default function MenuBrowser({ categories }: Props) {
 
   const resultCount = visible.reduce((sum, c) => sum + c.products.length, 0);
 
+  /* FLIP cost is per named element - cap tracking to the first 20 cards so
+     large toggles (favorites, clear) stay instant; the rest crossfade */
+  const flipBudget = useMemo(
+    () => new Set(visible.flatMap((c) => c.products).slice(0, 20).map((p) => p.slug)),
+    [visible],
+  );
+
   useEffect(() => {
     if (q) publish(EVENTS.search, { source: 'menu-page', query: q, results: resultCount });
   }, [q, resultCount]);
@@ -170,6 +177,16 @@ export default function MenuBrowser({ categories }: Props) {
     return () => observer.disconnect();
   }, [view, visible]);
 
+  /* keep ?fav=1 in the URL synced with the toggle, so the drawer link
+     always works even after toggling off (same-URL clicks were no-ops) */
+  const setFavOnlySynced = useCallback((v: boolean) => {
+    setFavOnly(v);
+    const url = new URL(window.location.href);
+    if (v) url.searchParams.set('fav', '1');
+    else url.searchParams.delete('fav');
+    window.history.replaceState(null, '', url.toString());
+  }, []);
+
   const scrollToSection = useCallback((slug: string) => {
     document.getElementById(`sec-${slug}`)?.scrollIntoView({ behavior: 'smooth' });
   }, []);
@@ -190,7 +207,7 @@ export default function MenuBrowser({ categories }: Props) {
       const s = new Set(f.proteins); if (s.has(v)) s.delete(v); else s.add(v);
       return { ...f, proteins: s };
     }));
-  const clearAll = () => withFlip(() => { setFilters(emptyFilters()); setQuery(''); setFavOnly(false); });
+  const clearAll = () => withFlip(() => { setFilters(emptyFilters()); setQuery(''); setFavOnlySynced(false); });
 
   /* Esc closes the mobile filters sheet; lock scroll while open */
   useEffect(() => {
@@ -396,7 +413,7 @@ export default function MenuBrowser({ categories }: Props) {
             </button>
             <button
               className={`side-row side-fav${favOnly ? ' is-active' : ''}`}
-              onClick={() => withFlip(() => setFavOnly(!favOnly))}
+              onClick={() => withFlip(() => setFavOnlySynced(!favOnly))}
             >
               <span className="side-thumb side-fav-ic">
                 <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
@@ -450,7 +467,7 @@ export default function MenuBrowser({ categories }: Props) {
                       <article
                         key={p.slug}
                         className="pcard"
-                        style={{ viewTransitionName: `p-${cat.slug}-${p.slug}` }}
+                        style={flipBudget.has(p.slug) ? { viewTransitionName: `p-${cat.slug}-${p.slug}` } : undefined}
                         onClick={() => { recordView(p.slug); setSelected({ cat: cat.slug, slug: p.slug }); }}
                       >
                         <FavButton slug={p.slug} className="pcard-fav" />
