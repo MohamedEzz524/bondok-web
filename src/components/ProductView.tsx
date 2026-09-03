@@ -10,7 +10,7 @@ import { useCart } from './cart-context';
 import { usePrefs } from './prefs-context';
 import FavButton from './FavButton';
 import UpsellRow from './UpsellRow';
-import { suggestFor } from '@/lib/upsell';
+import { suggestFor, findProduct } from '@/lib/upsell';
 
 interface Props {
   category: MenuCategory;
@@ -24,13 +24,27 @@ export default function ProductView({ category, product, variants }: Props) {
   const { add } = useCart();
   const { recordView } = usePrefs();
   const [qty, setQty] = useState(1);
+  /* extras marked on this product - added together with the main item */
+  const [extras, setExtras] = useState<Record<string, number>>({});
+  const setExtra = (slug: string, q: number) =>
+    setExtras((prev) => {
+      const next = { ...prev };
+      if (q <= 0) delete next[slug]; else next[slug] = q;
+      return next;
+    });
+  const extraCount = Object.values(extras).reduce((a, b) => a + b, 0);
 
-  useEffect(() => { recordView(product.slug); }, [product.slug, recordView]);
+  useEffect(() => { recordView(product.slug); setExtras({}); }, [product.slug, recordView]);
 
   const addToBag = () => {
-    for (let i = 0; i < qty; i++) {
-      add({ slug: product.slug, name: product.name, image: product.image, price: product.price }, 'product-page');
+    add({ slug: product.slug, name: product.name, image: product.image, price: product.price }, 'product-page', qty);
+    for (const [slug, q] of Object.entries(extras)) {
+      const hit = findProduct(slug);
+      if (!hit) continue;
+      const e = hit.product;
+      add({ slug: e.slug, name: e.name, image: e.image, price: e.price }, 'upsell-product-page', q);
     }
+    setExtras({});
   };
 
   return (
@@ -78,6 +92,7 @@ export default function ProductView({ category, product, variants }: Props) {
             </div>
             <button className="btn btn-solid pmodal-add" onClick={addToBag}>
               Add {qty > 1 ? `${qty} ` : ''}to Bag
+              {extraCount > 0 && ` + ${extraCount} extra${extraCount === 1 ? '' : 's'}`}
               {product.price !== undefined && ` · EGP ${product.price * qty}`}
             </button>
           </div>
@@ -89,7 +104,7 @@ export default function ProductView({ category, product, variants }: Props) {
         </div>
       </div>
 
-      <UpsellRow title="Frequently bought together" products={suggestFor(product.slug)} source="upsell-product-page" />
+      <UpsellRow title="Frequently bought together" products={suggestFor(product.slug)} source="upsell-product-page" selections={extras} onSelect={setExtra} />
 
       <div className="product-more">
         <h2>More from {category.name}</h2>

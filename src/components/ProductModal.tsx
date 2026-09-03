@@ -6,7 +6,7 @@ import { useCart } from './cart-context';
 import CloseIcon from './CloseIcon';
 import FavButton from './FavButton';
 import UpsellRow from './UpsellRow';
-import { suggestFor } from '@/lib/upsell';
+import { suggestFor, findProduct } from '@/lib/upsell';
 
 interface Props {
   product: Product;
@@ -22,6 +22,19 @@ export default function ProductModal({ product, variants, onSelectVariant, onClo
   const { add } = useCart();
   const [qty, setQty] = useState(1);
   const [closing, setClosing] = useState(false);
+  /* extras marked on this product - added together with the main item */
+  const [extras, setExtras] = useState<Record<string, number>>({});
+  const setExtra = (slug: string, q: number) =>
+    setExtras((prev) => {
+      const next = { ...prev };
+      if (q <= 0) delete next[slug]; else next[slug] = q;
+      return next;
+    });
+  const extraCount = Object.values(extras).reduce((a, b) => a + b, 0);
+
+  /* variant switch = different product: reset marked extras */
+  useEffect(() => { setExtras({}); }, [product.slug]);
+
 
   const close = () => {
     setClosing(true);
@@ -37,8 +50,12 @@ export default function ProductModal({ product, variants, onSelectVariant, onClo
   }, []);
 
   const addToBag = () => {
-    for (let i = 0; i < qty; i++) {
-      add({ slug: product.slug, name: product.name, image: product.image, price: product.price }, 'product-modal');
+    add({ slug: product.slug, name: product.name, image: product.image, price: product.price }, 'product-modal', qty);
+    for (const [slug, q] of Object.entries(extras)) {
+      const hit = findProduct(slug);
+      if (!hit) continue;
+      const e = hit.product;
+      add({ slug: e.slug, name: e.name, image: e.image, price: e.price }, 'upsell-popup', q);
     }
     close();
   };
@@ -78,7 +95,7 @@ export default function ProductModal({ product, variants, onSelectVariant, onClo
             <p>{product.description ?? 'Full product description arrives with the final menu data.'}</p>
           </div>
 
-          <UpsellRow title="Frequently bought together" products={suggestFor(product.slug)} source="upsell-popup" />
+          <UpsellRow title="Frequently bought together" products={suggestFor(product.slug)} source="upsell-popup" selections={extras} onSelect={setExtra} />
 
           <div className="pmodal-section">
             <h3>Additional Information</h3>
@@ -94,6 +111,7 @@ export default function ProductModal({ product, variants, onSelectVariant, onClo
           </div>
           <button className="btn btn-solid pmodal-add" onClick={addToBag}>
             Add {qty > 1 ? `${qty} ` : ''}to Bag
+            {extraCount > 0 && ` + ${extraCount} extra${extraCount === 1 ? '' : 's'}`}
             {product.price !== undefined && ` · EGP ${product.price * qty}`}
           </button>
         </div>

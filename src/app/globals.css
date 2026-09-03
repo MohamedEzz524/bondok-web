@@ -806,15 +806,29 @@ main.page { flex: 1 0 auto; }
   pointer-events: none;
 }
 .toast {
-  display: flex; align-items: center; gap: 8px;
-  background: var(--text); color: #fff;
-  border-radius: 10px; padding: 11px 16px;
-  font-size: 14px; font-weight: 600;
-  box-shadow: 0 4px 14px rgba(26,26,26,.25);
+  position: relative; overflow: hidden;
+  background: var(--white); color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 12px; padding: 10px 14px 12px;
+  min-width: 220px; max-width: 300px;
+  box-shadow: 0 6px 20px rgba(26,26,26,.18);
   animation: toast-in .22s ease-out;
 }
-.toast svg { color: var(--green); flex: 0 0 auto; }
+.toast-body { display: flex; align-items: center; gap: 10px; }
+.toast-body > svg { color: var(--green); flex: 0 0 auto; }
+.toast-img { width: 46px; aspect-ratio: 3 / 2; object-fit: contain; flex: 0 0 auto; }
+.toast-text { display: flex; flex-direction: column; line-height: 1.25; min-width: 0; }
+.toast-text strong { font-size: 13.5px; font-weight: 800; }
+.toast-text span { font-size: 12px; color: var(--text-muted); }
+.toast-bar {
+  position: absolute; left: 0; bottom: 0; height: 3px; width: 100%;
+  background: var(--orange); transform-origin: left;
+  animation-name: toast-drain; animation-timing-function: linear; animation-fill-mode: forwards;
+}
+@keyframes toast-drain { from { transform: scaleX(1); } to { transform: scaleX(0); } }
+.toast.is-remove .toast-bar { background: var(--red); }
 @keyframes toast-in { from { transform: translateX(24px); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .toast-bar { animation: none; } }
 
 /* ============ BAG PAGE ============ */
 .bag-page { width: 100%; max-width: 760px; margin: 0 auto; padding: 32px 20px 60px; }
@@ -944,6 +958,19 @@ main.page { flex: 1 0 auto; }
   display: flex; align-items: center; justify-content: center;
 }
 .upsell-add:hover { background: var(--orange-hover); }
+.upsell-card.is-selected { border-color: var(--orange); background: #fdf6ec; }
+.upsell-qty {
+  display: flex; align-items: center; gap: 2px;
+  background: var(--white); border: 1px solid var(--orange); border-radius: 999px;
+  padding: 2px; margin-top: 2px;
+}
+.upsell-qty button {
+  width: 24px; height: 24px; border-radius: 999px;
+  color: var(--orange); font-size: 15px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+}
+.upsell-qty button:hover { background: var(--bg); }
+.upsell-qty span { min-width: 18px; text-align: center; font-size: 13px; font-weight: 800; color: var(--text); }
 
 .fdbar {
   background: var(--white); border: 1px solid var(--border); border-radius: 12px;

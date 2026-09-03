@@ -43,8 +43,8 @@ interface Base { source: string; }
 
 export interface EventPayloads {
   [EVENTS.cartUpdate]: Base & { items: CartItem[]; count: number };
-  [EVENTS.cartItemAdd]: Base & { item: CartItem };
-  [EVENTS.cartItemRemove]: Base & { slug: string };
+  [EVENTS.cartItemAdd]: Base & { item: CartItem; added: number };
+  [EVENTS.cartItemRemove]: Base & { slug: string; item?: CartItem };
   [EVENTS.quantityUpdate]: Base & { slug: string; qty: number };
   [EVENTS.cartCleared]: Base;
   [EVENTS.cartError]: Base & { message: string };

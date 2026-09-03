@@ -15,7 +15,7 @@ interface CartState {
   items: CartItem[];
   count: number;                       // total units
   subtotal: number | null;             // null while any item has no price
-  add: (item: Omit<CartItem, 'qty'>, source?: string) => void;
+  add: (item: Omit<CartItem, 'qty'>, source?: string, qty?: number) => void;
   setQty: (slug: string, qty: number, source?: string) => void;
   remove: (slug: string, source?: string) => void;
   clear: (source?: string) => void;
@@ -42,14 +42,15 @@ export function CartProvider({ children }: { children: ReactNode }) {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(items)); } catch { /* storage full/blocked */ }
   }, [items, loaded]);
 
-  const add = useCallback((item: Omit<CartItem, 'qty'>, source = 'cart') => {
+  const add = useCallback((item: Omit<CartItem, 'qty'>, source = 'cart', qty = 1) => {
+    if (qty <= 0) return;
     setItems((prev) => {
       const existing = prev.find((i) => i.slug === item.slug);
       const next = existing
-        ? prev.map((i) => (i.slug === item.slug ? { ...i, qty: i.qty + 1 } : i))
-        : [...prev, { ...item, qty: 1 }];
-      const added = next.find((i) => i.slug === item.slug)!;
-      publish(EVENTS.cartItemAdd, { source, item: added });
+        ? prev.map((i) => (i.slug === item.slug ? { ...i, qty: i.qty + qty } : i))
+        : [...prev, { ...item, qty }];
+      const result = next.find((i) => i.slug === item.slug)!;
+      publish(EVENTS.cartItemAdd, { source, item: result, added: qty });
       publish(EVENTS.cartUpdate, { source, items: next, count: next.reduce((s, i) => s + i.qty, 0) });
       return next;
     });
@@ -57,10 +58,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const setQty = useCallback((slug: string, qty: number, source = 'cart') => {
     setItems((prev) => {
+      const removed = qty <= 0 ? prev.find((i) => i.slug === slug) : undefined;
       const next = qty <= 0
         ? prev.filter((i) => i.slug !== slug)
         : prev.map((i) => (i.slug === slug ? { ...i, qty } : i));
-      publish(EVENTS.quantityUpdate, { source, slug, qty });
+      if (removed) publish(EVENTS.cartItemRemove, { source, slug, item: removed });
+      else publish(EVENTS.quantityUpdate, { source, slug, qty });
       publish(EVENTS.cartUpdate, { source, items: next, count: next.reduce((s, i) => s + i.qty, 0) });
       return next;
     });
@@ -68,8 +71,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const remove = useCallback((slug: string, source = 'cart') => {
     setItems((prev) => {
+      const removed = prev.find((i) => i.slug === slug);
       const next = prev.filter((i) => i.slug !== slug);
-      publish(EVENTS.cartItemRemove, { source, slug });
+      publish(EVENTS.cartItemRemove, { source, slug, item: removed });
       publish(EVENTS.cartUpdate, { source, items: next, count: next.reduce((s, i) => s + i.qty, 0) });
       return next;
     });
