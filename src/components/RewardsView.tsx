@@ -1,11 +1,14 @@
 'use client';
 
-/* Bondok Rewards landing - structural placeholder for the loyalty program
-   (a future-phase project per scope). Animated hero + sections so the
-   designer reviews real motion. All program details are placeholders. */
+/* Bondok Rewards landing - mirrors the reference /rewards page exactly:
+   cream tab strip + full-bleed orange hero + footer (no sections below).
+   The tabs open the rewards popup (reference behavior) where the
+   freebies / how-it-works / FAQ placeholder content lives.
+   Loyalty program itself is a future-phase project per scope. */
 
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { motion, useReducedMotion } from 'motion/react';
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 
 const fadeUp = {
   initial: { opacity: 0, y: 26 },
@@ -23,16 +26,69 @@ const FLOATERS = [
   { left: '46%', top: '5%', size: 82, delay: 1.2 },
 ];
 
+const TABS = [
+  { key: 'freebies', label: 'Freebies' },
+  { key: 'rewards', label: 'Rewards' },
+  { key: 'how', label: 'How It Works' },
+  { key: 'faq', label: 'FAQ' },
+] as const;
+
+type TabKey = (typeof TABS)[number]['key'];
+
+const FREEBIES = [
+  { img: '/bondok/fav-tenders.webp', name: '6 Pcs Tenders' },
+  { img: '/bondok/fav-chicken-fillet.webp', name: 'Chicken Fillet Sandwich' },
+  { img: '/bondok/feat-sides.webp', name: 'Cheese Fries' },
+  { img: '/bondok/hero-shrimp-roll.webp', name: 'Shrimp Roll' },
+];
+
+const STEPS = [
+  { n: 1, t: 'Sign up', d: 'Just your phone number - no passwords, no forms.' },
+  { n: 2, t: 'Earn points', d: 'Every order adds points to your balance automatically.' },
+  { n: 3, t: 'Eat free', d: 'Swap points for freebies whenever you are ready.' },
+];
+
+function CoinSvg() {
+  return (
+    <svg viewBox="-4 -4 32 32" fill="currentColor">
+      <circle cx="12" cy="12" r="14.5" fill="none" stroke="currentColor" strokeWidth="2" />
+      <path d="M13.6.8c0 .3.4.5.1.7H13c-.4 0-1.1.4-1.2.9 0 .3.7.7.2.8-.5 0-.9-.6-1.1 0l-.4.6-.1.7-.8.3-.2.8q-.1 1-.8 1.6-.3.1-.5.4 0 .4.3.6l-.2.4-.4.2q-.2.2-.3.8l-.2.8q.1.3.4.5c.1.7-.7.8-.9 1.3q0 .3.3.4h.5q.3 0 .4.3l-.2.4-.4.6v.7l.2.3q0 .3-.3.5L6 17c-.3.3-.6 1-1.1.8l-1.2-.4q-.7 0-1.2.6v1q.1 1.1.7 2l.2.4.1.2-.1.8.1.6q.4.8 1.2 1 1.7.2 2.2-1.2.2-.6 0-1.1t0-.9l1.4-2.4s.4-.7.3-.9q-.5 0-.9.5l-.9 1.2-.8 1.1c-.8-.6-1.3 0-2 .5a3 3 0 0 1-.4-2q0-.5.6-.4l.6.4q.5 0 .6-.4l1-.8 1-1L8 16q.1-.4.4-.6 0-.2.3 0l.1.5c0 .7.2 1.6 1 1.4.4 0 .6-.4.9-.4.4-.2.5-.1.8-.6q0-.5.6-.7.4.2.6 0l.3.1.3.4q.4 0 .6-.2l.6-.4.2-.5c.5-1.1 2-.2 2.5-1l.5-.5q.4-.2.4-.5c.1-.5.2 0 .5-.2v-.3h.3l.5-.6q.2-.3.8-.5.3 0 .2-.6l-.5-.2q-.2 0 0-.2t.2-.7v-.2q.4 0 .5-.4h.1q.2 0 .3-.2l-.2-.5q-.1-.4.2-.5t.5-.3c.2-.4-.3-.6-.5-.7l-.5-.6.1-.4.5-.6q-.1-.5-.4-.8c-.3-.3.5-.6.4-.9q-.2-.4-.8-.4l-.3-.4-.5-.4-1-.5q0-.3-.3-.3l-.3-.3V.7l-.2-.2h-1l-.3-.5q-.4 0-.6.2l-.4.5q-.4.1-.6-.2c-.3 0-1.2 0-1.2.3" />
+    </svg>
+  );
+}
+
+function Brand() {
+  return (
+    <div className="drawer-brand rw-brand">
+      <span className="drawer-brand-top">Bondok</span>
+      <span className="drawer-brand-rewards">Rewards</span>
+    </div>
+  );
+}
+
 export default function RewardsView() {
   const reduced = useReducedMotion();
+  const [tab, setTab] = useState<TabKey | null>(null);
+
+  useEffect(() => {
+    document.body.style.overflow = tab ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [tab]);
+
+  useEffect(() => {
+    if (!tab) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setTab(null); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [tab]);
 
   return (
     <div className="rewards-page">
-      {/* anchor sub-nav (reference pattern) */}
+      {/* tab strip (reference: opens the rewards popup) */}
       <nav className="subnav rewards-subnav" aria-label="Rewards sections">
-        <a href="#freebies">Freebies</a>
-        <a href="#how">How It Works</a>
-        <a href="#rewards-faq">FAQ</a>
+        {TABS.map((t) => (
+          <button key={t.key} className="rw-tab" onClick={() => setTab(t.key)}>{t.label}</button>
+        ))}
       </nav>
 
       {/* orange hero with floating coins */}
@@ -46,10 +102,7 @@ export default function RewardsView() {
             transition={{ duration: 4, repeat: Infinity, delay: f.delay, ease: 'easeInOut' }}
             aria-hidden="true"
           >
-            <svg viewBox="-4 -4 32 32" fill="currentColor">
-              <circle cx="12" cy="12" r="14.5" fill="none" stroke="currentColor" strokeWidth="2" />
-              <path d="M13.6.8c0 .3.4.5.1.7H13c-.4 0-1.1.4-1.2.9 0 .3.7.7.2.8-.5 0-.9-.6-1.1 0l-.4.6-.1.7-.8.3-.2.8q-.1 1-.8 1.6-.3.1-.5.4 0 .4.3.6l-.2.4-.4.2q-.2.2-.3.8l-.2.8q.1.3.4.5c.1.7-.7.8-.9 1.3q0 .3.3.4h.5q.3 0 .4.3l-.2.4-.4.6v.7l.2.3q0 .3-.3.5L6 17c-.3.3-.6 1-1.1.8l-1.2-.4q-.7 0-1.2.6v1q.1 1.1.7 2l.2.4.1.2-.1.8.1.6q.4.8 1.2 1 1.7.2 2.2-1.2.2-.6 0-1.1t0-.9l1.4-2.4s.4-.7.3-.9q-.5 0-.9.5l-.9 1.2-.8 1.1c-.8-.6-1.3 0-2 .5a3 3 0 0 1-.4-2q0-.5.6-.4l.6.4q.5 0 .6-.4l1-.8 1-1L8 16q.1-.4.4-.6 0-.2.3 0l.1.5c0 .7.2 1.6 1 1.4.4 0 .6-.4.9-.4.4-.2.5-.1.8-.6q0-.5.6-.7.4.2.6 0l.3.1.3.4q.4 0 .6-.2l.6-.4.2-.5c.5-1.1 2-.2 2.5-1l.5-.5q.4-.2.4-.5c.1-.5.2 0 .5-.2v-.3h.3l.5-.6q.2-.3.8-.5.3 0 .2-.6l-.5-.2q-.2 0 0-.2t.2-.7v-.2q.4 0 .5-.4h.1q.2 0 .3-.2l-.2-.5q-.1-.4.2-.5t.5-.3c.2-.4-.3-.6-.5-.7l-.5-.6.1-.4.5-.6q-.1-.5-.4-.8c-.3-.3.5-.6.4-.9q-.2-.4-.8-.4l-.3-.4-.5-.4-1-.5q0-.3-.3-.3l-.3-.3V.7l-.2-.2h-1l-.3-.5q-.4 0-.6.2l-.4.5q-.4.1-.6-.2c-.3 0-1.2 0-1.2.3" />
-            </svg>
+            <CoinSvg />
           </motion.span>
         ))}
 
@@ -59,65 +112,111 @@ export default function RewardsView() {
         </motion.div>
         <div className="rw-hero-inner">
           <motion.div className="rw-hero-copy" {...fadeUp}>
-            <div className="drawer-brand rw-brand">
-              <span className="drawer-brand-top">Bondok</span>
-              <span className="drawer-brand-rewards">Rewards</span>
-            </div>
+            <Brand />
             <h1>More of the chicken you love, for FREE</h1>
             <p className="rw-points">Earn points with every EGP you spend</p>
-            <button className="btn rw-signup">Sign Up</button>
+            <button className="btn rw-signup" onClick={() => setTab('rewards')}>Sign Up</button>
             <span className="rw-fine">Program details are being finalized - points values and freebies announced at launch.</span>
           </motion.div>
         </div>
       </section>
 
-      {/* freebies */}
-      <motion.section id="freebies" className="rw-section" {...fadeUp}>
-        <h2>Freebies you can earn</h2>
-        <p>Redeem points for the food you already love.</p>
-        <div className="rw-freebies">
-          {[
-            { img: '/bondok/fav-tenders.webp', name: '6 Pcs Tenders' },
-            { img: '/bondok/fav-chicken-fillet.webp', name: 'Chicken Fillet Sandwich' },
-            { img: '/bondok/feat-sides.webp', name: 'Cheese Fries' },
-            { img: '/bondok/hero-shrimp-roll.webp', name: 'Shrimp Roll' },
-          ].map((f) => (
-            <div key={f.name} className="rw-freebie">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={f.img} alt={f.name} loading="lazy" />
-              <span>{f.name}</span>
-              <em>points TBD</em>
-            </div>
-          ))}
-        </div>
-      </motion.section>
+      {/* rewards popup (reference modal: title bar + tab strip + orange body) */}
+      <AnimatePresence>
+        {tab && (
+          <motion.div
+            className="rwm-overlay"
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            transition={{ duration: 0.18 }}
+            onClick={(e) => { if (e.target === e.currentTarget) setTab(null); }}
+          >
+            <motion.div
+              className="rwm"
+              role="dialog" aria-modal="true" aria-label="Bondok Rewards"
+              initial={{ opacity: 0, y: 24, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 24, scale: 0.98 }}
+              transition={{ duration: 0.22, ease: 'easeOut' }}
+            >
+              <div className="rwm-titlebar">
+                <span>Bondok Rewards</span>
+                <button className="rwm-close" aria-label="Close" onClick={() => setTab(null)}>
+                  <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+                    <path fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" d="M6 6l12 12M18 6L6 18" />
+                  </svg>
+                </button>
+              </div>
+              <div className="rwm-tabs">
+                {TABS.map((t) => (
+                  <button key={t.key} className={tab === t.key ? 'is-active' : ''} onClick={() => setTab(t.key)}>
+                    {t.label}
+                  </button>
+                ))}
+              </div>
+              <div className="rwm-body">
+                <span className="rwm-coin rwm-coin-a" aria-hidden="true"><CoinSvg /></span>
+                <span className="rwm-coin rwm-coin-b" aria-hidden="true"><CoinSvg /></span>
 
-      {/* how it works */}
-      <motion.section id="how" className="rw-section rw-how" {...fadeUp}>
-        <h2>How it works</h2>
-        <div className="rw-steps">
-          {[
-            { n: 1, t: 'Sign up', d: 'Just your phone number - no passwords, no forms.' },
-            { n: 2, t: 'Earn points', d: 'Every order adds points to your balance automatically.' },
-            { n: 3, t: 'Eat free', d: 'Swap points for freebies whenever you are ready.' },
-          ].map((s) => (
-            <div key={s.n} className="rw-step">
-              <span className="rw-step-n">{s.n}</span>
-              <h3>{s.t}</h3>
-              <p>{s.d}</p>
-            </div>
-          ))}
-        </div>
-      </motion.section>
+                {tab === 'rewards' && (
+                  <div className="rwm-pane rwm-home">
+                    <Brand />
+                    <h2>More of the chicken you love, for FREE</h2>
+                    <p className="rwm-points">Earn points with every EGP you spend</p>
+                    <button className="rwm-signup">Sign Up</button>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img className="rwm-photo" src="/bondok/hero-12pcs.webp" alt="Bondok bucket meal" />
+                    <p className="rwm-fine">Program details are being finalized - announced at launch.</p>
+                  </div>
+                )}
 
-      {/* FAQ */}
-      <motion.section id="rewards-faq" className="rw-section" {...fadeUp}>
-        <h2>Rewards FAQ</h2>
-        <p>
-          Full program terms arrive with the rewards launch. Meanwhile, questions are welcome
-          through <Link href="/complaints" className="rw-link">Complaints &amp; Suggestions</Link>.
-        </p>
-      </motion.section>
+                {tab === 'freebies' && (
+                  <div className="rwm-pane">
+                    <h2>Freebies you can earn</h2>
+                    <p className="rwm-sub">Redeem points for the food you already love.</p>
+                    <div className="rwm-freebies">
+                      {FREEBIES.map((f) => (
+                        <div key={f.name} className="rwm-freebie">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={f.img} alt={f.name} loading="lazy" />
+                          <span>{f.name}</span>
+                          <em>points TBD</em>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {tab === 'how' && (
+                  <div className="rwm-pane">
+                    <h2>How it works</h2>
+                    <div className="rwm-steps">
+                      {STEPS.map((s) => (
+                        <div key={s.n} className="rwm-step">
+                          <span className="rwm-step-n">{s.n}</span>
+                          <div>
+                            <h3>{s.t}</h3>
+                            <p>{s.d}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {tab === 'faq' && (
+                  <div className="rwm-pane">
+                    <h2>Rewards FAQ</h2>
+                    <p className="rwm-sub">
+                      Full program terms arrive with the rewards launch. Meanwhile, questions are welcome
+                      through <Link href="/complaints" onClick={() => setTab(null)}>Complaints &amp; Suggestions</Link>.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
