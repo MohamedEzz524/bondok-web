@@ -63,7 +63,7 @@ export default function RewardsView() {
               <span className="drawer-brand-top">Bondok</span>
               <span className="drawer-brand-rewards">Rewards</span>
             </div>
-            <h1>More chicken, more smiles - earn free food every order</h1>
+            <h1>More of the chicken you love, for FREE</h1>
             <p className="rw-points">Earn points with every EGP you spend</p>
             <button className="btn rw-signup">Sign Up</button>
             <span className="rw-fine">Program details are being finalized - points values and freebies announced at launch.</span>

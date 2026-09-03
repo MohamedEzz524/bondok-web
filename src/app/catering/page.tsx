@@ -11,25 +11,41 @@ export const metadata: Metadata = {
    header + compact dark footer (global chrome is hidden on this route).
    All copy/images are Bondok placeholders. */
 
-const sparkle = (
-  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-    <path d="M12 0l2.4 7.6L22 10l-7.6 2.4L12 20l-2.4-7.6L2 10l7.6-2.4L12 0z" />
-  </svg>
-);
+/* white hand-drawn doodles (reference has whisk/trumpet/stars around the food) */
+const DOODLE_SHAPES = [
+  /* burst star */
+  <svg key="burst" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true">
+    <path d="M12 2v5M12 17v5M2 12h5M17 12h5M5 5l3.2 3.2M15.8 15.8 19 19M19 5l-3.2 3.2M8.2 15.8 5 19" />
+  </svg>,
+  /* 4-point sparkle */
+  <svg key="spark" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+    <path d="M12 1c1 5 3 8 11 11-8 3-10 6-11 11-1-5-3-8-11-11 8-3 10-6 11-11z" />
+  </svg>,
+  /* squiggle */
+  <svg key="squig" viewBox="0 0 32 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+    <path d="M1 8c4-8 6 6 10-2s6 6 10-2 6 4 10-2" />
+  </svg>,
+];
 
-/* hero collage - positions mirror the reference food spread */
+/* hero collage - positions mirror the reference food spread:
+   items cut at the top edge, a big central platter, bowls on the right,
+   and a plate anchored to the bottom-right corner */
 const HERO_ART = [
-  { src: '/bondok/hero-12pcs.webp', style: { left: '37%', bottom: '-8%', width: '42%' } },
-  { src: '/bondok/hero-tenders.webp', style: { left: '49%', top: '-14%', width: '29%' } },
-  { src: '/bondok/feat-rolls.webp', style: { right: '-4%', top: '-13%', width: '29%' } },
-  { src: '/bondok/feat-sides.webp', style: { right: '2%', top: '40%', width: '17%' } },
-  { src: '/bondok/fav-tenders.webp', style: { right: '-5%', bottom: '-14%', width: '34%' } },
+  { src: '/bondok/hero-12pcs.webp', style: { left: '29%', bottom: '-16%', width: '42%' } },
+  { src: '/bondok/hero-tenders.webp', style: { left: '44%', top: '-20%', width: '28%' } },
+  { src: '/bondok/hero-shrimp-roll.webp', style: { right: '-5%', top: '-10%', width: '27%' } },
+  { src: '/bondok/feat-sides.webp', style: { left: '52%', top: '30%', width: '16%' } },
+  { src: '/bondok/fav-cheddar-jalapeno.webp', style: { right: '1%', top: '46%', width: '14%' } },
+  { src: '/bondok/fav-tenders.webp', style: { right: '-8%', bottom: '-20%', width: '36%' } },
 ];
 
 const DOODLES = [
-  { style: { left: '40%', top: '12%', width: 30 } },
-  { style: { left: '64%', top: '58%', width: 24 } },
-  { style: { right: '24%', top: '30%', width: 16 } },
+  { shape: 0, style: { left: '40%', top: '10%', width: 52, height: 52 } },
+  { shape: 1, style: { left: '76%', top: '6%', width: 34, height: 34 } },
+  { shape: 1, style: { left: '62%', top: '62%', width: 44, height: 44 } },
+  { shape: 2, style: { left: '66%', top: '40%', width: 64, height: 24 } },
+  { shape: 1, style: { left: '47%', top: '26%', width: 22, height: 22 } },
+  { shape: 0, style: { right: '2%', top: '28%', width: 36, height: 36 } },
 ];
 
 export default function Page() {
@@ -59,13 +75,13 @@ export default function Page() {
             <img key={a.src} src={a.src} alt="" style={a.style} />
           ))}
           {DOODLES.map((d, i) => (
-            <span key={i} className="cat-doodle" style={d.style}>{sparkle}</span>
+            <span key={i} className="cat-doodle" style={d.style}>{DOODLE_SHAPES[d.shape]}</span>
           ))}
         </div>
         <div className="cat-hero-inner">
           <div className="cat-hero-copy">
             <h1>Feed the Whole Crowd with Bondok Catering</h1>
-            <p>Turn your next gathering into a feast - golden fried chicken, sides, and sauces for everyone.</p>
+            <p>Turn your next gathering into a feast - golden fried chicken, crunchy sides, and signature sauces, portioned for everyone at the table.</p>
             <Link href="/menu" className="btn cat-hero-btn">Order Now</Link>
             <span className="cat-hero-fine">Catering availability and minimums are being finalized per branch.</span>
           </div>
@@ -77,8 +93,9 @@ export default function Page() {
         <div className="cat-benefits-inner">
           <h2>Feeding a Crowd? We Got You.</h2>
           <p className="cat-benefits-lead">
-            Customizable trays and crowd-sized portions for any occasion. Order ahead and we will have
-            everything hot and ready for your event.
+            Customizable trays and crowd-sized portions for any occasion. Place your order ahead with your
+            nearest branch and our team will confirm timing, trays, and delivery details - so everything
+            arrives hot and ready right when your event starts, with no stress on the big day.
           </p>
           <div className="cat-benefit-row">
             <div className="cat-benefit">
