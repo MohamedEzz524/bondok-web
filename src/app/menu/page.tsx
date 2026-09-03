@@ -12,10 +12,6 @@ export const metadata: Metadata = {
 export default function MenuPage() {
   return (
     <div className="menu-page">
-      <div className="menu-head">
-        <h1>Our Menu</h1>
-        <p>Golden, crispy, and made fresh - pick your favorites.</p>
-      </div>
       <Suspense fallback={<MenuSkeleton />}>
         <MenuBrowser categories={menuCategories} />
       </Suspense>

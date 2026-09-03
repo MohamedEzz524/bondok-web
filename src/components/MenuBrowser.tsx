@@ -6,9 +6,12 @@ import { useSearchParams } from 'next/navigation';
 import { useCart } from './cart-context';
 import { useUI } from './ui-context';
 import { EVENTS, publish } from '@/lib/pubsub';
+import Link from 'next/link';
 import type { MenuCategory, Product, Protein, Size } from '@/lib/menu-data';
+import { heroSlides } from '@/lib/data';
 import CloseIcon from './CloseIcon';
 import ProductModal from './ProductModal';
+import Select from './Select';
 
 interface Props {
   categories: MenuCategory[];
@@ -266,18 +269,22 @@ export default function MenuBrowser({ categories }: Props) {
         )}
       </div>
       {view === 'browse' && (
-        <select
-          className="sort-select"
-          aria-label="Sort products"
+        <Select
+          ariaLabel="Sort products"
           value={sort}
-          onChange={(e) => withFlip(() => setSort(e.target.value as typeof sort))}
-        >
-          <option value="default">Sort: Featured</option>
-          <option value="name-asc">Name A-Z</option>
-          <option value="name-desc">Name Z-A</option>
-          {priceCeiling !== null && <option value="price-asc">Price: Low to High</option>}
-          {priceCeiling !== null && <option value="price-desc">Price: High to Low</option>}
-        </select>
+          onChange={(v) => withFlip(() => setSort(v as typeof sort))}
+          options={[
+            { value: 'default', label: 'Sort: Featured' },
+            { value: 'name-asc', label: 'Name A-Z' },
+            { value: 'name-desc', label: 'Name Z-A' },
+            ...(priceCeiling !== null
+              ? [
+                  { value: 'price-asc', label: 'Price: Low to High' },
+                  { value: 'price-desc', label: 'Price: High to Low' },
+                ]
+              : []),
+          ]}
+        />
       )}
       {view === 'browse' && (
         <button className="filters-btn" onClick={() => setSheetOpen(true)}>
@@ -307,6 +314,19 @@ export default function MenuBrowser({ categories }: Props) {
 
       {view === 'launcher' ? (
         <>
+          {/* promo cards row (reference launcher structure) */}
+          <div className="promo-row">
+            {heroSlides.map((s) => (
+              <Link key={s.title} href={s.href} className="promo-mini">
+                <div className="promo-mini-text">
+                  <h3>{s.title}</h3>
+                  <p>{s.text}</p>
+                </div>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={s.image} alt={s.alt} loading="lazy" />
+              </Link>
+            ))}
+          </div>
           {searchBar}
           {/* launcher: one tile per category (reference /menu structure) */}
           <div className="cat-tiles">
@@ -316,7 +336,6 @@ export default function MenuBrowser({ categories }: Props) {
                 <img src={c.cover} alt={c.name} loading="lazy" />
                 <div className="cat-tile-body">
                   <h3>{c.name}</h3>
-                  <span>{c.products.length} item{c.products.length === 1 ? '' : 's'}</span>
                 </div>
               </button>
             ))}
@@ -327,11 +346,10 @@ export default function MenuBrowser({ categories }: Props) {
           {/* sidebar: category scrollspy list (reference) + our filters */}
           <aside className="menu-side">
             <button className="side-row side-row-top" onClick={() => { setView('launcher'); window.scrollTo({ top: 0 }); }}>
-              <span className="side-thumb side-thumb-logo">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/bondok/logo.jpg" alt="" />
-              </span>
-              Full Menu
+              <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                <path fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" d="M15 6l-6 6 6 6" />
+              </svg>
+              <span className="side-label">Full Menu</span>
             </button>
             {categories.map((c) => (
               <button
@@ -343,7 +361,7 @@ export default function MenuBrowser({ categories }: Props) {
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={c.cover} alt="" loading="lazy" />
                 </span>
-                {c.name}
+                <span className="side-label">{c.name}</span>
               </button>
             ))}
             <div className="side-filters">
