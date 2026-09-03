@@ -3,7 +3,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { flushSync } from 'react-dom';
 import { useSearchParams } from 'next/navigation';
+import { useCart } from './cart-context';
+import { EVENTS, publish } from '@/lib/pubsub';
 import type { MenuCategory, Product, Protein, Size } from '@/lib/menu-data';
+import CloseIcon from './CloseIcon';
 
 interface Props {
   categories: MenuCategory[];
@@ -49,6 +52,7 @@ function matches(p: Product, f: Filters, q: string): boolean {
 }
 
 export default function MenuBrowser({ categories }: Props) {
+  const { add } = useCart();
   const searchParams = useSearchParams();
   const [query, setQuery] = useState(() => searchParams.get('q') ?? '');
 
@@ -123,6 +127,14 @@ export default function MenuBrowser({ categories }: Props) {
   }, [categories, catFilter, filters, q]);
 
   const resultCount = visible.reduce((sum, c) => sum + c.products.length, 0);
+
+  useEffect(() => {
+    if (q) publish(EVENTS.search, { source: 'menu-page', query: q, results: resultCount });
+  }, [q, resultCount]);
+
+  useEffect(() => {
+    publish(EVENTS.filterChange, { source: 'menu-page', active: activeCount });
+  }, [activeCount]);
 
   const toggleSize = (v: Size) =>
     withFlip(() => setFilters((f) => {
@@ -213,7 +225,7 @@ export default function MenuBrowser({ categories }: Props) {
           />
           {query && (
             <button className="menu-search-clear" aria-label="Clear search" onClick={() => withFlip(() => setQuery(''))}>
-              <svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M18.3 5.7 12 12l6.3 6.3-1.4 1.4L10.6 13.4 5.7 18.3l-1.4-1.4L10.6 12 4.3 5.7l1.4-1.4L12 10.6l4.9-4.9z" /></svg>
+              <CloseIcon size={16} />
             </button>
           )}
         </div>
@@ -280,7 +292,12 @@ export default function MenuBrowser({ categories }: Props) {
                       <div className="product-body">
                         <h3>{p.name}</h3>
                         {p.price !== undefined && <span className="product-price">EGP {p.price}</span>}
-                        <button className="btn btn-outline product-add">Add to Bag</button>
+                        <button
+                          className="btn btn-outline product-add"
+                          onClick={() => add({ slug: p.slug, name: p.name, image: p.image, price: p.price }, 'menu-page')}
+                        >
+                          Add to Bag
+                        </button>
                       </div>
                     </article>
                   ))}
@@ -299,7 +316,7 @@ export default function MenuBrowser({ categories }: Props) {
             <div className="fdrawer-head">
               <h3>Filters</h3>
               <button className="icon-btn" aria-label="Close filters" onClick={() => setDrawerOpen(false)}>
-                <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M18.3 5.7 12 12l6.3 6.3-1.4 1.4L10.6 13.4 5.7 18.3l-1.4-1.4L10.6 12 4.3 5.7l1.4-1.4L12 10.6l4.9-4.9z" /></svg>
+                <CloseIcon size={22} />
               </button>
             </div>
             <div className="fdrawer-body">{filterGroups}</div>

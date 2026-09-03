@@ -1,7 +1,8 @@
-import ComingSoon from '@/components/ComingSoon';
+import type { Metadata } from 'next';
+import BagView from '@/components/BagView';
 
-export const metadata = { title: 'Your Bag — Bondok Fried Chicken' };
+export const metadata: Metadata = { title: 'Your Bag — Bondok Fried Chicken' };
 
-export default function Page() {
-  return <ComingSoon title={`Your Bag`} text={`Your bag is empty. Online ordering is coming with our launch - explore the menu meanwhile.`} />;
+export default function BagPage() {
+  return <BagView />;
 }

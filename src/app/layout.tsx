@@ -1,11 +1,14 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { UIProvider } from '@/components/ui-context';
+import { CartProvider } from '@/components/cart-context';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import BottomTabs from '@/components/BottomTabs';
 import MenuDrawer from '@/components/MenuDrawer';
 import OrderModal from '@/components/OrderModal';
+import StickyCart from '@/components/StickyCart';
+import Toaster from '@/components/Toaster';
 
 export const metadata: Metadata = {
   title: 'Bondok Fried Chicken',
@@ -17,12 +20,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body>
         <UIProvider>
-          <Header />
-          <main className="page">{children}</main>
-          <Footer />
-          <BottomTabs />
-          <MenuDrawer />
-          <OrderModal />
+          <CartProvider>
+            <Header />
+            <main className="page">{children}</main>
+            <Footer />
+            <BottomTabs />
+            <MenuDrawer />
+            <OrderModal />
+            <StickyCart />
+            <Toaster />
+          </CartProvider>
         </UIProvider>
       </body>
     </html>

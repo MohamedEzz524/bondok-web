@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import Link from 'next/link';
 import { useUI } from './ui-context';
+import CloseIcon from './CloseIcon';
 
 export default function MenuDrawer() {
   const { drawerOpen, closeDrawer } = useUI();
@@ -24,7 +25,7 @@ export default function MenuDrawer() {
     <div className="drawer-overlay" onClick={(e) => { if (e.target === e.currentTarget) closeDrawer(); }}>
       <aside className="drawer" role="dialog" aria-label="Menu">
         <button className="drawer-close icon-btn" aria-label="Close menu" onClick={closeDrawer}>
-          <svg viewBox="0 0 24 24" width="24" height="24"><path fill="currentColor" d="M18.3 5.7 12 12l6.3 6.3-1.4 1.4L10.6 13.4 5.7 18.3l-1.4-1.4L10.6 12 4.3 5.7l1.4-1.4L12 10.6l4.9-4.9z" /></svg>
+          <CloseIcon size={24} />
         </button>
 
         <div className="drawer-brand">

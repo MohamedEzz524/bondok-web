@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import { menuCategories } from '@/lib/menu-data';
 import MenuBrowser from '@/components/MenuBrowser';
+import MenuSkeleton from '@/components/MenuSkeleton';
 
 export const metadata: Metadata = {
   title: 'Menu — Bondok Fried Chicken',
@@ -15,7 +16,7 @@ export default function MenuPage() {
         <h1>Our Menu</h1>
         <p>Golden, crispy, and made fresh - pick your favorites.</p>
       </div>
-      <Suspense fallback={null}>
+      <Suspense fallback={<MenuSkeleton />}>
         <MenuBrowser categories={menuCategories} />
       </Suspense>
     </div>

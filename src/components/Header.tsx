@@ -4,9 +4,11 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useRef, useState } from 'react';
 import { useUI } from './ui-context';
+import { useCart } from './cart-context';
 
 export default function Header() {
   const { openDrawer } = useUI();
+  const { count } = useCart();
   const router = useRouter();
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchValue, setSearchValue] = useState('');
@@ -74,12 +76,13 @@ export default function Header() {
             <span className="rewards-word">Rewards</span>
           </Link>
           <button className="btn btn-outline btn-signup">Sign Up</button>
-          <button className="btn btn-solid btn-bag" aria-label="View shopping bag">
+          <Link href="/bag" className="btn btn-solid btn-bag" aria-label="View shopping bag">
             <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
               <path fill="currentColor" d="M7 7V6a5 5 0 0 1 10 0v1h3v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7h3zm2 0h6V6a3 3 0 0 0-6 0v1z" />
             </svg>
             <span>Bag</span>
-          </button>
+            {count > 0 && <span className="bag-count">{count}</span>}
+          </Link>
         </div>
       </div>
     </header>

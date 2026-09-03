@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import Link from 'next/link';
 import { useUI } from './ui-context';
+import CloseIcon from './CloseIcon';
 
 export default function OrderModal() {
   const { orderMode, orderClosing, switchOrder, closeOrder } = useUI();
@@ -28,7 +29,7 @@ export default function OrderModal() {
     >
       <div className="omodal" role="dialog" aria-label="Order" data-mode={orderMode}>
         <button className="omodal-close" aria-label="Close" onClick={closeOrder}>
-          <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M18.3 5.7 12 12l6.3 6.3-1.4 1.4L10.6 13.4 5.7 18.3l-1.4-1.4L10.6 12 4.3 5.7l1.4-1.4L12 10.6l4.9-4.9z" /></svg>
+          <CloseIcon size={18} />
         </button>
 
         <header className="omodal-head">
