@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { flushSync } from 'react-dom';
+import { AnimatePresence, motion } from 'motion/react';
 import { useSearchParams } from 'next/navigation';
 import { useCart } from './cart-context';
 import { useUI } from './ui-context';
@@ -313,8 +314,15 @@ export default function MenuBrowser({ categories }: Props) {
         </div>
       </div>
 
+      <AnimatePresence mode="wait" initial={false}>
       {view === 'launcher' ? (
-        <>
+        <motion.div
+          key="launcher"
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          transition={{ duration: 0.22, ease: 'easeOut' }}
+        >
           {/* promo cards row (reference launcher structure);
               becomes a carousel only when more than 3 promos exist */}
           <div className="promo-wrap">
@@ -361,9 +369,16 @@ export default function MenuBrowser({ categories }: Props) {
               </button>
             ))}
           </div>
-        </>
+        </motion.div>
       ) : (
-        <div className="menu-layout">
+        <motion.div
+          key="browse"
+          className="menu-layout"
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          transition={{ duration: 0.22, ease: 'easeOut' }}
+        >
           {/* sidebar: category scrollspy list (reference) + our filters */}
           <aside className="menu-side">
             <button className="side-row side-row-top" onClick={() => { setView('launcher'); window.scrollTo({ top: 0 }); }}>
@@ -443,8 +458,9 @@ export default function MenuBrowser({ categories }: Props) {
               ))
             )}
           </div>
-        </div>
+        </motion.div>
       )}
+      </AnimatePresence>
 
       {/* mobile filters bottom sheet */}
       {sheetOpen && (
