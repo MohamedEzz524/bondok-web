@@ -500,12 +500,6 @@ ul { list-style: none; margin: 0; padding: 0; }
 
 /* promo cards row above the tiles (reference launcher structure) */
 .promo-wrap { position: relative; }
-.promo-row.is-carousel {
-  display: flex; overflow-x: auto;
-  scroll-snap-type: x mandatory; scrollbar-width: none;
-}
-.promo-row.is-carousel::-webkit-scrollbar { display: none; }
-.promo-row.is-carousel .promo-mini { flex: 0 0 calc((100% - 32px) / 3); scroll-snap-align: start; }
 .promo-arrow {
   position: absolute; top: 50%; transform: translateY(-50%);
   width: 38px; height: 38px; border-radius: 999px;
@@ -519,10 +513,13 @@ ul { list-style: none; margin: 0; padding: 0; }
 .promo-arrow-next { right: -14px; }
 
 .promo-row {
-  display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+  display: flex; overflow-x: auto; gap: 16px;
+  scroll-snap-type: x mandatory; scrollbar-width: none;
   margin-bottom: 24px;
 }
+.promo-row::-webkit-scrollbar { display: none; }
 .promo-mini {
+  flex: 0 0 30%; min-width: 300px; scroll-snap-align: start;
   display: flex; align-items: stretch;
   background: var(--white); border-radius: 12px;
   box-shadow: var(--shadow-card); overflow: hidden;
@@ -894,7 +891,7 @@ ul { list-style: none; margin: 0; padding: 0; }
   .favorites-head h4 { font-size: 20px; line-height: 28px; }
   .features-grid { gap: 24px; }
   .cat-tiles { grid-template-columns: repeat(3, 1fr); }
-  .promo-row { grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .promo-mini { flex-basis: 44%; }
   .promo-mini img { width: 100px; }
 }
 
