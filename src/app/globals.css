@@ -876,18 +876,12 @@ main.page { flex: 1 0 auto; }
 .fav-btn {
   display: inline-flex; align-items: center; justify-content: center;
   width: 32px; height: 32px; border-radius: 999px;
-  background: var(--white);
-  border: 1px solid var(--border);
   color: var(--text-muted);
-  transition: color .15s ease, border-color .15s ease, background-color .15s ease;
+  transition: color .15s ease;
 }
 .fav-btn .fav-fill { opacity: 0; transition: opacity .18s ease; }
-.fav-btn:hover { color: var(--red); border-color: #f3c1c1; }
-.fav-btn.is-on {
-  color: var(--red);
-  background: #fdeaea;
-  border-color: #f3c1c1;
-}
+.fav-btn:hover { color: var(--red); }
+.fav-btn.is-on { color: var(--red); }
 .fav-btn.is-on .fav-fill { opacity: 1; }
 .fav-btn.is-on svg { animation: fav-pop .28s cubic-bezier(.3,1.6,.5,1); }
 @keyframes fav-pop { 0% { transform: scale(.7); } 60% { transform: scale(1.25); } 100% { transform: scale(1); } }
