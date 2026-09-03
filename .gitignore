@@ -41,3 +41,4 @@ yarn-error.log*
 next-env.d.ts
 _verify-desktop.png
 _verify-mobile.png
+_verify-menu*.png
