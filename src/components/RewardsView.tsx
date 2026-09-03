@@ -1,14 +1,14 @@
 'use client';
 
-/* Bondok Rewards landing - mirrors the reference /rewards page exactly:
-   cream tab strip + full-bleed orange hero + footer (no sections below).
-   The tabs open the rewards popup (reference behavior) where the
-   freebies / how-it-works / FAQ placeholder content lives.
-   Loyalty program itself is a future-phase project per scope. */
+/* Bondok Rewards - cloned from the real reference rewards experience
+   (campaign.popeyes.com/rewards, embedded on popeyes.com/rewards):
+   tab strip -> orange hero -> free-treat picker -> sticky "points" section
+   with reward cards scrolling past -> getting-started steps -> FAQ with
+   category pills. All program values are placeholders until the loyalty
+   program (future phase) is defined with the client. */
 
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
+import { useState } from 'react';
+import { motion, useReducedMotion } from 'motion/react';
 
 const fadeUp = {
   initial: { opacity: 0, y: 26 },
@@ -26,27 +26,46 @@ const FLOATERS = [
   { left: '46%', top: '5%', size: 82, delay: 1.2 },
 ];
 
-const TABS = [
-  { key: 'freebies', label: 'Freebies' },
-  { key: 'rewards', label: 'Rewards' },
-  { key: 'how', label: 'How It Works' },
-  { key: 'faq', label: 'FAQ' },
-] as const;
-
-type TabKey = (typeof TABS)[number]['key'];
-
-const FREEBIES = [
-  { img: '/bondok/fav-tenders.webp', name: '6 Pcs Tenders' },
-  { img: '/bondok/fav-chicken-fillet.webp', name: 'Chicken Fillet Sandwich' },
-  { img: '/bondok/feat-sides.webp', name: 'Cheese Fries' },
-  { img: '/bondok/hero-shrimp-roll.webp', name: 'Shrimp Roll' },
+const TREATS = [
+  { img: '/bondok/menu/sides/french-fries.webp', name: 'French Fries' },
+  { img: '/bondok/menu/sides/coleslaw.webp', name: 'Coleslaw' },
+  { img: '/bondok/menu/sides/bbq-sauce.webp', name: 'BBQ Sauce' },
 ];
 
-const STEPS = [
-  { n: 1, t: 'Sign up', d: 'Just your phone number - no passwords, no forms.' },
-  { n: 2, t: 'Earn points', d: 'Every order adds points to your balance automatically.' },
-  { n: 3, t: 'Eat free', d: 'Swap points for freebies whenever you are ready.' },
+/* sample points values - real ones come with the loyalty program */
+const REWARD_CARDS = [
+  { img: '/bondok/menu/sides/cheese-fries.webp', name: 'Cheese Fries', points: 300 },
+  { img: '/bondok/menu/kids-tenders/4-pcs-tenders.webp', name: '4 Pcs Tenders', points: 300 },
+  { img: '/bondok/fav-chicken-fillet.webp', name: 'Chicken Fillet Sandwich', points: 600 },
+  { img: '/bondok/menu/meals/classic-meal.webp', name: 'Classic Meal', points: 900 },
+  { img: '/bondok/menu/meals/bondok-meal.webp', name: 'Bondok Meal', points: 1200 },
 ];
+
+const STEP_CARDS = [
+  { n: 1, t: 'Join Rewards', d: 'Sign up with just your phone number - no passwords, no forms.' },
+  { n: 2, t: 'Earn Points', d: 'Here is the deal: every EGP you spend adds points to your balance.' },
+  { n: 3, t: 'Redeem FREE Food', d: 'Snag your first rewards just by signing up and keep earning for more.' },
+];
+
+const FAQ_CATS: Record<string, { q: string; a: string }[]> = {
+  General: [
+    { q: 'What is Bondok Rewards?', a: 'Our loyalty program - earn points on every order and swap them for free food. Full details arrive at launch.' },
+    { q: 'How do I join?', a: 'Sign up with your phone number when the program launches - it takes seconds.' },
+    { q: 'Does joining cost anything?', a: 'No - joining Bondok Rewards is completely free.' },
+  ],
+  Earning: [
+    { q: 'How do I earn points?', a: 'Every EGP you spend on orders earns points automatically. Exact rates are announced at launch.' },
+    { q: 'Do points expire?', a: 'Point expiry rules will be published with the program terms.' },
+  ],
+  'Point Balances': [
+    { q: 'Where can I see my points?', a: 'Your balance will show in your account once the program launches.' },
+    { q: 'My points look wrong - what do I do?', a: 'Reach out through Complaints & Suggestions and our team will check your account.' },
+  ],
+  Redemptions: [
+    { q: 'How can I redeem rewards?', a: 'Swap points for freebies right from the rewards page when you order.' },
+    { q: 'Can redemptions be combined with other discounts?', a: 'Combination rules will be part of the program terms at launch.' },
+  ],
+};
 
 function CoinSvg() {
   return (
@@ -57,38 +76,48 @@ function CoinSvg() {
   );
 }
 
-function Brand() {
+/* small inline coin for chips */
+function MiniCoin() {
   return (
-    <div className="drawer-brand rw-brand">
-      <span className="drawer-brand-top">Bondok</span>
-      <span className="drawer-brand-rewards">Rewards</span>
-    </div>
+    <svg viewBox="-4 -4 32 32" width="16" height="16" fill="var(--orange)" aria-hidden="true">
+      <circle cx="12" cy="12" r="14.5" fill="none" stroke="var(--orange)" strokeWidth="3" />
+      <circle cx="12" cy="12" r="7" />
+    </svg>
+  );
+}
+
+function Sparkle({ style }: { style: React.CSSProperties }) {
+  return (
+    <svg className="rw2-spark" style={style} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M12 1c1 5 3 8 11 11-8 3-10 6-11 11-1-5-3-8-11-11 8-3 10-6 11-11z" />
+    </svg>
+  );
+}
+
+/* hand-drawn "Free" sticker like the reference reward cards */
+function FreeSticker() {
+  return (
+    <svg className="rw2-free" viewBox="0 0 56 32" aria-hidden="true">
+      <ellipse cx="28" cy="16" rx="26" ry="13" fill="none" stroke="#01847e" strokeWidth="1.8" />
+      <text x="28" y="21" textAnchor="middle" fontFamily="cursive" fontStyle="italic" fontSize="14" fill="#01847e">Free</text>
+      <path d="M50 4l3-2M52 8l4-1M4 26l-3 2" stroke="#01847e" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
   );
 }
 
 export default function RewardsView() {
   const reduced = useReducedMotion();
-  const [tab, setTab] = useState<TabKey | null>(null);
-
-  useEffect(() => {
-    document.body.style.overflow = tab ? 'hidden' : '';
-    return () => { document.body.style.overflow = ''; };
-  }, [tab]);
-
-  useEffect(() => {
-    if (!tab) return;
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setTab(null); };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [tab]);
+  const [faqCat, setFaqCat] = useState('General');
+  const [openQ, setOpenQ] = useState<number | null>(null);
 
   return (
     <div className="rewards-page">
-      {/* tab strip (reference: opens the rewards popup) */}
+      {/* anchor tab strip (reference pattern) */}
       <nav className="subnav rewards-subnav" aria-label="Rewards sections">
-        {TABS.map((t) => (
-          <button key={t.key} className="rw-tab" onClick={() => setTab(t.key)}>{t.label}</button>
-        ))}
+        <a href="#freebies">Freebies</a>
+        <a href="#earn">Rewards</a>
+        <a href="#how">How It Works</a>
+        <a href="#rewards-faq">FAQ</a>
       </nav>
 
       {/* orange hero with floating coins */}
@@ -105,118 +134,133 @@ export default function RewardsView() {
             <CoinSvg />
           </motion.span>
         ))}
-
         <motion.div className="rw-hero-media" {...fadeUp} transition={{ duration: 0.45, delay: 0.15, ease: 'easeOut' }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/bondok/hero-12pcs.webp" alt="Bondok bucket meal" />
         </motion.div>
         <div className="rw-hero-inner">
           <motion.div className="rw-hero-copy" {...fadeUp}>
-            <Brand />
+            <div className="drawer-brand rw-brand">
+              <span className="drawer-brand-top">Bondok</span>
+              <span className="drawer-brand-rewards">Rewards</span>
+            </div>
             <h1>More of the chicken you love, for FREE</h1>
             <p className="rw-points">Earn points with every EGP you spend</p>
-            <button className="btn rw-signup" onClick={() => setTab('rewards')}>Sign Up</button>
+            <button className="btn rw-signup">Sign Up</button>
             <span className="rw-fine">Program details are being finalized - points values and freebies announced at launch.</span>
           </motion.div>
         </div>
       </section>
 
-      {/* rewards popup (reference modal: title bar + tab strip + orange body) */}
-      <AnimatePresence>
-        {tab && (
-          <motion.div
-            className="rwm-overlay"
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            transition={{ duration: 0.18 }}
-            onClick={(e) => { if (e.target === e.currentTarget) setTab(null); }}
-          >
-            <motion.div
-              className="rwm"
-              role="dialog" aria-modal="true" aria-label="Bondok Rewards"
-              initial={{ opacity: 0, y: 24, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 24, scale: 0.98 }}
-              transition={{ duration: 0.22, ease: 'easeOut' }}
-            >
-              <div className="rwm-titlebar">
-                <span>Bondok Rewards</span>
-                <button className="rwm-close" aria-label="Close" onClick={() => setTab(null)}>
-                  <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-                    <path fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" d="M6 6l12 12M18 6L6 18" />
-                  </svg>
-                </button>
-              </div>
-              <div className="rwm-tabs">
-                {TABS.map((t) => (
-                  <button key={t.key} className={tab === t.key ? 'is-active' : ''} onClick={() => setTab(t.key)}>
-                    {t.label}
-                  </button>
-                ))}
-              </div>
-              <div className="rwm-body">
-                <span className="rwm-coin rwm-coin-a" aria-hidden="true"><CoinSvg /></span>
-                <span className="rwm-coin rwm-coin-b" aria-hidden="true"><CoinSvg /></span>
-
-                {tab === 'rewards' && (
-                  <div className="rwm-pane rwm-home">
-                    <Brand />
-                    <h2>More of the chicken you love, for FREE</h2>
-                    <p className="rwm-points">Earn points with every EGP you spend</p>
-                    <button className="rwm-signup">Sign Up</button>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img className="rwm-photo" src="/bondok/hero-12pcs.webp" alt="Bondok bucket meal" />
-                    <p className="rwm-fine">Program details are being finalized - announced at launch.</p>
-                  </div>
-                )}
-
-                {tab === 'freebies' && (
-                  <div className="rwm-pane">
-                    <h2>Freebies you can earn</h2>
-                    <p className="rwm-sub">Redeem points for the food you already love.</p>
-                    <div className="rwm-freebies">
-                      {FREEBIES.map((f) => (
-                        <div key={f.name} className="rwm-freebie">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={f.img} alt={f.name} loading="lazy" />
-                          <span>{f.name}</span>
-                          <em>points TBD</em>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {tab === 'how' && (
-                  <div className="rwm-pane">
-                    <h2>How it works</h2>
-                    <div className="rwm-steps">
-                      {STEPS.map((s) => (
-                        <div key={s.n} className="rwm-step">
-                          <span className="rwm-step-n">{s.n}</span>
-                          <div>
-                            <h3>{s.t}</h3>
-                            <p>{s.d}</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {tab === 'faq' && (
-                  <div className="rwm-pane">
-                    <h2>Rewards FAQ</h2>
-                    <p className="rwm-sub">
-                      Full program terms arrive with the rewards launch. Meanwhile, questions are welcome
-                      through <Link href="/complaints" onClick={() => setTab(null)}>Complaints &amp; Suggestions</Link>.
-                    </p>
-                  </div>
-                )}
-              </div>
-            </motion.div>
+      {/* free welcome treat (reference: "Feeling the love? Us too!") */}
+      <section id="freebies" className="rw2-treat">
+        <motion.div {...fadeUp}>
+          <h2>
+            Feeling the love? Us too!<br />
+            <span className="rw2-teal">FREE</span> treat on us now
+          </h2>
+          <p className="rw2-treat-min">with a minimum purchase</p>
+        </motion.div>
+        {TREATS.map((t, i) => (
+          <motion.div key={t.name} className="rw2-treat-item" {...fadeUp}>
+            <Sparkle style={i % 2 ? { right: '8%', top: 12, width: 30 } : { left: '8%', top: 12, width: 38 }} />
+            <Sparkle style={i % 2 ? { left: '14%', bottom: 40, width: 20 } : { right: '12%', bottom: 40, width: 22 }} />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={t.img} alt={t.name} loading="lazy" />
+            <h3>{t.name}</h3>
+            <span className="rw2-chip">FREE <MiniCoin /></span>
           </motion.div>
-        )}
-      </AnimatePresence>
+        ))}
+        <motion.button className="btn btn-solid rw2-treat-cta" {...fadeUp}>Free Reward!</motion.button>
+      </section>
+
+      {/* sticky points section with reward cards scrolling past */}
+      <section id="earn" className="rw2-earn">
+        <div className="rw2-earn-inner">
+          <div className="rw2-earn-left">
+            <p className="rw2-earn-eq">EGP 1 = <MiniCoinWhite /> 10 points</p>
+            <h2>Dig in and let the rewards roll in!</h2>
+            <Sparkle style={{ right: '4%', top: -18, width: 34, color: '#fff' }} />
+            <Sparkle style={{ left: '-8%', bottom: -30, width: 24, color: '#fff' }} />
+          </div>
+          <div className="rw2-cards">
+            {REWARD_CARDS.map((c) => (
+              <motion.article key={c.name} className="rw2-card" {...fadeUp} viewport={{ once: true, amount: 0.5 }}>
+                <div className="rw2-card-img">
+                  <FreeSticker />
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={c.img} alt={c.name} loading="lazy" />
+                </div>
+                <div className="rw2-card-body">
+                  <span className="rw2-chip">{c.points} <MiniCoin /></span>
+                  <h3>{c.name}</h3>
+                </div>
+              </motion.article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* getting started */}
+      <section id="how" className="rw2-steps">
+        <motion.h2 {...fadeUp}>Getting started is as easy as pie!</motion.h2>
+        <div className="rw2-steps-row">
+          {STEP_CARDS.map((s) => (
+            <motion.div key={s.n} className="rw2-step-card" {...fadeUp}>
+              <span className="rw2-step-n">{s.n}</span>
+              <h3>{s.t}</h3>
+              <p>{s.d}</p>
+            </motion.div>
+          ))}
+        </div>
+        <div className="rw2-coinband" aria-hidden="true" />
+      </section>
+
+      {/* FAQ with category pills */}
+      <section id="rewards-faq" className="rw2-faq">
+        <motion.h2 {...fadeUp}>FAQs</motion.h2>
+        <div className="rw2-faq-tabs" role="tablist" aria-label="FAQ categories">
+          {Object.keys(FAQ_CATS).map((cat) => (
+            <button
+              key={cat}
+              role="tab"
+              aria-selected={faqCat === cat}
+              className={`rw2-faq-tab${faqCat === cat ? ' is-active' : ''}`}
+              onClick={() => { setFaqCat(cat); setOpenQ(null); }}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+        <div className="rw2-faq-list">
+          {FAQ_CATS[faqCat].map((f, i) => (
+            <div key={f.q} className={`faq-item${openQ === i ? ' is-open' : ''}`}>
+              <button className="faq-q" aria-expanded={openQ === i} onClick={() => setOpenQ(openQ === i ? null : i)}>
+                {f.q}
+                <svg className="faq-chev" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                  <path fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" d="m6 9 6 6 6-6" />
+                </svg>
+              </button>
+              {openQ === i && <p className="faq-a">{f.a}</p>}
+            </div>
+          ))}
+        </div>
+        <button className="btn btn-solid rw2-faq-cta">Start Earnin&apos;</button>
+        <p className="rw2-disclaimer">
+          Disclaimer: The Bondok Rewards program details shown here are placeholders. Points values,
+          freebies, and terms are announced when the loyalty program launches.
+        </p>
+        <div className="rw2-coinband" aria-hidden="true" />
+      </section>
     </div>
+  );
+}
+
+function MiniCoinWhite() {
+  return (
+    <svg viewBox="-4 -4 32 32" width="20" height="20" fill="#ffe6a8" aria-hidden="true" style={{ verticalAlign: '-3px' }}>
+      <circle cx="12" cy="12" r="14.5" fill="none" stroke="#ffe6a8" strokeWidth="3" />
+      <circle cx="12" cy="12" r="7" />
+    </svg>
   );
 }
