@@ -87,6 +87,29 @@ export default function HeroCarousel() {
     return () => document.removeEventListener('keydown', onKey);
   }, [prev, next]);
 
+  /* touch/pointer swipe */
+  const swipe = useRef({ down: false, startX: 0, moved: 0 });
+  const onPointerDown = (e: React.PointerEvent) => {
+    swipe.current = { down: true, startX: e.clientX, moved: 0 };
+    hoverPaused.current = true;
+  };
+  const onPointerMove = (e: React.PointerEvent) => {
+    if (!swipe.current.down) return;
+    const dx = e.clientX - swipe.current.startX;
+    if (Math.abs(dx) > Math.abs(swipe.current.moved)) swipe.current.moved = dx;
+  };
+  const onPointerUp = () => {
+    if (!swipe.current.down) return;
+    swipe.current.down = false;
+    hoverPaused.current = false;
+    const dx = swipe.current.moved;
+    if (dx <= -60) next();
+    else if (dx >= 60) prev();
+  };
+  const suppressDragClick = (e: React.MouseEvent) => {
+    if (Math.abs(swipe.current.moved) > 10) { e.preventDefault(); e.stopPropagation(); swipe.current.moved = 0; }
+  };
+
   return (
     <section className="hero" aria-label="Promotions">
       <div className="hero-viewport">
@@ -94,6 +117,13 @@ export default function HeroCarousel() {
           className="hero-track"
           onMouseEnter={() => { hoverPaused.current = true; }}
           onMouseLeave={() => { hoverPaused.current = false; }}
+          onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={onPointerUp}
+          onPointerCancel={onPointerUp}
+          onClickCapture={suppressDragClick}
+          onDragStart={(e) => e.preventDefault()}
+          style={{ touchAction: 'pan-y' }}
         >
           {heroSlides.map((s, i) => (
             <Link
@@ -109,7 +139,7 @@ export default function HeroCarousel() {
                   <span className="promo-btn">{s.cta}</span>
                 </div>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img className="promo-img" src={s.image} alt={s.alt} />
+                <img className="promo-img" src={s.image} alt={s.alt} draggable={false} />
               </div>
             </Link>
           ))}
