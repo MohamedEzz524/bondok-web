@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useRef, useState } from 'react';
 import { useUI } from './ui-context';
 import { useCart } from './cart-context';
+import Image from "next/image";
 
 export default function Header() {
   const { openDrawer } = useUI();
@@ -45,7 +46,7 @@ export default function Header() {
         <div className="header-center">
           <Link href="/" className="logo" aria-label="Bondok Home">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img className="logo-img" src="/bondok/logo.jpg" alt="Bondok Fried Chicken" />
+            <Image className="logo-img" src="/bondok/logo.jpg" alt="Bondok Fried Chicken" />
           </Link>
         </div>
 
