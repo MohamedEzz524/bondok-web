@@ -13,7 +13,7 @@ export default function FeatureCards() {
             </Link>
             <div className="feature-body">
               <div>
-                <h2>{c.title}</h2>
+                <h2 className={c.titleInImage ? 'sr-only' : undefined}>{c.title}</h2>
                 <div className="feature-text">{c.text}</div>
               </div>
               <div className="feature-cta">

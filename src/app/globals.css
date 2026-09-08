@@ -97,6 +97,8 @@ h1, h2, h3, h4, h5, h6, p { margin: 0; }
   /* unified top spacing for every page that opens with a heading
      (pages that open with other content, e.g. PDP gallery, set their own) */
   --page-top: clamp(36px, 4vw, 56px);
+  /* unified inline padding for page containers (mobile collapses to 16px) */
+  --pad-x: 24px;
 }
 h1, h2, h3, h4, h5, h6 { font-family: var(--font-display); font-weight: 800; color: var(--text); line-height: 1.1; }
 h1 { font-size: var(--fs-h1); line-height: 1.04; }
@@ -251,9 +253,9 @@ main.page { flex: 1 0 auto; }
   background: var(--white); border-radius: 12px; box-shadow: var(--shadow-card);
   overflow: hidden; display: flex; flex-direction: column;
 }
-.fav-imgwrap { position: relative; margin-top: 16px; display: flex; align-items: center; justify-content: center; height: 160px; }
-/* product cutouts: shown as-is on the card (no crop needed) */
-.fav-photo { width: 170px !important; height: 150px !important; object-fit: contain; }
+.fav-imgwrap { position: relative; display: flex; align-items: center; justify-content: center; aspect-ratio: 1036 / 588; }
+/* final marketing art (wide frames on baked cream bg) fills the card */
+.fav-photo { width: 100% !important; height: 100% !important; object-fit: cover; }
 .fav-title { padding: 16px; text-align: center; color: var(--text); font-size: 16px; line-height: 20px; font-weight: 400; }
 
 /* ============ FEATURE TILES ============ */
@@ -1242,8 +1244,15 @@ main.page { flex: 1 0 auto; }
 
 .offers-empty { min-height: auto; padding: 36px 20px 20px; }
 
+/* final marketing slides: copy is baked into the art */
+.promo-full { position: relative; }
+.promo-full .promo-img {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; max-height: none; padding: 0;
+}
+
 /* ============ REVIEWS PAGE (designer layout) ============ */
-.rv-page { width: 100%; max-width: 1330px; margin: 0 auto; padding: var(--page-top) 24px 90px; }
+.rv-page { width: 100%; max-width: 1330px; margin: 0 auto; padding: var(--page-top) var(--pad-x) 90px; }
 .rv-page h2 { text-transform: uppercase; letter-spacing: .3px; }
 .pg-kicker { font-size: var(--fs-h6); font-weight: 800; text-transform: uppercase; letter-spacing: 1.4px; color: var(--orange); margin-bottom: 8px; }
 .pg-sub { font-size: var(--fs-body); color: var(--text-muted); margin-top: 8px; }
@@ -1441,7 +1450,7 @@ main.page { flex: 1 0 auto; }
 }
 
 /* ============ BRANCHES PAGE (designer layout) ============ */
-.br-page { width: 100%; max-width: 1330px; margin: 0 auto; padding: var(--page-top) 24px 90px; }
+.br-page { width: 100%; max-width: 1330px; margin: 0 auto; padding: var(--page-top) var(--pad-x) 90px; }
 .br-page h1 { text-transform: uppercase; }
 .br-hero { text-align: center; max-width: 680px; margin: 0 auto 40px; }
 .br-hero h1 { margin-top: 18px; }
@@ -1570,7 +1579,7 @@ main.page { flex: 1 0 auto; }
 
 @media (max-width: 1000px) {
   .br-layout { grid-template-columns: 1fr; }
-  .br-map { position: static; min-height: 380px; order: 2; }
+  .br-map { position: relative; top: auto; min-height: 380px; order: 2; }
 }
 @media (max-width: 640px) {
   .br-search-row { flex-direction: column; }
@@ -1578,7 +1587,7 @@ main.page { flex: 1 0 auto; }
 }
 
 /* ============ CONTACT / COMPLAINTS PAGE (designer layout) ============ */
-.ct-page { width: 100%; max-width: 1330px; margin: 0 auto; padding: var(--page-top) 24px 90px; }
+.ct-page { width: 100%; max-width: 1330px; margin: 0 auto; padding: var(--page-top) var(--pad-x) 90px; }
 .ct-page h1, .ct-page h2, .ct-page h3 { text-transform: uppercase; }
 .ct-sub { font-size: var(--fs-lead); line-height: 1.6; color: var(--text-muted); margin-top: 14px; max-width: 54ch; margin-inline: auto; }
 
@@ -1728,7 +1737,7 @@ main.page { flex: 1 0 auto; }
 .acc.is-open .acc-body { opacity: 1; }
 
 /* ============ CHECKOUT SYSTEM (designer layout: cart -> shipping -> payment -> review -> done) ============ */
-.co-page { width: 100%; max-width: 1330px; margin: 0 auto; padding: 30px 24px 90px; }
+.co-page { width: 100%; max-width: 1330px; margin: 0 auto; padding: 30px var(--pad-x) 90px; }
 .co-page h1 { text-transform: uppercase; }
 
 /* stepper */
@@ -2052,6 +2061,98 @@ main.page { flex: 1 0 auto; }
   display: inline-flex; align-items: center; justify-content: center;
 }
 
+/* ============ UNIFIED MOBILE PASS ============
+   One place controls mobile type + container padding for every page. */
+@media (max-width: 640px) {
+  :root {
+    --fs-h1: 30px;
+    --fs-h2: 22px;
+    --fs-h3: 18px;
+    --fs-h4: 16px;
+    --fs-lead: 15px;
+    --fs-body: 14px;
+    --fs-small: 12px;
+    --page-top: 30px;
+    --pad-x: 16px;
+  }
+  .container { padding-inline: var(--pad-x); }
+  .rv-hero h1, .ct-hero h1, .br-hero h1 { line-height: 1.08; }
+
+  /* pill rows scroll horizontally instead of wrapping awkwardly */
+  .br-filters {
+    flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; margin-inline: calc(-1 * var(--pad-x));
+    padding-inline: var(--pad-x); scroll-padding-inline: var(--pad-x);
+  }
+  /* reviews pills scroll inside their white bar - no bleed */
+  .rv-filterbar { flex-direction: column; align-items: stretch; gap: 10px; }
+  .rv-filters {
+    flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; width: 100%; min-width: 0;
+  }
+  .br-filters::-webkit-scrollbar, .rv-filters::-webkit-scrollbar { display: none; }
+  .br-filter, .rv-filter { white-space: nowrap; flex: 0 0 auto; }
+
+  /* branches */
+  .br-page { overflow-x: clip; }
+  .br-list-head { flex-wrap: wrap; row-gap: 2px; }
+  .br-sel-top { flex-wrap: wrap; row-gap: 8px; }
+  .br-shop-ic { width: 36px; height: 36px; }
+  .br-card-selected { padding: 16px 16px 18px; }
+  .br-card-compact { padding: 15px 16px; }
+  .br-compact-head { flex-wrap: wrap; row-gap: 4px; }
+  .br-compact-head h4 { flex: 1 1 100%; }
+  .br-chev { display: none; }
+  .br-panel { padding: 12px 13px; }
+  .br-panel-row { flex-wrap: wrap; row-gap: 6px; }
+  .br-panel-right { text-align: left; }
+  .br-actions { flex-wrap: wrap; }
+  .br-order { flex: 1 1 100%; }
+  .br-map { min-height: 300px; border-radius: 16px; }
+  .br-map-legend { max-width: calc(100% - 32px); flex-wrap: wrap; row-gap: 4px; padding: 8px 12px; }
+  .br-map-follow { max-width: calc(100% - 90px); font-size: 12px; }
+  .br-sub, .rv-sub, .ct-sub { font-size: var(--fs-lead); }
+  .br-count strong { font-size: 18px; }
+  .br-search input { padding: 14px 0; font-size: 14px; }
+  .br-locate { font-size: 13.5px; padding: 13px 16px; }
+
+  /* reviews */
+  .rv-summary { padding: 22px 18px; gap: 20px; }
+  .rv-score-num { font-size: 38px; }
+  .rv-filterbar { padding: 10px 12px; }
+  .rv-sort { width: 100%; justify-content: space-between; }
+  .rv-fav-card, .rv-card { padding: 18px 16px; }
+  .rv-cta { padding: 28px 16px; border-radius: 20px; }
+  .rv-cta-copy h2 { font-size: var(--fs-h1); }
+  .rv-form { padding: 18px 14px; }
+  .rv-video, .rv-photo { border-radius: 18px; }
+
+  /* contact */
+  .ct-channel { padding: 18px 16px; }
+  .ct-form { padding: 18px 14px; border-radius: 18px; }
+  .ct-kind { padding: 14px 12px; }
+  .ct-faq-q { padding: 15px 16px; font-size: 15px; }
+  .ct-faq-a { padding: 0 16px 15px; }
+  .ct-human { padding: 15px 14px; }
+
+  /* checkout */
+  .co-steps { margin-bottom: 26px; }
+  .co-step-dot { width: 28px; height: 28px; font-size: 12px; }
+  .co-step:not(:last-child)::after { top: 13px; left: calc(50% + 20px); right: calc(-50% + 20px); height: 3px; }
+  .co-step-label { font-size: 11.5px; margin-top: 7px; }
+  .co-card, .co-summary, .co-recap { padding: 18px 14px; border-radius: 16px; }
+  .co-item { padding: 16px 14px; }
+  .co-total-num { font-size: 27px; }
+  .co-prep-chip { font-size: 12.5px; padding: 9px 13px; }
+  .co-mode button { font-size: 13px; padding: 11px 10px; }
+  .co-confirm-btns { flex-direction: column; }
+  .co-receipt-row h3 { font-size: 21px; }
+  .co-ribbon { top: 16px; right: -52px; font-size: 10px; }
+  .co-eta-num { font-size: 34px; }
+  .co-upsell-head { flex-direction: column; align-items: flex-start; gap: 6px; }
+  .co-guarantee { flex-wrap: wrap; }
+}
+
 /* ============ DOC POPUP (FAQ / legal - reference pattern) ============ */
 .docmodal-overlay {
   position: fixed; inset: 0; z-index: 320;
@@ -2117,7 +2218,7 @@ main.page { flex: 1 0 auto; }
 .offers-loc-link { color: #fff; font-size: 14px; font-weight: 700; text-decoration: underline; margin-top: 3px; white-space: nowrap; }
 .offers-loc-link:hover { opacity: .85; }
 
-.offers-body { max-width: 1136px; margin: 0 auto; padding: 0 16px; }
+.offers-body { max-width: 1136px; margin: 0 auto; padding: 0 var(--pad-x); }
 
 .offers-signup { background: var(--white); border-radius: 8px; box-shadow: var(--shadow-card); padding: 12px 16px; margin-top: 16px; }
 .offers-signup-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 8px; }
@@ -2487,8 +2588,7 @@ main.page { flex: 1 0 auto; }
   .favorites { margin-top: 24px; }
   .favorites-grid { flex-wrap: wrap; gap: 8px; }
   .fav-card { flex: 1 1 calc(50% - 4px); }
-  .fav-imgwrap { height: 120px; }
-  .fav-photo { width: 110px !important; height: 110px !important; }
+
 
   .features-grid { flex-direction: column; gap: 12px; padding-inline: 16px; }
   .feature-card { width: 100%; max-width: 100%; flex: 1 1 auto; }

@@ -132,14 +132,16 @@ export default function HeroCarousel() {
               className="hero-slide"
               ref={(el) => { slideRefs.current[i] = el; }}
             >
-              <div className="promo">
-                <div className="promo-copy">
-                  <h2>{s.title}</h2>
-                  <p>{s.text}</p>
-                  <span className="promo-btn">{s.cta}</span>
-                </div>
+              <div className={`promo${s.full ? ' promo-full' : ''}`}>
+                {!s.full && (
+                  <div className="promo-copy">
+                    <h2>{s.title}</h2>
+                    <p>{s.text}</p>
+                    <span className="promo-btn">{s.cta}</span>
+                  </div>
+                )}
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img className="promo-img" src={s.image} alt={s.alt} draggable={false} />
+                <img className="promo-img" src={s.image} alt={s.title} draggable={false} />
               </div>
             </Link>
           ))}

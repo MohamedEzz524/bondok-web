@@ -9,6 +9,8 @@ export interface HeroSlide {
   image: string;
   alt: string;
   href: string;
+  /* final marketing art with copy baked in - render image-only, no overlay */
+  full?: boolean;
 }
 
 export interface FavoriteItem {
@@ -19,6 +21,8 @@ export interface FavoriteItem {
 }
 
 export interface FeatureCard {
+  /* the final art carries the headline - card title renders sr-only */
+  titleInImage?: boolean;
   title: string;
   text: string;
   cta: string;
@@ -32,7 +36,8 @@ export const heroSlides: HeroSlide[] = [
     title: '12 Pcs Bucket',
     text: 'Golden, crispy fried chicken - made for sharing with the whole family.',
     cta: 'Order Now',
-    image: '/bondok/hero-12pcs.webp',
+    image: '/bondok/home/banner-bucket.webp',
+    full: true,
     alt: '12 Pcs Meal',
     href: '/menu/meals/12-pcs-meal',
   },
@@ -40,7 +45,8 @@ export const heroSlides: HeroSlide[] = [
     title: 'NEW Shrimp Roll',
     text: 'Crunchy shrimp, bold sauce, soft roll. Try it today.',
     cta: 'Order Now',
-    image: '/bondok/hero-shrimp-roll.webp',
+    image: '/bondok/home/banner-shrimp-roll.webp',
+    full: true,
     alt: 'Shrimp Roll',
     href: '/menu/rolls/shrimp-roll',
   },
@@ -48,25 +54,33 @@ export const heroSlides: HeroSlide[] = [
     title: '12 Tenders Feast',
     text: 'Crispy tenders stacked high - dip into every flavor.',
     cta: 'Order Now',
-    image: '/bondok/hero-tenders.webp',
+    image: '/bondok/home/banner-tenders-feast.webp',
+    full: true,
     alt: '12 Pcs Tenders',
     href: '/menu/kids-tenders/12-pcs-tenders',
   },
 ];
 
 export const favorites: FavoriteItem[] = [
-  { title: 'Chicken Fillet Sandwich', image: '/bondok/fav-chicken-fillet.webp', alt: 'Chicken Fillet Sandwich', href: '/menu' },
-  { title: '6 Pcs Tenders', image: '/bondok/fav-tenders.webp', alt: '6 Pcs Tenders', href: '/menu' },
-  { title: 'Cheddar Jalapeno', image: '/bondok/fav-cheddar-jalapeno.webp', alt: 'Chicken Cheddar Jalapeno', href: '/menu' },
-  { title: 'Texas & Beef Burger', image: '/bondok/fav-texas-burger.webp', alt: 'Texas and Beef Burger', href: '/menu' },
+  { title: 'Bondok Meal', image: '/bondok/home/fav-bondok-meal.webp', alt: 'Bondok Meal', href: '/menu/meals/bondok-meal' },
+  { title: '12 Pcs Tenders', image: '/bondok/home/fav-12-tenders.webp', alt: '12 Pcs Tenders', href: '/menu/kids-tenders/12-pcs-tenders' },
+  { title: 'Shrimp Roll', image: '/bondok/home/fav-shrimp-roll.webp', alt: 'Shrimp Roll', href: '/menu/rolls/shrimp-roll' },
+  { title: 'Cheezy Jalapeno Fries', image: '/bondok/home/fav-cheese-fries.webp', alt: 'Cheezy Jalapeno Fries', href: '/menu/sides/cheese-fries' },
+  { title: 'Texas & Beef Burger', image: '/bondok/home/fav-texas-burger.webp', alt: 'Texas and Beef Burger', href: '/menu/burgers/texas-and-beef-burger' },
+  { title: 'Chicken Cheddar Jalapeno', image: '/bondok/home/fav-cheddar.webp', alt: 'Chicken Cheddar Jalapeno', href: '/menu/sandwiches/chicken-cheddar-jalapeno' },
+  { title: 'Chicken Mozzarella', image: '/bondok/home/fav-mozzarella.webp', alt: 'Chicken Mozzarella', href: '/menu/sandwiches/chicken-mozzarella' },
+  { title: 'Grilled Chicken', image: '/bondok/home/fav-grilled-chicken.webp', alt: 'Grilled Chicken', href: '/menu/grilled/grilled-chicken' },
 ];
 
+/* titleInImage: the final art already carries the headline - the card
+   renders its title for screen readers only */
 export const featureCards: FeatureCard[] = [
   {
-    title: 'Rolled & Loaded',
+    title: 'Big Flavour Wrap',
     text: 'Crispy chicken fillet wrapped tight with our signature sauces. Grab yours today.',
     cta: 'Order Now',
-    image: '/bondok/feat-rolls.webp',
+    image: '/bondok/home/feature-wrap.webp',
+    titleInImage: true,
     alt: 'Chicken Fillet Roll',
     href: '/menu',
   },
@@ -74,7 +88,8 @@ export const featureCards: FeatureCard[] = [
     title: 'Meals Made for Sharing',
     text: '12, 16, or 20 pieces of golden fried chicken with sides for the whole table.',
     cta: 'Order Now',
-    image: '/bondok/feat-family.webp',
+    image: '/bondok/home/feature-family.webp',
+    titleInImage: true,
     alt: '16 Pcs Family Meal',
     href: '/menu',
   },
@@ -82,7 +97,8 @@ export const featureCards: FeatureCard[] = [
     title: 'Little Bondok Meals',
     text: 'Kid-sized favorites with nuggets, fillet, or fried chicken. Smiles included.',
     cta: 'Order Now',
-    image: '/bondok/feat-kids.webp',
+    image: '/bondok/home/feature-kids.webp',
+    titleInImage: true,
     alt: 'Kids Meal',
     href: '/menu',
   },
@@ -90,7 +106,8 @@ export const featureCards: FeatureCard[] = [
     title: 'Sides & Sauces',
     text: 'Cheese fries, mozzarella sticks, onion rings, and our famous sauce lineup.',
     cta: 'See the Menu',
-    image: '/bondok/feat-sides.webp',
+    image: '/bondok/home/feature-sides.webp',
+    titleInImage: true,
     alt: 'Cheese Fries',
     href: '/menu',
   },
