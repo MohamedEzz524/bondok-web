@@ -12,7 +12,8 @@ export default function CheckoutSteps({ current }: { current: number }) {
   return (
     <ol className="co-steps" aria-label="Checkout progress">
       {STEPS.map((label, i) => {
-        const state = i < current ? 'done' : i === current ? 'current' : 'todo';
+        /* reaching the last step means the journey is complete - show its check */
+        const state = i < current || (i === current && i === STEPS.length - 1) ? 'done' : i === current ? 'current' : 'todo';
         const dot = (
           <span className="co-step-dot">
             {state === 'done' ? (

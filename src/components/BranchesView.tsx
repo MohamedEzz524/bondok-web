@@ -78,7 +78,8 @@ export default function BranchesView() {
       {/* search row */}
       <div className="br-search-row">
         <label className="br-search">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path strokeLinecap="round" d="m20 20-3.5-3.5" /></svg>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/icons/Icon-search.svg" alt="" width="19" height="19" />
           <input
             placeholder="Search by area, street, or branch name"
             value={query}
@@ -87,7 +88,8 @@ export default function BranchesView() {
           />
         </label>
         <button className="btn btn-solid br-locate" onClick={useLocation}>
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><circle cx="12" cy="12" r="7" /><circle cx="12" cy="12" r="2.4" fill="currentColor" stroke="none" /><path strokeLinecap="round" d="M12 2v3m0 14v3M2 12h3m14 0h3" /></svg>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/icons/icon-current-location.svg" alt="" width="17" height="17" />
           Use Current Location
         </button>
       </div>
@@ -128,7 +130,8 @@ export default function BranchesView() {
                     <span className="br-sel-pill"><span className="br-sel-dot" aria-hidden="true" />Selected kitchen</span>
                     {s.role && <span className="br-role">{s.role}</span>}
                     <span className="br-shop-ic" aria-hidden="true">
-                      <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" strokeWidth="1.8"><path strokeLinejoin="round" d="M4 10v10h16V10M2 10l2-6h16l2 6c0 1.4-1.1 2.5-2.5 2.5S17 11.4 17 10c0 1.4-1.1 2.5-2.5 2.5S12 11.4 12 10c0 1.4-1.1 2.5-2.5 2.5S7 11.4 7 10c0 1.4-1.1 2.5-2.5 2.5S2 11.4 2 10z" /><path d="M9 20v-6h6v6" /></svg>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src="/icons/icon-selected-branch.svg" alt="" width="20" />
                     </span>
                   </div>
                   <h3>{b.name}</h3>
@@ -159,7 +162,8 @@ export default function BranchesView() {
                       <svg viewBox="0 0 54 54" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M40.4 29.8H0v-6.6h40.4L21.8 4.6 26.5 0l26.6 26.5-26.6 26.5-4.7-4.6 18.6-18.6z" /></svg>
                     </Link>
                     <button className="br-round" title="Directions arrive with branch map links" aria-label="Directions">
-                      <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path strokeLinejoin="round" d="m12 2 10 10-10 10L2 12 12 2z" /><path strokeLinecap="round" strokeLinejoin="round" d="M9 13v-1.5a1 1 0 0 1 1-1h4M12.5 8.5l2 2-2 2" /></svg>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src="/icons/icon-direction.svg" alt="" width="19" />
                     </button>
                     <button className="br-round" title="Hotline numbers pending from client" aria-label="Call branch">
                       {/* eslint-disable-next-line @next/next/no-img-element */}

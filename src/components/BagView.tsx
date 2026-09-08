@@ -4,6 +4,7 @@
    Prices render as pending until client menu data arrives. */
 
 import Link from 'next/link';
+import { AnimatePresence, motion } from 'motion/react';
 import { useCart } from './cart-context';
 import { suggestForCart, FREE_DELIVERY_THRESHOLD } from '@/lib/upsell';
 import CheckoutSteps from './CheckoutSteps';
@@ -56,8 +57,15 @@ export default function BagView() {
 
       <div className="co-layout">
         <div className="co-items">
+          <AnimatePresence initial={false}>
           {items.map((it) => (
-            <article key={it.slug} className="co-item">
+            <motion.article
+              key={it.slug}
+              className="co-item"
+              layout
+              exit={{ opacity: 0, x: -70, height: 0, paddingTop: 0, paddingBottom: 0, marginBottom: -18, overflow: 'hidden' }}
+              transition={{ duration: 0.28, ease: 'easeOut' }}
+            >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img className="co-item-img" src={it.image} alt="" />
               <div className="co-item-main">
@@ -78,18 +86,17 @@ export default function BagView() {
                     <button className="co-qty-plus" aria-label="Increase quantity" onClick={() => setQty(it.slug, it.qty + 1, 'cart-page')}>+</button>
                   </span>
                   <span className="co-item-actions">
-                    <Link className="co-edit" href="/menu" title="Edit options (menu customization)">
-                      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M4 20h4L20 8l-4-4L4 16v4zM13 7l4 4" /></svg>
-                      Edit
-                    </Link>
+                    {/* Edit-options button returns here once product customizations exist */}
                     <button className="co-trash" aria-label={`Remove ${it.name}`} onClick={() => remove(it.slug, 'cart-page')}>
-                      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M4 7h16M9 7V5h6v2m-8 0 1 13h8l1-13M10 11v6m4-6v6" /></svg>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src="/icons/icon-delete.svg" alt="" width="15" height="15" />
                     </button>
                   </span>
                 </div>
               </div>
-            </article>
+            </motion.article>
           ))}
+          </AnimatePresence>
         </div>
 
         <aside className="co-summary">
@@ -131,7 +138,10 @@ export default function BagView() {
             {promoMsg && <p className="co-voucher-msg">{promoMsg}</p>}
           </div>
           <p className="co-secure">
-            <span>🔒 Encrypted Checkout</span>·<span>✓ Contactless Handover</span>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <span><img src="/icons/icon-secure.png" alt="" width="14" /> Encrypted Checkout</span>·
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <span><img src="/icons/icon-guarantee.svg" alt="" width="12" /> Contactless Handover</span>
           </p>
         </aside>
       </div>

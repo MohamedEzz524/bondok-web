@@ -72,9 +72,8 @@ export default function Header() {
                 else { setSearchOpen(true); setTimeout(() => searchRef.current?.focus(), 60); }
               }}
             >
-              <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-                <path fill="currentColor" d="M15.5 14h-.8l-.3-.3a6.5 6.5 0 1 0-.7.7l.3.3v.8l5 5 1.5-1.5zm-6 0a4.5 4.5 0 1 1 0-9 4.5 4.5 0 0 1 0 9z" />
-              </svg>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/icons/Icon-search.svg" alt="" width="20" height="20" />
             </button>
           </div>
           <Link href="/rewards" className="rewards-link">

@@ -33,10 +33,10 @@ interface Shipping {
 }
 
 const slide = {
-  initial: { opacity: 0, x: 28 },
-  animate: { opacity: 1, x: 0 },
-  exit: { opacity: 0, x: -20 },
-  transition: { duration: 0.22, ease: 'easeOut' as const },
+  initial: { opacity: 0, y: 16 },
+  animate: { opacity: 1, y: 0 },
+  exit: { opacity: 0, y: -10 },
+  transition: { duration: 0.25, ease: 'easeOut' as const },
 };
 
 const fmt = (v: number | null | undefined) => (v == null ? '—' : `EGP ${v}`);
@@ -51,6 +51,8 @@ export default function CheckoutFlow() {
   const [pay, setPay] = useState<'card' | 'cod' | 'wallet'>('card');
   const [saveCard, setSaveCard] = useState(true);
   const [error, setError] = useState('');
+  const [copied, setCopied] = useState(false);
+  const [placed, setPlaced] = useState<{ items: typeof items; count: number; subtotal: number | null } | null>(null);
   const orderIdRef = useRef('');
 
   const orderId = useMemo(() => {
@@ -84,10 +86,22 @@ export default function CheckoutFlow() {
   };
 
   const placeOrder = () => {
+    setPlaced({ items: [...items], count, subtotal });
     publish(EVENTS.orderPlaced, { source: 'checkout', orderId, count, subtotal });
     clear('checkout');
     go('done');
   };
+
+  const copyId = () => {
+    navigator.clipboard?.writeText(orderId).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1600);
+    }).catch(() => { /* clipboard unavailable */ });
+  };
+
+  const maskedPhone = ship.phone
+    ? `+20 ${ship.phone.slice(1, 3)}${ship.phone.slice(3, 4)} *** **${ship.phone.slice(-2)}`
+    : 'your phone';
 
   const branchName = branches.find((b) => b.id === ship.branch)?.name;
 
@@ -235,8 +249,9 @@ export default function CheckoutFlow() {
                   </div>
                   <p className="co-eta-num">25 - 40 <span>minutes</span></p>
                   <div className="co-eta-note">
-                    <span className="co-eta-ic" aria-hidden="true">
-                      <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="#fff" strokeWidth="1.8"><circle cx="6" cy="17" r="3" /><circle cx="18" cy="17" r="3" /><path strokeLinecap="round" strokeLinejoin="round" d="M6 17h6l3-8h3m-5 0h-3l-1.5 4" /></svg>
+                    <span className="co-eta-ic co-eta-ic-img" aria-hidden="true">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src="/icons/icon-temp1.png" alt="" width="40" height="40" />
                     </span>
                     <p><strong>Hot &amp; Fresh Kitchen Dispatch</strong><br />Prepared right after you confirm payment. Live distance arrives with branch data.</p>
                   </div>
@@ -263,7 +278,10 @@ export default function CheckoutFlow() {
                       <strong>Credit / Debit Card</strong>
                       <span className="co-chip co-chip-warm">Instant</span>
                     </span>
-                    <span className="co-paylogos"><b>VISA</b><i aria-hidden="true" /></span>
+                    <span className="co-paylogos">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src="/icons/card-logos.png" alt="Visa and Mastercard" height="26" />
+                    </span>
                   </button>
                   <p className="co-payopt-desc">Fast, encrypted and secure checkout with 3D Secure verification</p>
                   {pay === 'card' && (
@@ -306,7 +324,7 @@ export default function CheckoutFlow() {
                     <strong>Cash on Delivery</strong>
                     <span>Pay when you receive your meal at your door with cash or courier POS terminal</span>
                   </span>
-                  <span className="co-payopt-ic" aria-hidden="true">💵</span>
+                  <span className="co-payopt-ic" aria-hidden="true"><img src="/icons/icon-wallet.svg" alt="" width="22" /></span>
                 </button>
 
                 <button className={`co-payopt co-payopt-btn${pay === 'wallet' ? ' is-on' : ''}`} onClick={() => setPay('wallet')}>
@@ -315,12 +333,13 @@ export default function CheckoutFlow() {
                     <strong>Digital Wallet / Vodafone Cash <span className="co-chip">Fast Pay</span></strong>
                     <span>Instantly transfer via Orange Money, Vodafone Cash, or InstaPay</span>
                   </span>
-                  <span className="co-payopt-ic" aria-hidden="true">📲</span>
+                  <span className="co-payopt-ic" aria-hidden="true"><img src="/icons/icon-secure.png" alt="" width="20" /></span>
                 </button>
 
                 <div className="co-guarantee">
-                  <span className="co-guarantee-ic" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" strokeWidth="1.9"><path strokeLinecap="round" d="M7 3v7a2 2 0 0 0 2 2v9m0-18v4m8-4c-2 1.5-3 3.5-3 6 0 1.6.8 2.6 2 3v9" /></svg>
+                  <span className="co-guarantee-ic co-guarantee-ic-img" aria-hidden="true">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src="/icons/icon-temp2.png" alt="" width="46" height="46" />
                   </span>
                   <p><strong>Made-to-Order Freshness Guarantee</strong><br />Your meal is prepped the moment the kitchen receives verified payment clearance.</p>
                 </div>
@@ -333,7 +352,7 @@ export default function CheckoutFlow() {
                     <span className="co-chip">{count} items</span>
                   </div>
                   <div className="co-paymethod-tag">
-                    <span className="co-paymethod-ic" aria-hidden="true">💳</span>
+                    <span className="co-paymethod-ic" aria-hidden="true"><img src="/icons/icon-wallet.svg" alt="" width="20" /></span>
                     <div>
                       <p><strong>{pay === 'card' ? 'Credit / Debit Card' : pay === 'cod' ? 'Cash on Delivery' : 'Digital Wallet'}</strong></p>
                       <p className="co-recap-desc">{pay === 'cod' ? 'Pay at your door' : 'Activates with payment gateway'}</p>
@@ -388,7 +407,7 @@ export default function CheckoutFlow() {
                 <div className="co-card">
                   <div className="co-card-head">
                     <h3 className="co-card-title">
-                      <span className="co-title-ic" aria-hidden="true">🚚</span>
+                      <span className="co-title-ic" aria-hidden="true"><img src="/icons/icon-shipping.svg" alt="" width="22" /></span>
                       {ship.mode === 'pickup' ? 'Pickup Details' : 'Delivery Details'}
                     </h3>
                     <button className="co-edit-link" onClick={() => go('shipping')}>✎ Edit</button>
@@ -419,7 +438,7 @@ export default function CheckoutFlow() {
 
                 <div className="co-card">
                   <div className="co-card-head">
-                    <h3 className="co-card-title"><span className="co-title-ic" aria-hidden="true">💳</span>Payment Method</h3>
+                    <h3 className="co-card-title"><span className="co-title-ic" aria-hidden="true"><img src="/icons/icon-wallet.svg" alt="" width="20" /></span>Payment Method</h3>
                     <button className="co-edit-link" onClick={() => go('payment')}>✎ Edit</button>
                   </div>
                   <div className="co-panel co-panel-row">
@@ -446,7 +465,7 @@ export default function CheckoutFlow() {
               <aside className="co-side">
                 <div className="co-card">
                   <div className="co-card-head">
-                    <h3 className="co-card-title"><span className="co-title-ic" aria-hidden="true">🍴</span>Order Items <span className="co-chip">{count} items</span></h3>
+                    <h3 className="co-card-title"><span className="co-title-ic co-title-ic-solid" aria-hidden="true"><img src="/icons/icon-bag.svg" alt="" width="15" /></span>Order Items <span className="co-chip">{count} items</span></h3>
                     <Link href="/bag" className="co-edit-link">✎ Edit</Link>
                   </div>
                   {items.map((it) => (
@@ -487,17 +506,142 @@ export default function CheckoutFlow() {
 
         {step === 'done' && (
           <motion.div key="done" {...slide}>
-            <div className="co-done">
-              <svg viewBox="0 0 24 24" width="62" height="62" aria-hidden="true">
-                <circle cx="12" cy="12" r="11" fill="#68b631" />
-                <path fill="#fff" d="M9.5 15.5 6.3 12.3l-1.4 1.4 4.6 4.6 9-9-1.4-1.4z" />
-              </svg>
-              <h1>Order placed!</h1>
-              <p className="co-subline">
-                Order <strong>{orderId}</strong> is being prepared{ship.mode === 'pickup' ? ` for pickup at ${branchName ?? 'your branch'}` : ' and heading your way soon'}.
-              </p>
-              <p className="co-demo">Demo build - live orders route to the branch via the Cloud-Kitchen API.</p>
-              <Link href="/menu" className="btn btn-solid co-empty-btn">Back to Menu</Link>
+            <div className="co-confirm-hero">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/icons/Order-confirmed.png" alt="" width="96" />
+              <h1>Order confirmed!</h1>
+              <p className="co-subline">Thank you for choosing Bondok. Your order is on the way!</p>
+            </div>
+
+            <div className="co-layout">
+              <div className="co-reviewcol">
+                <div className="co-card co-receipt">
+                  <span className="co-ribbon" aria-hidden="true">Priority Prep</span>
+                  <p className="ct-label ct-caps">Receipt ID</p>
+                  <div className="co-receipt-row">
+                    <h3>#{orderId}</h3>
+                    <button className="co-copy" onClick={copyId} aria-label="Copy receipt id">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      {copied ? <span className="co-copied">Copied!</span> : <img src="/icons/icon-clipboard.svg" alt="" width="15" />}
+                    </button>
+                  </div>
+
+                  <div className="co-review-grid">
+                    <div className="co-panel">
+                      <p className="co-panel-cap">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src="/icons/icon-estimated.svg" alt="" width="14" />
+                        Estimated {ship.mode === 'pickup' ? 'Pickup' : 'Delivery'}
+                      </p>
+                      <p className="co-panel-main">25 - 40 min</p>
+                      <p className="co-recap-desc">Dispatches in ~8 mins</p>
+                    </div>
+                    <div className="co-panel">
+                      <p className="co-panel-cap">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src="/icons/icon-wallet.svg" alt="" width="16" />
+                        Payment Method
+                      </p>
+                      <p className="co-panel-main">{fmt(placed?.subtotal)}</p>
+                      <p className="co-recap-desc">{pay === 'card' ? 'Card - activates with gateway' : pay === 'cod' ? 'Cash on Delivery' : 'Digital Wallet'}</p>
+                    </div>
+                  </div>
+
+                  <div className="co-panel co-deliverto">
+                    <div className="co-deliverto-head">
+                      <p className="co-panel-cap">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src="/icons/Icon-location.svg" alt="" width="12" />
+                        {ship.mode === 'pickup' ? 'Picking Up From' : 'Delivering To'}
+                      </p>
+                      <span className="co-chip">{ship.mode === 'pickup' ? 'Pickup' : 'Doorstep'}</span>
+                    </div>
+                    <p className="co-panel-main">{ship.name || '—'}</p>
+                    <p className="co-recap-desc">
+                      {ship.mode === 'pickup' ? (branchName ?? '—') : `${ship.address}${ship.building ? `, ${ship.building}` : ''}, ${ship.city}`}
+                    </p>
+                  </div>
+
+                  <div className="co-panel co-progress">
+                    <div className="co-progress-row">
+                      <p className="co-progress-label">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src="/icons/icon-preparing-meal.svg" alt="" width="15" />
+                        Preparing meal
+                      </p>
+                      <span className="co-recap-desc">Courier assigned soon</span>
+                    </div>
+                    <span className="br-bar"><span style={{ width: '34%' }} /></span>
+                  </div>
+
+                  <p className="co-sms">
+                    We&apos;ll do our best to get your order to you fast! An SMS confirmation arrives at
+                    {' '}{maskedPhone} once the SMS gateway is live.
+                  </p>
+
+                  <div className="co-confirm-btns">
+                    <button className="btn btn-solid co-track" title="Live tracking arrives with the Cloud-Kitchen API">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src="/icons/icon-track-your-order.svg" alt="" width="17" />
+                      Track Your Order
+                    </button>
+                    <Link href="/" className="co-home">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src="/icons/Icon-back-to-home.svg" alt="" width="17" />
+                      Back to Home
+                    </Link>
+                  </div>
+                </div>
+
+                <div className="co-guarantee">
+                  <span className="co-guarantee-ic co-guarantee-ic-light" aria-hidden="true">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src="/icons/icon-guarantee.svg" alt="" width="18" />
+                  </span>
+                  <p><strong>100% Satisfaction Guarantee</strong><br />Hot &amp; crispy promise. Need help? The hotline number arrives with launch.</p>
+                  <Link href="/complaints" className="co-edit-link co-helpdesk">Help Desk</Link>
+                </div>
+              </div>
+
+              <aside className="co-side">
+                <div className="co-card co-promo">
+                  <div className="co-promo-img">
+                    <div className="co-promo-quote">
+                      <p className="co-promo-cap">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src="/icons/heart.svg" alt="" width="13" />
+                        Bondok Kitchen Craft
+                      </p>
+                      <p className="co-promo-line">&ldquo;Same Great Taste,</p>
+                      <p className="co-promo-line co-promo-line-orange">Now at Your Door!&rdquo;</p>
+                    </div>
+                    <span className="co-promo-smiley" aria-hidden="true">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src="/icons/icon-smiley.svg" alt="" width="30" />
+                    </span>
+                  </div>
+                  <div className="co-delivery-items">
+                    <div className="co-card-head">
+                      <h3 className="co-delivery-title">Items in this delivery</h3>
+                      <span className="co-recap-desc">{placed?.count ?? 0} Items</span>
+                    </div>
+                    {(placed?.items ?? []).map((it) => (
+                      <p key={it.slug} className="co-sumrow">
+                        <span>{it.qty}× {it.name}</span>
+                        <strong>{fmt(it.price != null ? it.price * it.qty : null)}</strong>
+                      </p>
+                    ))}
+                  </div>
+                </div>
+                <div className="co-guarantee co-dispatch">
+                  <span className="co-dispatch-ic" aria-hidden="true">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src="/icons/icon-temp1.png" alt="" width="34" height="34" />
+                  </span>
+                  <p><strong>Fast Courier Dispatch</strong><br />Express delivery fleet in your area</p>
+                  <span className="co-chip co-chip-warm">Live</span>
+                </div>
+              </aside>
             </div>
           </motion.div>
         )}
