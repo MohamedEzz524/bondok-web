@@ -1685,7 +1685,14 @@ main.page { flex: 1 0 auto; }
   display: flex; align-items: center; justify-content: center;
 }
 .ct-kind.is-on .ct-kind-radio { border: none; }
-.ct-kind img { height: 26px; width: auto; }
+.ct-kind-ic {
+  width: 26px; height: 26px; display: inline-block;
+  background: var(--text);
+  -webkit-mask: center / contain no-repeat; mask: center / contain no-repeat;
+  transition: background-color .15s ease;
+}
+.ct-kind.is-on .ct-kind-ic { background: var(--orange); }
+.ct-kind.is-on .ct-kind-title { color: var(--orange); }
 .ct-kind-title { font-size: 16px; font-weight: 800; color: var(--text); }
 .ct-kind-text { font-size: 13.5px; line-height: 1.45; color: var(--text-muted); }
 
@@ -1916,6 +1923,10 @@ main.page { flex: 1 0 auto; }
 }
 .co-loc-chips button.is-on { background: #fdf0d7; color: #b8770f; }
 .co-phone { display: flex; align-items: center; gap: 10px; background: #f1eee8; border-radius: 8px; padding: 0 14px; }
+.co-inpwrap { display: flex; align-items: center; gap: 10px; background: #f1eee8; border-radius: 8px; padding: 0 13px; }
+.co-inpwrap img { flex: 0 0 auto; opacity: .8; }
+.co-inpwrap input { flex: 1; border: none; background: none; padding: 12px 0; font-size: 14px; font-family: var(--font); color: var(--text); outline: none; }
+.co-inpwrap input::placeholder { color: #a29d92; }
 .co-phone span { font-size: 14px; font-weight: 700; color: var(--text); white-space: nowrap; }
 .co-phone input { flex: 1; border: none; background: none; padding: 13px 0; font-size: 14px; font-family: var(--font); color: var(--text); outline: none; }
 .co-demo { font-size: var(--fs-small); color: var(--text-muted); margin-top: 8px; }
@@ -2238,7 +2249,8 @@ main.page { flex: 1 0 auto; }
 .pd-also-row {
   display: flex; gap: 18px; margin-top: 20px;
   overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none;
-  padding-bottom: 4px;
+  margin-inline: calc(-1 * var(--pad-x)); padding: 4px var(--pad-x);
+  scroll-padding-inline: var(--pad-x);
 }
 .pd-also-row::-webkit-scrollbar { display: none; }
 .pd-also-card {

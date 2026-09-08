@@ -50,7 +50,8 @@ export default function BagView() {
           </p>
         </div>
         <span className="co-prep-chip">
-          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="var(--orange)" strokeWidth="2" aria-hidden="true"><circle cx="12" cy="13" r="8" /><path strokeLinecap="round" d="M12 9.5V13l2.5 1.5M9 2h6" /></svg>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/icons/icon-average-time.svg" alt="" width="15" height="16" />
           Average prep time: 12 mins
         </span>
       </div>

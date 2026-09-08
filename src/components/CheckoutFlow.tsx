@@ -14,8 +14,8 @@ import { EVENTS, publish } from '@/lib/pubsub';
 import CheckoutSteps from './CheckoutSteps';
 import Select from './Select';
 
-type Step = 'shipping' | 'payment' | 'review' | 'done';
-const STEP_INDEX: Record<Step, number> = { shipping: 1, payment: 2, review: 3, done: 4 };
+type Step = 'shipping' | 'payment' | 'done';
+const STEP_INDEX: Record<Step, number> = { shipping: 1, payment: 2, done: 3 };
 
 const EG_PHONE = /^01[0125][0-9]{8}$/;
 const LOCATIONS = ['Home', 'Work / Office', 'Other Place'];
@@ -171,7 +171,11 @@ export default function CheckoutFlow() {
                 <div className="ct-row">
                   <div className="ct-field">
                     <label className="ct-label" htmlFor="co-name">Full Name <span className="ct-req">*</span></label>
-                    <input id="co-name" className="ct-input" placeholder="Your name" value={ship.name} onChange={(e) => setShip({ ...ship, name: e.target.value })} />
+                    <span className="co-inpwrap">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src="/icons/Icon-name.svg" alt="" width="15" />
+                      <input id="co-name" placeholder="Your name" value={ship.name} onChange={(e) => setShip({ ...ship, name: e.target.value })} />
+                    </span>
                   </div>
                   <div className="ct-field">
                     <label className="ct-label" htmlFor="co-phone">Phone Number <span className="ct-req">*</span></label>
@@ -191,7 +195,11 @@ export default function CheckoutFlow() {
                     <div className="ct-row">
                       <div className="ct-field">
                         <label className="ct-label" htmlFor="co-addr">Delivery Address <span className="ct-req">*</span></label>
-                        <input id="co-addr" className="ct-input" placeholder="Street, area" value={ship.address} onChange={(e) => setShip({ ...ship, address: e.target.value })} />
+                        <span className="co-inpwrap">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src="/icons/Icon-location.svg" alt="" width="13" />
+                          <input id="co-addr" placeholder="Street, area" value={ship.address} onChange={(e) => setShip({ ...ship, address: e.target.value })} />
+                        </span>
                       </div>
                       <div className="ct-field">
                         <label className="ct-label">City <span className="ct-req">*</span></label>
@@ -205,7 +213,11 @@ export default function CheckoutFlow() {
                     </div>
                     <div className="ct-field">
                       <label className="ct-label" htmlFor="co-bldg">Building / Apartment / Floor <span className="ct-req">*</span></label>
-                      <input id="co-bldg" className="ct-input" placeholder="Building 14, Apt 4B, 3rd Floor" value={ship.building} onChange={(e) => setShip({ ...ship, building: e.target.value })} />
+                      <span className="co-inpwrap">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src="/icons/Icon-building.svg" alt="" width="16" />
+                        <input id="co-bldg" placeholder="Building 14, Apt 4B, 3rd Floor" value={ship.building} onChange={(e) => setShip({ ...ship, building: e.target.value })} />
+                      </span>
                     </div>
                     <div className="ct-field">
                       <label className="ct-label" htmlFor="co-notes">Delivery Notes <span className="ct-hint">Optional</span></label>
@@ -324,7 +336,7 @@ export default function CheckoutFlow() {
                     <strong>Cash on Delivery</strong>
                     <span>Pay when you receive your meal at your door with cash or courier POS terminal</span>
                   </span>
-                  <span className="co-payopt-ic" aria-hidden="true"><img src="/icons/icon-wallet.svg" alt="" width="22" /></span>
+                  <span className="co-payopt-ic" aria-hidden="true"><img src="/icons/icon-cod.svg" alt="" width="24" /></span>
                 </button>
 
                 <button className={`co-payopt co-payopt-btn${pay === 'wallet' ? ' is-on' : ''}`} onClick={() => setPay('wallet')}>
@@ -333,7 +345,7 @@ export default function CheckoutFlow() {
                     <strong>Digital Wallet / Vodafone Cash <span className="co-chip">Fast Pay</span></strong>
                     <span>Instantly transfer via Orange Money, Vodafone Cash, or InstaPay</span>
                   </span>
-                  <span className="co-payopt-ic" aria-hidden="true"><img src="/icons/icon-secure.png" alt="" width="20" /></span>
+                  <span className="co-payopt-ic" aria-hidden="true"><img src="/icons/icon-wallet1.svg" alt="" width="22" /></span>
                 </button>
 
                 <div className="co-guarantee">
@@ -352,12 +364,12 @@ export default function CheckoutFlow() {
                     <span className="co-chip">{count} items</span>
                   </div>
                   <div className="co-paymethod-tag">
-                    <span className="co-paymethod-ic" aria-hidden="true"><img src="/icons/icon-wallet.svg" alt="" width="20" /></span>
+                    <span className="co-paymethod-ic" aria-hidden="true"><img src="/icons/icon-wallet1.svg" alt="" width="20" /></span>
                     <div>
                       <p><strong>{pay === 'card' ? 'Credit / Debit Card' : pay === 'cod' ? 'Cash on Delivery' : 'Digital Wallet'}</strong></p>
                       <p className="co-recap-desc">{pay === 'cod' ? 'Pay at your door' : 'Activates with payment gateway'}</p>
                     </div>
-                    <span className="co-paymethod-ok">✓</span>
+                    <span className="co-paymethod-ok" aria-hidden="true"><img src="/icons/icon-rounded-check.svg" alt="" width="17" /></span>
                   </div>
                   <p className="co-sumrow"><span>Subtotal ({count} items)</span><strong>{fmt(subtotal)}</strong></p>
                   <p className="co-sumrow"><span>Priority Delivery</span><strong className="co-fee">with branch data</strong></p>
@@ -369,11 +381,11 @@ export default function CheckoutFlow() {
                     </div>
                     <p className="co-total-num">{fmt(subtotal)}</p>
                   </div>
-                  <button className="btn btn-solid co-cta" onClick={() => go('review')}>
-                    Continue to Review
+                  <button className="btn btn-solid co-cta" onClick={placeOrder}>
+                    Place Order{subtotal != null ? ` — EGP ${subtotal}` : ''}
                     <svg viewBox="0 0 54 54" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M40.4 29.8H0v-6.6h40.4L21.8 4.6 26.5 0l26.6 26.5-26.6 26.5-4.7-4.6 18.6-18.6z" /></svg>
                   </button>
-                  <p className="co-demo co-center">You will not be charged until the final review step.</p>
+                  <p className="co-demo co-center">By placing your order you confirm your craving and agree to our Terms.</p>
                   {items[0] && (
                     <div className="co-paysum-item">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -390,115 +402,6 @@ export default function CheckoutFlow() {
                   )}
                 </div>
                 <button className="co-back" onClick={() => go('shipping')}>← Back to delivery details</button>
-              </aside>
-            </div>
-          </motion.div>
-        )}
-
-        {step === 'review' && (
-          <motion.div key="review" {...slide}>
-            <header className="co-head co-head-center">
-              <h1>Order review</h1>
-              <p className="co-subline">Review your order details before placing it.</p>
-            </header>
-
-            <div className="co-layout">
-              <div className="co-reviewcol">
-                <div className="co-card">
-                  <div className="co-card-head">
-                    <h3 className="co-card-title">
-                      <span className="co-title-ic" aria-hidden="true"><img src="/icons/icon-shipping.svg" alt="" width="22" /></span>
-                      {ship.mode === 'pickup' ? 'Pickup Details' : 'Delivery Details'}
-                    </h3>
-                    <button className="co-edit-link" onClick={() => go('shipping')}>✎ Edit</button>
-                  </div>
-                  <div className="co-review-grid">
-                    <div className="co-panel">
-                      <p className="ct-label ct-caps">Recipient &amp; contact</p>
-                      <p className="co-panel-main">{ship.name}</p>
-                      <p className="co-recap-desc">+20 {ship.phone}</p>
-                    </div>
-                    <div className="co-panel">
-                      <p className="ct-label ct-caps">{ship.mode === 'pickup' ? 'Pickup branch' : 'Destination'}</p>
-                      <p className="co-panel-main">{ship.mode === 'pickup' ? (branchName ?? '—') : `${ship.address}${ship.building ? `, ${ship.building}` : ''}`}</p>
-                      {ship.mode === 'delivery' && <p className="co-recap-desc">{ship.city}, Egypt</p>}
-                    </div>
-                  </div>
-                  <div className="co-etabar">
-                    <span className="co-etabar-ic" aria-hidden="true">
-                      <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="#fff" strokeWidth="2"><circle cx="12" cy="12" r="9" /><path strokeLinecap="round" d="M12 7.5V12l3 2" /></svg>
-                    </span>
-                    <div>
-                      <p className="ct-label ct-caps co-etabar-label">Estimated {ship.mode === 'pickup' ? 'pickup' : 'delivery'} time</p>
-                      <p className="co-etabar-num">25 - 40 min</p>
-                    </div>
-                    <span className="co-express"><span className="pg-dot" aria-hidden="true" />Express Ready</span>
-                  </div>
-                </div>
-
-                <div className="co-card">
-                  <div className="co-card-head">
-                    <h3 className="co-card-title"><span className="co-title-ic" aria-hidden="true"><img src="/icons/icon-wallet.svg" alt="" width="20" /></span>Payment Method</h3>
-                    <button className="co-edit-link" onClick={() => go('payment')}>✎ Edit</button>
-                  </div>
-                  <div className="co-panel co-panel-row">
-                    <span className="co-visa-chip">{pay === 'card' ? 'VISA' : pay === 'cod' ? 'CASH' : 'WALLET'}</span>
-                    <div>
-                      <p className="co-panel-main">{pay === 'card' ? 'Credit / Debit Card' : pay === 'cod' ? 'Cash on Delivery' : 'Digital Wallet / Vodafone Cash'}</p>
-                      <p className="co-recap-desc">{pay === 'card' ? 'activates with payment gateway' : pay === 'cod' ? 'pay at your door' : 'activates with payment gateway'}</p>
-                    </div>
-                    <div className="co-billing">
-                      <p className="ct-label ct-caps">Billing address</p>
-                      <p className="co-recap-desc">Same as delivery address</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="co-guarantee">
-                  <span className="co-guarantee-ic" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" strokeWidth="1.9"><path strokeLinejoin="round" d="M12 2 4 5v6c0 5 3.4 8.6 8 11 4.6-2.4 8-6 8-11V5l-8-3z" /><path strokeLinecap="round" strokeLinejoin="round" d="m8.5 12 2.5 2.5 4.5-5" /></svg>
-                  </span>
-                  <p><strong>100% On-Time Guarantee:</strong> Arrives fresh and warm, or your next combo meal is on us.</p>
-                </div>
-              </div>
-
-              <aside className="co-side">
-                <div className="co-card">
-                  <div className="co-card-head">
-                    <h3 className="co-card-title"><span className="co-title-ic co-title-ic-solid" aria-hidden="true"><img src="/icons/icon-bag.svg" alt="" width="15" /></span>Order Items <span className="co-chip">{count} items</span></h3>
-                    <Link href="/bag" className="co-edit-link">✎ Edit</Link>
-                  </div>
-                  {items.map((it) => (
-                    <div key={it.key ?? it.slug} className="co-recap-item">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={it.image} alt="" />
-                      <div>
-                        <p className="co-recap-name">{it.name}</p>
-                        <span className="co-qty-chip">Qty: {it.qty}</span>
-                      </div>
-                      <strong>{fmt(it.price != null ? it.price * it.qty : null)}</strong>
-                    </div>
-                  ))}
-                  <div className="co-panel co-totalspanel">
-                    <p className="co-sumrow"><span>Subtotal</span><strong>{fmt(subtotal)}</strong></p>
-                    <p className="co-sumrow"><span>Delivery Fee ⚡</span><strong className="co-fee">with branch data</strong></p>
-                    <p className="co-sumrow"><span>Applicable Taxes</span><strong>Included</strong></p>
-                    <div className="co-total">
-                      <div>
-                        <p className="co-total-label">Total</p>
-                        <p className="co-total-sub">{pay === 'cod' ? 'Pay on delivery' : 'Ready to charge'}</p>
-                      </div>
-                      <p className="co-total-num">{fmt(subtotal)}</p>
-                    </div>
-                  </div>
-                  <button className="btn btn-solid co-cta co-place" onClick={placeOrder}>
-                    <span>Place Order</span>
-                    <span className="co-place-total">{fmt(subtotal)}
-                      <svg viewBox="0 0 54 54" width="13" height="13" aria-hidden="true"><path fill="currentColor" d="M40.4 29.8H0v-6.6h40.4L21.8 4.6 26.5 0l26.6 26.5-26.6 26.5-4.7-4.6 18.6-18.6z" /></svg>
-                    </span>
-                  </button>
-                  <p className="co-demo co-center">By tapping Place Order, you confirm your craving and agree to Terms.</p>
-                </div>
               </aside>
             </div>
           </motion.div>

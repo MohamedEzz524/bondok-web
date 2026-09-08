@@ -6,7 +6,7 @@
 
 import Link from 'next/link';
 
-const STEPS = ['Cart', 'Shipping', 'Payment', 'Review', 'Done'];
+const STEPS = ['Cart', 'Shipping', 'Payment', 'Done'];
 
 export default function CheckoutSteps({ current }: { current: number }) {
   return (

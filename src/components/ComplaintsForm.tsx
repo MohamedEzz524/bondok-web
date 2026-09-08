@@ -172,8 +172,7 @@ export default function ComplaintsForm() {
                         <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="var(--orange)" /><path fill="none" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" d="m7.5 12.5 3 3 6-6.5" /></svg>
                       )}
                     </span>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={k.icon} alt="" height="26" />
+                    <span className="ct-kind-ic" style={{ WebkitMaskImage: `url(${k.icon})`, maskImage: `url(${k.icon})` }} aria-hidden="true" />
                     <span className="ct-kind-title">{k.title}</span>
                     <span className="ct-kind-text">{k.text}</span>
                   </button>
