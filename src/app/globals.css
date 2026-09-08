@@ -2150,10 +2150,9 @@ main.page { flex: 1 0 auto; }
 .pd-fbt-thumb { position: relative; width: 78px; height: 78px; background: #f3efe7; border-radius: 14px; padding: 8px; }
 .pd-fbt-thumb img { width: 100%; height: 100%; object-fit: contain; }
 .pd-fbt-check {
-  position: absolute; right: -5px; bottom: -5px; width: 20px; height: 20px;
-  border-radius: 999px; background: var(--orange); color: #fff;
-  font-size: 11px; font-weight: 800; display: inline-flex; align-items: center; justify-content: center;
-  border: 2px solid var(--white);
+  position: absolute; right: -6px; bottom: -6px;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--white); border-radius: 999px;
 }
 .pd-fbt-name { font-size: 12.5px; font-weight: 700; color: var(--text); max-width: 96px; }
 .pd-fbt-price { font-size: 12.5px; font-weight: 800; color: var(--text); }
@@ -2178,7 +2177,7 @@ main.page { flex: 1 0 auto; }
 
 /* combo toggle */
 .pd-combo { display: flex; align-items: center; gap: 14px; padding: 18px 20px; }
-.pd-combo-ic { flex: 0 0 auto; width: 42px; height: 42px; border-radius: 12px; background: #fdeee0; display: inline-flex; align-items: center; justify-content: center; }
+.pd-combo-ic { flex: 0 0 auto; width: 42px; height: 42px; border-radius: 12px; background: #fdeee0; display: inline-flex; align-items: center; justify-content: center; overflow: hidden; }
 .pd-combo-body { flex: 1; }
 .pd-combo-title { display: flex; align-items: center; gap: 9px; font-size: 15px; font-weight: 800; text-transform: uppercase; color: var(--text); }
 .pd-combo-sub { font-size: var(--fs-small); color: var(--text-muted); margin-top: 3px; }
@@ -2233,6 +2232,7 @@ main.page { flex: 1 0 auto; }
 .pd-note-title { margin-bottom: 9px; }
 .pd-note { background: #f7f4ec; }
 
+.pd-add img, .pd-fbt-btn img { filter: brightness(0) invert(1); }
 .pd-add { width: 100%; justify-content: center; gap: 10px; font-size: 15.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .5px; padding: 17px 20px; border-radius: 16px; }
 .pd-delta-note { font-size: var(--fs-small); color: var(--text-muted); text-align: center; }
 
@@ -2426,6 +2426,10 @@ main.page { flex: 1 0 auto; }
 /* ============ OFFERS PAGE (reference geometry @1440) ============ */
 .offers-page { width: 100%; padding-bottom: 72px; }
 .offers-locbar { background: #01847e; color: #fff; padding: 12px 0 14px; }
+.offers-locbar-bleed { margin-inline: calc(50% - 50vw); margin-bottom: 18px; }
+.loc-bar-btn { text-align: left; color: #fff; padding: 0; background: none; cursor: pointer; }
+.loc-bar-btn:hover .offers-loc-title { text-decoration: underline; }
+.offers-loc-link { cursor: pointer; background: none; }
 .offers-locbar-inner {
   max-width: 1136px; margin: 0 auto; padding: 0 16px;
   display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;

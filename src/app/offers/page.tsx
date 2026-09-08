@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { offers } from '@/lib/offers';
+import LocationBar from '@/components/LocationBar';
 
 export const metadata: Metadata = { title: 'Offers — Bondok Fried Chicken' };
 
@@ -11,21 +12,7 @@ export default function Page() {
 
   return (
     <div className="offers-page">
-      {/* teal location banner (reference: prompts branch choice for pricing) */}
-      <div className="offers-locbar">
-        <div className="offers-locbar-inner">
-          <div>
-            <p className="offers-loc-title">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
-                <path d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z" />
-              </svg>
-              Choose a Location
-            </p>
-            <p className="offers-loc-sub">For availability and prices</p>
-          </div>
-          <Link href="/branches" className="offers-loc-link">See Branches</Link>
-        </div>
-      </div>
+      <LocationBar />
 
       <div className="offers-body">
         {/* sign-up promo banner */}

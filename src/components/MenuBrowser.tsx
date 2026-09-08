@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from 'motion/react';
 import { useSearchParams } from 'next/navigation';
 import { useCart } from './cart-context';
 import { useUI } from './ui-context';
+import LocationBar from './LocationBar';
 import { EVENTS, publish } from '@/lib/pubsub';
 import Link from 'next/link';
 import type { MenuCategory, Product, Protein, Size } from '@/lib/menu-data';
@@ -323,19 +324,7 @@ export default function MenuBrowser({ categories }: Props) {
 
   return (
     <>
-      {/* full-bleed branch banner (reference pattern) */}
-      <div className="branch-banner">
-        <div className="branch-banner-inner">
-          <button className="branch-banner-text" onClick={() => openOrder('pickup')}>
-            <strong>
-              <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><path fill="currentColor" d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5z" /></svg>
-              Choose a Location
-            </strong>
-            <span>For availability and prices</span>
-          </button>
-          <button className="branch-banner-link" onClick={() => openOrder('pickup')}>See Branches</button>
-        </div>
-      </div>
+      <LocationBar fullBleed />
 
       <AnimatePresence mode="wait" initial={false}>
       {view === 'launcher' ? (

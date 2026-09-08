@@ -123,7 +123,8 @@ export default function ProductView({ category, product, variants }: Props) {
               {config.badge && <span className="pd-badge">{config.badge}</span>}
               <button className="pd-share" aria-label="Share this product" onClick={share}>
                 {shared ? <span className="pd-shared">Link copied!</span> : (
-                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.9" aria-hidden="true"><circle cx="6" cy="12" r="2.6" /><circle cx="17.5" cy="5.5" r="2.6" /><circle cx="17.5" cy="18.5" r="2.6" /><path d="m8.4 10.8 6.8-4M8.4 13.2l6.8 4" /></svg>
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img src="/icons/Icon-share.png" alt="" width="15" />
                 )}
               </button>
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -163,7 +164,7 @@ export default function ProductView({ category, product, variants }: Props) {
                       <div className="pd-fbt-thumb">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={p.image} alt={p.name} />
-                        <span className="pd-fbt-check" aria-hidden="true">✓</span>
+                        <span className="pd-fbt-check" aria-hidden="true"><img src="/icons/icon-rounded-check1.svg" alt="" width="18" /></span>
                       </div>
                       <p className="pd-fbt-name">{p.name}</p>
                       <p className="pd-fbt-price">{p.price != null ? `EGP ${p.price}` : '—'}</p>
@@ -174,7 +175,9 @@ export default function ProductView({ category, product, variants }: Props) {
                   <p className="ct-label ct-caps">Bundle price</p>
                   <p className="pd-fbt-total">{fbtTotal != null ? `EGP ${fbtTotal}` : 'with menu prices'}</p>
                   <button className="btn btn-solid pd-fbt-btn" onClick={addBundle}>
-                    🛍 Add to Cart
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src="/icons/icon-cart.svg" alt="" width="16" />
+                    Add to Cart
                   </button>
                 </div>
               </div>
@@ -187,7 +190,7 @@ export default function ProductView({ category, product, variants }: Props) {
           <div className="pd-card">
             <div className="pd-toprow">
               <p className="pd-rating">
-                <span className="pd-star" aria-hidden="true">★</span>
+                <span className="pd-star" aria-hidden="true"><img src="/icons/Icon-star.svg" alt="" width="15" /></span>
                 <strong>4.8</strong> <span>(1.2k reviews)</span>
               </p>
               <FavButton slug={product.slug} />
@@ -230,7 +233,7 @@ export default function ProductView({ category, product, variants }: Props) {
             <div className="pd-card pd-combo">
               <span className="pd-combo-ic" aria-hidden="true">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/icons/icon-preparing-meal.svg" alt="" width="16" />
+                <img src="/icons/HOT.png" alt="" width="26" />
               </span>
               <div className="pd-combo-body">
                 <p className="pd-combo-title">
@@ -313,7 +316,9 @@ export default function ProductView({ category, product, variants }: Props) {
           )}
 
           <button className="btn btn-solid pd-add" onClick={addToCart}>
-            🛒 Add to Cart{unitPrice != null ? ` — EGP ${unitPrice * qty}` : ''}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/icons/icon-cart.svg" alt="" width="18" />
+            Add to Cart{unitPrice != null ? ` — EGP ${unitPrice * qty}` : ''}
           </button>
           {delta > 0 && unitPrice == null && (
             <p className="pd-delta-note">Selected extras add EGP {delta} once menu prices arrive.</p>
