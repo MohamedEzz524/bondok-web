@@ -245,11 +245,21 @@ main.page { flex: 1 0 auto; }
 
 /* ============ CROWD FAVORITES ============ */
 .favorites { width: 100%; max-width: 1136px; margin: 40px auto 0; padding-inline: 16px; }
-.favorites-head { padding-left: 16px; margin-bottom: 16px; }
+.favorites-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-left: 16px; margin-bottom: 16px; }
 .favorites-head h4 { font-weight: 700; color: var(--text); font-size: 22px; line-height: 30px; }
-.favorites-grid { display: flex; gap: 16px; }
+.favorites-nav { display: flex; gap: 8px; }
+.favorites-nav button {
+  width: 34px; height: 34px; border-radius: 999px; background: var(--white);
+  box-shadow: var(--shadow-card); color: var(--text); font-size: 18px;
+  display: inline-flex; align-items: center; justify-content: center;
+  transition: color .15s ease;
+}
+.favorites-nav button:hover { color: var(--orange); }
+/* 4-visible auto-rotating strip */
+.favorites-vp { overflow: hidden; }
+.favorites-track { display: flex; will-change: transform; }
 .fav-card {
-  flex: 1 1 0;
+  flex: 0 0 calc(25% - 12px); margin-right: 16px;
   background: var(--white); border-radius: 12px; box-shadow: var(--shadow-card);
   overflow: hidden; display: flex; flex-direction: column;
 }
@@ -2757,6 +2767,7 @@ main.page { flex: 1 0 auto; }
   .order-btn { font-size: 16px; }
 
   .favorites { margin-top: 24px; }
+  .fav-card { flex: 0 0 calc(50% - 8px); }
   .favorites-grid { flex-wrap: wrap; gap: 8px; }
   .fav-card { flex: 1 1 calc(50% - 4px); }
 
