@@ -133,26 +133,12 @@ export default function ComplaintsForm() {
       <section className="ct-main" id="ct-form">
         <div className="ct-side">
           <p className="pg-kicker">Your voice matters</p>
-          <h2>Tell us<br />what&apos;s on<br />your mind</h2>
+          <h2>Tell us what&apos;s on<br />your mind</h2>
           <p className="ct-side-text">
             We review every submission individually. Whether it&apos;s a delivery bump, an
             ingredient recommendation, or praise for your neighborhood store crew, it
             reaches the culinary directors directly.
           </p>
-          <div className="ct-human">
-            <div className="ct-human-head">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/icons/icon-guarantee.svg" alt="" width="22" height="27" />
-              <div>
-                <h4>100% Human Response</h4>
-                <p className="ct-human-sub">No automated bot loops.</p>
-              </div>
-            </div>
-            <p>
-              If something wasn&apos;t crisp, hot, or 100% accurate, we ensure your next meal
-              is credited or made completely right.
-            </p>
-          </div>
         </div>
 
         <form className="ct-form" onSubmit={submit}>

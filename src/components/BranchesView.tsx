@@ -29,6 +29,8 @@ export default function BranchesView() {
   const [selectedId, setSelectedId] = useState(branches[0].id);
   const [locStatus, setLocStatus] = useState('');
   const [userPos, setUserPos] = useState<[number, number] | null>(null);
+  const [sortKey, setSortKey] = useState<'near' | 'az'>('near');
+  const [sortOpen, setSortOpen] = useState(false);
 
   const km = (id: string) => (userPos ? haversine(userPos, branchSamples[id].coords) : null);
   const distLabel = (id: string) => {
@@ -45,7 +47,7 @@ export default function BranchesView() {
       const matchF = filter === 'all' || s.features.includes(filter);
       return matchQ && matchF;
     })
-    .sort((a, b) => (userPos ? km(a.id)! - km(b.id)! : 0));
+    .sort((a, b) => (sortKey === 'az' ? a.name.localeCompare(b.name) : userPos ? km(a.id)! - km(b.id)! : 0));
 
   const selected = list.find((b) => b.id === selectedId) ?? list[0];
 
@@ -75,8 +77,8 @@ export default function BranchesView() {
         <p className="br-sub">{branches.length} locations and growing - find the Bondok nearest to you.</p>
       </header>
 
-      {/* search row */}
-      <div className="br-search-row">
+      {/* search bar: input + sort + locate in one container */}
+      <div className="br-searchbar">
         <label className="br-search">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/icons/Icon-search.svg" alt="" width="19" height="19" />
@@ -87,6 +89,21 @@ export default function BranchesView() {
             aria-label="Search branches"
           />
         </label>
+        <div className="br-sortwrap">
+          <button className="br-sortbtn" aria-haspopup="listbox" aria-expanded={sortOpen} onClick={() => setSortOpen(!sortOpen)}>
+            <span>Sort by:</span> {sortKey === 'near' ? 'Near' : 'A-Z'}
+            <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true"><path fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" d="m6 9 6 6 6-6" /></svg>
+          </button>
+          {sortOpen && (
+            <div className="rv-sort-menu" role="listbox">
+              {([['near', 'Nearest first'], ['az', 'Name (A-Z)']] as const).map(([k, label]) => (
+                <button key={k} role="option" aria-selected={sortKey === k} className={sortKey === k ? 'is-active' : ''} onClick={() => { setSortKey(k); setSortOpen(false); }}>
+                  {label}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
         <button className="btn btn-solid br-locate" onClick={useLocation}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/icons/icon-current-location.svg" alt="" width="17" height="17" />
@@ -113,7 +130,7 @@ export default function BranchesView() {
         <div className="br-list">
           <div className="br-list-head">
             <p className="br-count"><strong>{list.length} Locations</strong> <span>{query.trim() ? `near "${query.trim()}"` : 'across Egypt'}</span></p>
-            <p className="br-sort">Sort: <strong>{userPos ? 'Nearest to you' : 'Nearest first'}</strong></p>
+
           </div>
 
           {list.length === 0 && (
@@ -128,11 +145,6 @@ export default function BranchesView() {
                 <motion.article layout transition={layoutSpring} key={b.id} className="br-card br-card-selected">
                   <div className="br-sel-top">
                     <span className="br-sel-pill"><span className="br-sel-dot" aria-hidden="true" />Selected kitchen</span>
-                    {s.role && <span className="br-role">{s.role}</span>}
-                    <span className="br-shop-ic" aria-hidden="true">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src="/icons/icon-selected-branch.svg" alt="" width="20" />
-                    </span>
                   </div>
                   <h3>{b.name}</h3>
                   <p className="br-addr">

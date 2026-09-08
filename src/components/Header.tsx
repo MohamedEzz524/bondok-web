@@ -5,7 +5,6 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useRef, useState } from 'react';
 import { useUI } from './ui-context';
 import { useCart } from './cart-context';
-import Image from "next/image";
 
 export default function Header() {
   const { openDrawer } = useUI();
@@ -46,7 +45,7 @@ export default function Header() {
         <div className="header-center">
           <Link href="/" className="logo" aria-label="Bondok Home">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <Image className="logo-img" src="/bondok/logo.jpg" alt="Bondok Fried Chicken" />
+            <img className="logo-img" src="/bondok/logo.webp" alt="Bondok Fried Chicken" />
           </Link>
         </div>
 
@@ -76,8 +75,9 @@ export default function Header() {
               <img src="/icons/Icon-search.svg" alt="" width="20" height="20" />
             </button>
           </div>
-          <Link href="/rewards" className="rewards-link">
-            <span className="rewards-word">Rewards</span>
+          <Link href="/rewards" className="rewards-link" aria-label="Bondok Rewards">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/bondok/rewards.webp" alt="Rewards" className="rewards-img" />
           </Link>
           <button className="btn btn-outline btn-signup">Sign Up</button>
           <Link href="/bag" className="btn btn-solid btn-bag" aria-label="View shopping bag">

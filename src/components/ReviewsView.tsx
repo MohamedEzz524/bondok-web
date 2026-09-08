@@ -41,6 +41,13 @@ const SORTS = [
 
 const PAGE = 6;
 
+/* video reaction placeholders - real clips come from client files */
+const VIDEOS = [
+  { dur: '0:45', title: 'First Bite Reaction', sub: 'Chili Fire crunch test', handle: '@cairofoodie' },
+  { dur: '1:20', title: 'Trying the Entire Menu', sub: 'Ranked best meals in town', handle: '@thehungryegyptian' },
+  { dur: '0:58', title: 'Secret Sauce Hack', sub: 'Cheese fries dipping combo', handle: '@nour.eats' },
+];
+
 export default function ReviewsView() {
   const [filter, setFilter] = useState('all');
   const [sort, setSort] = useState<(typeof SORTS)[number]['key']>('recent');
@@ -212,11 +219,17 @@ export default function ReviewsView() {
         <h2>Real bites. Real reactions.</h2>
         <p className="pg-sub">Watch Bondok lovers share their unfiltered first impressions.</p>
         <div className="rv-video-grid">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="rv-video" role="img" aria-label="Video review placeholder">
-              <button className="rv-play" aria-label="Play video">
-                <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path fill="currentColor" d="M8 5.5v13l11-6.5z" /></svg>
-              </button>
+          {VIDEOS.map((v) => (
+            <div key={v.title} className="rv-video" role="img" aria-label={`Video: ${v.title}`}>
+              <span className="rv-video-dur">{v.dur}</span>
+              <div className="rv-video-foot">
+                <button className="rv-play" aria-label={`Play ${v.title}`}>
+                  <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M8 5.5v13l11-6.5z" /></svg>
+                </button>
+                <p className="rv-video-title">{v.title}</p>
+                <p className="rv-video-sub">{v.sub}</p>
+                <p className="rv-video-handle">{v.handle}</p>
+              </div>
             </div>
           ))}
         </div>
@@ -236,7 +249,7 @@ export default function ReviewsView() {
           </a>
         </div>
         <div className="rv-community-grid">
-          {[1, 2, 3].map((i) => <div key={i} className="rv-photo" role="img" aria-label="Community photo placeholder" />)}
+          {[1, 2, 3, 4].map((i) => <div key={i} className="rv-photo" role="img" aria-label="Community photo placeholder" />)}
         </div>
       </section>
 
