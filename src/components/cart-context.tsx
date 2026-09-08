@@ -4,12 +4,18 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 import { EVENTS, publish } from '@/lib/pubsub';
 
 export interface CartItem {
-  slug: string;          // unique product slug
+  slug: string;          // product slug
+  key?: string;          // unique cart-line id (slug + options hash); defaults to slug
   name: string;
   image: string;
-  price?: number;        // EGP - undefined until client menu data arrives
+  price?: number;        // EGP unit price incl. option deltas - undefined until menu data
+  options?: string[];    // human-readable customization summary
+  note?: string;         // kitchen note
   qty: number;
 }
+
+/* line identity: same product with different options = separate lines */
+export const lineKey = (i: Pick<CartItem, 'slug' | 'key'>) => i.key ?? i.slug;
 
 interface CartState {
   items: CartItem[];
@@ -32,7 +38,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) setItems(JSON.parse(raw));
+      if (raw) {
+        const list: CartItem[] = JSON.parse(raw);
+        setItems(list.map((i) => ({ ...i, key: i.key ?? i.slug })));
+      }
     } catch { /* corrupted storage: start empty */ }
     setLoaded(true);
   }, []);
@@ -45,11 +54,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const add = useCallback((item: Omit<CartItem, 'qty'>, source = 'cart', qty = 1) => {
     if (qty <= 0) return;
     setItems((prev) => {
-      const existing = prev.find((i) => i.slug === item.slug);
+      const k = lineKey(item);
+      const existing = prev.find((i) => lineKey(i) === k);
       const next = existing
-        ? prev.map((i) => (i.slug === item.slug ? { ...i, qty: i.qty + qty } : i))
-        : [...prev, { ...item, qty }];
-      const result = next.find((i) => i.slug === item.slug)!;
+        ? prev.map((i) => (lineKey(i) === k ? { ...i, qty: i.qty + qty } : i))
+        : [...prev, { ...item, key: k, qty }];
+      const result = next.find((i) => lineKey(i) === k)!;
       publish(EVENTS.cartItemAdd, { source, item: result, added: qty });
       publish(EVENTS.cartUpdate, { source, items: next, count: next.reduce((s, i) => s + i.qty, 0) });
       return next;
@@ -58,10 +68,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const setQty = useCallback((slug: string, qty: number, source = 'cart') => {
     setItems((prev) => {
-      const removed = qty <= 0 ? prev.find((i) => i.slug === slug) : undefined;
+      const removed = qty <= 0 ? prev.find((i) => lineKey(i) === slug) : undefined;
       const next = qty <= 0
-        ? prev.filter((i) => i.slug !== slug)
-        : prev.map((i) => (i.slug === slug ? { ...i, qty } : i));
+        ? prev.filter((i) => lineKey(i) !== slug)
+        : prev.map((i) => (lineKey(i) === slug ? { ...i, qty } : i));
       if (removed) publish(EVENTS.cartItemRemove, { source, slug, item: removed });
       else publish(EVENTS.quantityUpdate, { source, slug, qty });
       publish(EVENTS.cartUpdate, { source, items: next, count: next.reduce((s, i) => s + i.qty, 0) });
@@ -71,8 +81,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const remove = useCallback((slug: string, source = 'cart') => {
     setItems((prev) => {
-      const removed = prev.find((i) => i.slug === slug);
-      const next = prev.filter((i) => i.slug !== slug);
+      const removed = prev.find((i) => lineKey(i) === slug);
+      const next = prev.filter((i) => lineKey(i) !== slug);
       publish(EVENTS.cartItemRemove, { source, slug, item: removed });
       publish(EVENTS.cartUpdate, { source, items: next, count: next.reduce((s, i) => s + i.qty, 0) });
       return next;

@@ -112,7 +112,7 @@ export default function CheckoutFlow() {
         <Link href="/bag" className="co-edit-link">Edit</Link>
       </div>
       {items.map((it) => (
-        <div key={it.slug} className="co-recap-item">
+        <div key={it.key ?? it.slug} className="co-recap-item">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={it.image} alt="" />
           <div>
@@ -469,7 +469,7 @@ export default function CheckoutFlow() {
                     <Link href="/bag" className="co-edit-link">✎ Edit</Link>
                   </div>
                   {items.map((it) => (
-                    <div key={it.slug} className="co-recap-item">
+                    <div key={it.key ?? it.slug} className="co-recap-item">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={it.image} alt="" />
                       <div>
@@ -626,7 +626,7 @@ export default function CheckoutFlow() {
                       <span className="co-recap-desc">{placed?.count ?? 0} Items</span>
                     </div>
                     {(placed?.items ?? []).map((it) => (
-                      <p key={it.slug} className="co-sumrow">
+                      <p key={it.key ?? it.slug} className="co-sumrow">
                         <span>{it.qty}× {it.name}</span>
                         <strong>{fmt(it.price != null ? it.price * it.qty : null)}</strong>
                       </p>

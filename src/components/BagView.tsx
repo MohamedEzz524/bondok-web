@@ -60,7 +60,7 @@ export default function BagView() {
           <AnimatePresence initial={false}>
           {items.map((it) => (
             <motion.article
-              key={it.slug}
+              key={it.key ?? it.slug}
               className="co-item"
               layout
               exit={{ opacity: 0, x: -70, height: 0, paddingTop: 0, paddingBottom: 0, marginBottom: -18, overflow: 'hidden' }}
@@ -72,7 +72,10 @@ export default function BagView() {
                 <div className="co-item-toprow">
                   <div>
                     <h3>{it.name}</h3>
-                    <p className="co-item-desc">Customizations arrive with menu options</p>
+                    <p className="co-item-desc">
+                      {it.options?.length ? it.options.join(' · ') : 'No customizations'}
+                      {it.note ? ` · “${it.note}”` : ''}
+                    </p>
                   </div>
                   <div className="co-item-price">
                     <strong>{fmt(it.price != null ? it.price * it.qty : null)}</strong>
@@ -81,13 +84,13 @@ export default function BagView() {
                 </div>
                 <div className="co-item-botrow">
                   <span className="co-qty">
-                    <button aria-label="Decrease quantity" onClick={() => setQty(it.slug, it.qty - 1, 'cart-page')}>−</button>
+                    <button aria-label="Decrease quantity" onClick={() => setQty(it.key ?? it.slug, it.qty - 1, 'cart-page')}>−</button>
                     <b>{it.qty}</b>
-                    <button className="co-qty-plus" aria-label="Increase quantity" onClick={() => setQty(it.slug, it.qty + 1, 'cart-page')}>+</button>
+                    <button className="co-qty-plus" aria-label="Increase quantity" onClick={() => setQty(it.key ?? it.slug, it.qty + 1, 'cart-page')}>+</button>
                   </span>
                   <span className="co-item-actions">
                     {/* Edit-options button returns here once product customizations exist */}
-                    <button className="co-trash" aria-label={`Remove ${it.name}`} onClick={() => remove(it.slug, 'cart-page')}>
+                    <button className="co-trash" aria-label={`Remove ${it.name}`} onClick={() => remove(it.key ?? it.slug, 'cart-page')}>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src="/icons/icon-delete.svg" alt="" width="15" height="15" />
                     </button>
