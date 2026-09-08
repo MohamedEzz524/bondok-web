@@ -294,7 +294,9 @@ export default function ComplaintsForm() {
                   <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6" /></svg>
                 </span>
               </button>
-              {openFaq === i && <p className="ct-faq-a">{f.a}</p>}
+              <div className={`acc${openFaq === i ? ' is-open' : ''}`}>
+                <div><p className="ct-faq-a acc-body">{f.a}</p></div>
+              </div>
             </div>
           ))}
         </div>

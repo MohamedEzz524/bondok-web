@@ -6,6 +6,7 @@
 
 export interface BranchSample {
   address: string;
+  coords: [number, number];  // approximate area centroid [lat, lng]
   status: string;          // "Open Now" | "Open until Midnight" | ...
   closes: string;          // "Closes at 2:00 AM"
   distance: string;        // "0.4 km"
@@ -20,6 +21,7 @@ export interface BranchSample {
 
 export const branchSamples: Record<string, BranchSample> = {
   b01: {
+    coords: [30.056, 31.330],
     address: 'Abbas El Akkad St, Nasr City, Cairo',
     status: 'Open Now', closes: 'Closes at 2:00 AM',
     distance: '0.4 km', walk: '~8 min walk',
@@ -29,6 +31,7 @@ export const branchSamples: Record<string, BranchSample> = {
     role: 'Flagship Store',
   },
   b02: {
+    coords: [30.090, 31.322],
     address: 'El Merghany St, Heliopolis, Cairo',
     status: 'Open until Midnight', closes: 'Closes at 12:00 AM',
     distance: '1.1 km', walk: '~14 min walk',
@@ -37,6 +40,7 @@ export const branchSamples: Record<string, BranchSample> = {
     features: ['dinein', 'curbside'],
   },
   b03: {
+    coords: [29.960, 31.257],
     address: 'Road 9, Maadi, Cairo',
     status: 'Open · Late Night Window', closes: 'Closes at 3:00 AM',
     distance: '0.9 km', walk: '~12 min walk',
@@ -45,6 +49,7 @@ export const branchSamples: Record<string, BranchSample> = {
     features: ['late'],
   },
   b04: {
+    coords: [30.058, 31.200],
     address: 'Gameat El Dewal St, Mohandessin, Giza',
     status: 'Drive-Thru & Counter', closes: 'Closes at 1:00 AM',
     distance: '1.8 km', walk: '~22 min walk',
@@ -53,6 +58,7 @@ export const branchSamples: Record<string, BranchSample> = {
     features: ['drivethru', 'late'],
   },
   b05: {
+    coords: [30.038, 31.212],
     address: 'Tahrir St, Dokki, Giza',
     status: 'Open Now', closes: 'Closes at 1:00 AM',
     distance: '2.2 km', walk: '~26 min walk',
@@ -61,6 +67,7 @@ export const branchSamples: Record<string, BranchSample> = {
     features: ['dinein'],
   },
   b06: {
+    coords: [29.938, 30.913],
     address: 'El Hosary Square, 6th of October, Giza',
     status: 'Open Now', closes: 'Closes at 2:00 AM',
     distance: '9.4 km', walk: 'Drive ~15 min',
@@ -69,6 +76,7 @@ export const branchSamples: Record<string, BranchSample> = {
     features: ['drivethru', 'late', 'curbside'],
   },
   b07: {
+    coords: [30.039, 30.977],
     address: 'Zayed Central Mall, Sheikh Zayed, Giza',
     status: 'Open Now', closes: 'Closes at 12:00 AM',
     distance: '11 km', walk: 'Drive ~18 min',
@@ -77,6 +85,7 @@ export const branchSamples: Record<string, BranchSample> = {
     features: ['dinein', 'curbside'],
   },
   b08: {
+    coords: [30.030, 31.470],
     address: '90th St, New Cairo, Cairo',
     status: 'Rooftop Lounge & Dine-in', closes: 'Closes at 2:00 AM',
     distance: '12 km', walk: 'Drive ~20 min',
@@ -85,6 +94,7 @@ export const branchSamples: Record<string, BranchSample> = {
     features: ['dinein', 'late'],
   },
   b09: {
+    coords: [30.122, 31.244],
     address: 'Shubra St, Shubra, Cairo',
     status: 'Open Now', closes: 'Closes at 1:00 AM',
     distance: '6.5 km', walk: 'Drive ~12 min',
@@ -93,6 +103,7 @@ export const branchSamples: Record<string, BranchSample> = {
     features: ['curbside'],
   },
   b10: {
+    coords: [31.200, 29.919],
     address: 'Fouad St, Raml Station, Alexandria',
     status: 'Open Now', closes: 'Closes at 2:00 AM',
     distance: 'Alexandria', walk: '',
@@ -101,6 +112,7 @@ export const branchSamples: Record<string, BranchSample> = {
     features: ['dinein', 'late'],
   },
   b11: {
+    coords: [31.041, 31.378],
     address: 'El Geish St, Mansoura',
     status: 'Open Now', closes: 'Closes at 1:00 AM',
     distance: 'Mansoura', walk: '',

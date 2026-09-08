@@ -6,22 +6,46 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { motion } from 'motion/react';
 import { branches } from '@/lib/branches';
 import { branchSamples, BRANCH_FILTERS } from '@/lib/branches-sample';
+
+/* great-circle distance in km between [lat, lng] pairs */
+function haversine([lat1, lng1]: [number, number], [lat2, lng2]: [number, number]) {
+  const R = 6371;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLng = ((lng2 - lng1) * Math.PI) / 180;
+  const q =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(q));
+}
+
+const layoutSpring = { layout: { duration: 0.3, ease: 'easeOut' as const } };
 
 export default function BranchesView() {
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState('all');
   const [selectedId, setSelectedId] = useState(branches[0].id);
   const [locStatus, setLocStatus] = useState('');
+  const [userPos, setUserPos] = useState<[number, number] | null>(null);
 
-  const list = branches.filter((b) => {
-    const s = branchSamples[b.id];
-    const q = query.trim().toLowerCase();
-    const matchQ = !q || b.name.toLowerCase().includes(q) || b.area.toLowerCase().includes(q) || s.address.toLowerCase().includes(q);
-    const matchF = filter === 'all' || s.features.includes(filter);
-    return matchQ && matchF;
-  });
+  const km = (id: string) => (userPos ? haversine(userPos, branchSamples[id].coords) : null);
+  const distLabel = (id: string) => {
+    const d = km(id);
+    if (d == null) return branchSamples[id].distance;
+    return d < 100 ? `${d.toFixed(1)} km` : `${Math.round(d)} km`;
+  };
+
+  const list = branches
+    .filter((b) => {
+      const s = branchSamples[b.id];
+      const q = query.trim().toLowerCase();
+      const matchQ = !q || b.name.toLowerCase().includes(q) || b.area.toLowerCase().includes(q) || s.address.toLowerCase().includes(q);
+      const matchF = filter === 'all' || s.features.includes(filter);
+      return matchQ && matchF;
+    })
+    .sort((a, b) => (userPos ? km(a.id)! - km(b.id)! : 0));
 
   const selected = list.find((b) => b.id === selectedId) ?? list[0];
 
@@ -29,7 +53,15 @@ export default function BranchesView() {
     if (!navigator.geolocation) { setLocStatus('Location is not available in this browser.'); return; }
     setLocStatus('Locating…');
     navigator.geolocation.getCurrentPosition(
-      () => setLocStatus('Location captured - nearest-branch sorting activates once branch coordinates arrive.'),
+      (pos) => {
+        const here: [number, number] = [pos.coords.latitude, pos.coords.longitude];
+        setUserPos(here);
+        const nearest = [...branches].sort(
+          (a, b) => haversine(here, branchSamples[a.id].coords) - haversine(here, branchSamples[b.id].coords),
+        )[0];
+        setSelectedId(nearest.id);
+        setLocStatus(`Nearest branch selected: ${nearest.name} (~${haversine(here, branchSamples[nearest.id].coords).toFixed(1)} km away).`);
+      },
       () => setLocStatus('Location permission denied - you can still search by area name.'),
     );
   };
@@ -79,7 +111,7 @@ export default function BranchesView() {
         <div className="br-list">
           <div className="br-list-head">
             <p className="br-count"><strong>{list.length} Locations</strong> <span>{query.trim() ? `near "${query.trim()}"` : 'across Egypt'}</span></p>
-            <p className="br-sort">Sort: <strong>Nearest first</strong></p>
+            <p className="br-sort">Sort: <strong>{userPos ? 'Nearest to you' : 'Nearest first'}</strong></p>
           </div>
 
           {list.length === 0 && (
@@ -91,7 +123,7 @@ export default function BranchesView() {
             const isSel = selected && b.id === selected.id;
             if (isSel) {
               return (
-                <article key={b.id} className="br-card br-card-selected">
+                <motion.article layout transition={layoutSpring} key={b.id} className="br-card br-card-selected">
                   <div className="br-sel-top">
                     <span className="br-sel-pill"><span className="br-sel-dot" aria-hidden="true" />Selected kitchen</span>
                     {s.role && <span className="br-role">{s.role}</span>}
@@ -111,7 +143,7 @@ export default function BranchesView() {
                         <p className="br-muted">{s.closes}</p>
                       </div>
                       <div className="br-panel-right">
-                        <p className="br-dist">{s.distance}</p>
+                        <p className="br-dist">{distLabel(b.id)}</p>
                         {s.walk && <p className="br-muted">{s.walk}</p>}
                       </div>
                     </div>
@@ -134,14 +166,14 @@ export default function BranchesView() {
                       <img src="/icons/Icon-phone.svg" alt="" width="15" height="15" />
                     </button>
                   </div>
-                </article>
+                </motion.article>
               );
             }
             return (
-              <button key={b.id} className="br-card br-card-compact" onClick={() => setSelectedId(b.id)}>
+              <motion.button layout transition={layoutSpring} key={b.id} className="br-card br-card-compact" onClick={() => setSelectedId(b.id)}>
                 <span className="br-compact-head">
                   <h4>{b.name}</h4>
-                  <span className="br-dist-chip">{s.distance}</span>
+                  <span className="br-dist-chip">{distLabel(b.id)}</span>
                   <svg className="br-chev" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="m9 6 6 6-6 6" /></svg>
                 </span>
                 <span className="br-compact-addr">{s.address}</span>
@@ -149,7 +181,7 @@ export default function BranchesView() {
                   <span className="br-open"><span className="br-dot-on" aria-hidden="true" />{s.status}</span>
                   <span className="br-compact-note">{s.note}</span>
                 </span>
-              </button>
+              </motion.button>
             );
           })}
         </div>

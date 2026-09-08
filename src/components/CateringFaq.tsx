@@ -23,7 +23,9 @@ export default function CateringFaq() {
               <path fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" d="m6 9 6 6 6-6" />
             </svg>
           </button>
-          {open === i && <p className="faq-a">{f.a}</p>}
+          <div className={`acc${open === i ? ' is-open' : ''}`}>
+            <div><p className="faq-a acc-body">{f.a}</p></div>
+          </div>
         </div>
       ))}
     </div>

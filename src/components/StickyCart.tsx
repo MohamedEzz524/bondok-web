@@ -9,7 +9,7 @@ export default function StickyCart() {
   const pathname = usePathname();
 
   /* hidden when empty or already on the bag page */
-  if (count === 0 || pathname === '/bag') return null;
+  if (count === 0 || pathname === '/bag' || pathname === '/checkout') return null;
 
   return (
     <Link href="/bag" className="sticky-cart" aria-label={`View bag, ${count} items`}>

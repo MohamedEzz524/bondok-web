@@ -41,6 +41,7 @@ for (const file of files) {
       .replaceAll(`"/${root}/`, `"${BASE}/${root}/`)
       .replaceAll(`'/${root}/`, `'${BASE}/${root}/`)
       .replaceAll(`url(/${root}/`, `url(${BASE}/${root}/`)
+      .replaceAll("\u0060/" + root + "/", "\u0060" + BASE + "/" + root + "/")
       .replaceAll(`\\"/${root}/`, `\\"${BASE}/${root}/`)
       .replaceAll(`"__KEEP__/${root}/`, `"${BASE}/${root}/`);
   }

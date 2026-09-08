@@ -60,7 +60,9 @@ export default function FaqContent() {
                   {f.q}
                   <span className="faq-plus" aria-hidden="true">{isOpen ? '×' : '+'}</span>
                 </button>
-                {isOpen && <p className="faq-a">{f.a}</p>}
+                <div className={`acc${isOpen ? ' is-open' : ''}`}>
+                  <div><p className="faq-a acc-body">{f.a}</p></div>
+                </div>
               </div>
             );
           })}
