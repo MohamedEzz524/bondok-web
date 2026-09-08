@@ -23,18 +23,39 @@ function Avatar({ initials }: { initials: string }) {
   return <span className="rv-avatar">{initials}</span>;
 }
 
+const n5 = gridReviews.filter((r) => r.stars === 5).length;
+const n4 = gridReviews.filter((r) => r.stars === 4).length;
 const FILTERS = [
-  { key: 'all', label: `All (${summary.total.toLocaleString()})` },
-  { key: '5', label: '★★★★★  5 Stars (1,060)' },
-  { key: '4', label: '★★★★  4 Stars (124)' },
+  { key: 'all', label: `All (${gridReviews.length})` },
+  { key: '5', label: `★★★★★  5 Stars (${n5})` },
+  { key: '4', label: `★★★★  4 Stars (${n4})` },
 ];
+
+const SORTS = [
+  { key: 'recent', label: 'Most Recent' },
+  { key: 'helpful', label: 'Most Helpful' },
+  { key: 'rating', label: 'Highest Rated' },
+] as const;
+
+const PAGE = 6;
 
 export default function ReviewsView() {
   const [filter, setFilter] = useState('all');
+  const [sort, setSort] = useState<(typeof SORTS)[number]['key']>('recent');
+  const [sortOpen, setSortOpen] = useState(false);
+  const [shown, setShown] = useState(PAGE);
   const [formStars, setFormStars] = useState(5);
   const [sent, setSent] = useState(false);
 
-  const visible = filter === '4' ? [] : gridReviews;
+  const filtered = gridReviews.filter((r) => filter === 'all' || r.stars === Number(filter));
+  const sorted = [...filtered].sort((a, b) =>
+    sort === 'helpful' ? b.helpful - a.helpful
+    : sort === 'rating' ? b.stars - a.stars || b.helpful - a.helpful
+    : a.daysAgo - b.daysAgo
+  );
+  const visible = sorted.slice(0, shown);
+
+  const pickFilter = (key: string) => { setFilter(key); setShown(PAGE); };
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -111,7 +132,7 @@ export default function ReviewsView() {
               <button
                 key={f.key}
                 className={`rv-filter${filter === f.key ? ' is-active' : ''}`}
-                onClick={() => setFilter(f.key)}
+                onClick={() => pickFilter(f.key)}
               >
                 {f.label}
               </button>
@@ -119,7 +140,32 @@ export default function ReviewsView() {
           </div>
           <div className="rv-sort">
             <span>Sort by:</span>
-            <button className="rv-sort-btn">Most Recent</button>
+            <div className="rv-sort-wrap">
+              <button
+                className="rv-sort-btn"
+                aria-haspopup="listbox"
+                aria-expanded={sortOpen}
+                onClick={() => setSortOpen(!sortOpen)}
+              >
+                {SORTS.find((o) => o.key === sort)!.label}
+                <svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true"><path fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" d="m6 9 6 6 6-6" /></svg>
+              </button>
+              {sortOpen && (
+                <div className="rv-sort-menu" role="listbox">
+                  {SORTS.map((o) => (
+                    <button
+                      key={o.key}
+                      role="option"
+                      aria-selected={sort === o.key}
+                      className={sort === o.key ? 'is-active' : ''}
+                      onClick={() => { setSort(o.key); setSortOpen(false); }}
+                    >
+                      {o.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
@@ -132,7 +178,7 @@ export default function ReviewsView() {
                   <p className="rv-name">{r.name}</p>
                   <p className="rv-meta">{r.branch} · {r.when}</p>
                 </div>
-                <Stars size={12} />
+                <Stars n={r.stars} size={12} />
               </div>
               <p className="rv-text">{r.text}</p>
               <div className="rv-card-foot">
@@ -145,15 +191,15 @@ export default function ReviewsView() {
             </article>
           ))}
         </div>
-        {visible.length === 0 && (
-          <p className="rv-empty">4-star reviews load once Google Reviews are connected.</p>
-        )}
-
         <div className="rv-loadmore-wrap">
-          <button className="rv-loadmore">
-            Load More Reviews (Showing {visible.length || 0} of {summary.total.toLocaleString()})
-            <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" d="m6 9 6 6 6-6" /></svg>
-          </button>
+          {shown < sorted.length ? (
+            <button className="rv-loadmore" onClick={() => setShown(shown + PAGE)}>
+              Load More Reviews (Showing {visible.length} of {sorted.length})
+              <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" d="m6 9 6 6 6-6" /></svg>
+            </button>
+          ) : (
+            <p className="rv-empty">Showing all {sorted.length} reviews - thousands more arrive once Google Reviews connect.</p>
+          )}
         </div>
       </section>
 

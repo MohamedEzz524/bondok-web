@@ -13,6 +13,13 @@ import Select from './Select';
 
 type Kind = 'complaint' | 'suggestion' | 'compliment';
 
+/* which extra fields each feedback type needs */
+const KIND_FIELDS: Record<Kind, { order: boolean; upload: boolean; placeholder: string }> = {
+  complaint: { order: true, upload: true, placeholder: 'Tell us what happened, item specifics, and how we can make it right...' },
+  suggestion: { order: false, upload: false, placeholder: 'Share your creative idea - a new flavor, a combo, a store improvement...' },
+  compliment: { order: true, upload: false, placeholder: 'Tell us what made your day - the meal, the crew, the experience...' },
+};
+
 const KINDS: { key: Kind; icon: string; title: string; text: string }[] = [
   { key: 'complaint', icon: '/icons/icon-complaint.svg', title: 'Complaint', text: "Something didn't go as expected." },
   { key: 'suggestion', icon: '/icons/icon-suggestion.svg', title: 'Suggestion', text: 'Have an idea to make Bondok better?' },
@@ -221,20 +228,23 @@ export default function ComplaintsForm() {
                 </div>
               </div>
 
-              <div className="ct-field">
-                <label className="ct-label" htmlFor="ct-order">Order Number <span className="ct-hint">Find this in receipt or app</span></label>
-                <input id="ct-order" className="ct-input" placeholder="#BND-94821" value={orderNo} onChange={(e) => setOrderNo(e.target.value)} />
-              </div>
+              {KIND_FIELDS[kind].order && (
+                <div className="ct-field">
+                  <label className="ct-label" htmlFor="ct-order">Order Number <span className="ct-hint">Find this in receipt or app</span></label>
+                  <input id="ct-order" className="ct-input" placeholder="#BND-94821" value={orderNo} onChange={(e) => setOrderNo(e.target.value)} />
+                </div>
+              )}
 
               <div className="ct-field">
                 <label className="ct-label" htmlFor="ct-msg">Your Message <span className="ct-req">*</span></label>
                 <textarea
                   id="ct-msg" className="ct-input ct-textarea" rows={4}
-                  placeholder="Tell us what happened, item specifics, or share your creative idea..."
+                  placeholder={KIND_FIELDS[kind].placeholder}
                   value={message} onChange={(e) => setMessage(e.target.value)}
                 />
               </div>
 
+              {KIND_FIELDS[kind].upload && (
               <div className="ct-field">
                 <p className="ct-label ct-caps">Attach photo or receipt (optional)</p>
                 <button type="button" className="ct-upload" onClick={() => fileRef.current?.click()}>
@@ -247,6 +257,7 @@ export default function ComplaintsForm() {
                   onChange={(e) => setFileName(e.target.files?.[0]?.name ?? '')}
                 />
               </div>
+              )}
 
               <label className="ct-consent">
                 <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} />
