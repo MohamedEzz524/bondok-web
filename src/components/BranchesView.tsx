@@ -175,7 +175,7 @@ export default function BranchesView() {
                     </Link>
                     <button className="br-round" title="Directions arrive with branch map links" aria-label="Directions">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src="/icons/icon-direction.svg" alt="" width="19" />
+                      <img src="/icons/Icon-direction.svg" alt="" width="18" />
                     </button>
                     <button className="br-round" title="Hotline numbers pending from client" aria-label="Call branch">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
