@@ -45,7 +45,7 @@ export default function ReviewsView() {
     <div className="rv-page">
       {/* hero */}
       <header className="rv-hero">
-        <p className="rv-eyebrow"><span className="rv-dot" aria-hidden="true" />Real people. Real taste.</p>
+        <p className="pg-eyebrow"><span className="pg-dot" aria-hidden="true" />Real people. Real taste.</p>
         <h1>What people say<br />about Bondok?</h1>
         <p className="rv-sub">
           Thousands of food lovers have shared their Bondok experience. See what they have
@@ -81,7 +81,7 @@ export default function ReviewsView() {
 
       {/* customer favorites */}
       <section className="rv-favorites">
-        <p className="rv-kicker">Customer favorites</p>
+        <p className="pg-kicker">Customer favorites</p>
         <h2>They tried it. They loved it.</h2>
         <div className="rv-fav-grid">
           {featured.map((r) => (
@@ -159,9 +159,9 @@ export default function ReviewsView() {
 
       {/* video reactions */}
       <section className="rv-videos">
-        <p className="rv-kicker">See the reaction</p>
+        <p className="pg-kicker">See the reaction</p>
         <h2>Real bites. Real reactions.</h2>
-        <p className="rv-section-sub">Watch Bondok lovers share their unfiltered first impressions.</p>
+        <p className="pg-sub">Watch Bondok lovers share their unfiltered first impressions.</p>
         <div className="rv-video-grid">
           {[1, 2, 3].map((i) => (
             <div key={i} className="rv-video" role="img" aria-label="Video review placeholder">
@@ -177,9 +177,9 @@ export default function ReviewsView() {
       <section className="rv-community">
         <div className="rv-community-head">
           <div>
-            <p className="rv-kicker">Community moments</p>
+            <p className="pg-kicker">Community moments</p>
             <h2>Bondok in the wild</h2>
-            <p className="rv-section-sub">Real food moments captured by our community. Tag @BondokFriedChicken to be featured.</p>
+            <p className="pg-sub">Real food moments captured by our community. Tag @BondokFriedChicken to be featured.</p>
           </div>
           <a className="rv-follow" href="#" onClick={(e) => e.preventDefault()}>
             Follow on Facebook

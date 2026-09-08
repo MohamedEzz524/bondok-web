@@ -19,7 +19,7 @@ if (res.status !== 0) process.exit(res.status ?? 1);
 
 const EXTS = new Set([".html", ".css", ".js", ".txt", ".json"]);
 /* public-folder roots referenced with absolute paths in source */
-const ROOTS = ["bondok", "fonts"];
+const ROOTS = ["bondok", "fonts", "icons"];
 
 const files = [];
 (function walk(dir) {

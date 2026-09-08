@@ -99,7 +99,6 @@ export const featureCards: FeatureCard[] = [
 export const footerLinks: { label: string; href: string }[] = [
   { label: 'Menu', href: '/menu' },
   { label: 'Offers', href: '/offers' },
-  { label: 'Support', href: '/support' },
   { label: 'FAQs', href: '/faq' },
   { label: 'Our Branches', href: '/branches' },
   { label: 'Catering', href: '/catering' },
@@ -109,5 +108,5 @@ export const footerLinks: { label: string; href: string }[] = [
   { label: 'Privacy Policy', href: '/privacy' },
   { label: 'Delivery Terms', href: '/delivery-terms' },
   { label: 'Offer Terms', href: '/offer-terms' },
-  { label: 'Complaints & Suggestions', href: '/complaints' },
+  { label: 'Contact Us', href: '/complaints' },
 ];
