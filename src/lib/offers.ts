@@ -49,7 +49,7 @@ export const offers: Offer[] = [
     title: '25% Off Chicken Fillet Sandwich',
     text: 'Juicy fillet, fresh bun, your pick of sauce.',
     image: '/bondok/fav-chicken-fillet.webp',
-    href: '/menu/sandwiches/chicken-fillet',
+    href: '/menu/fillet/chicken-fillet',
     sample: true,
   },
   {
@@ -87,7 +87,7 @@ export const offers: Offer[] = [
     title: 'Texas Burger Combo',
     text: 'Crunchy, saucy, stacked - with fries and a drink.',
     image: '/bondok/fav-texas-burger.webp',
-    href: '/menu/sandwiches/texas-burger',
+    href: '/menu/burgers/texas-and-beef-burger',
     fromPrice: 210,
     mode: 'delivery',
     sample: true,
