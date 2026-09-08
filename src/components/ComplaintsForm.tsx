@@ -229,7 +229,7 @@ export default function ComplaintsForm() {
               </div>
 
               {KIND_FIELDS[kind].order && (
-                <div className="ct-field">
+                <div className="ct-field ct-anim">
                   <label className="ct-label" htmlFor="ct-order">Order Number <span className="ct-hint">Find this in receipt or app</span></label>
                   <input id="ct-order" className="ct-input" placeholder="#BND-94821" value={orderNo} onChange={(e) => setOrderNo(e.target.value)} />
                 </div>
@@ -245,7 +245,7 @@ export default function ComplaintsForm() {
               </div>
 
               {KIND_FIELDS[kind].upload && (
-              <div className="ct-field">
+              <div className="ct-field ct-anim">
                 <p className="ct-label ct-caps">Attach photo or receipt (optional)</p>
                 <button type="button" className="ct-upload" onClick={() => fileRef.current?.click()}>
                   <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="m21 12.5-8.5 8.5a6 6 0 0 1-8.5-8.5l8.5-8.5a4 4 0 0 1 5.7 5.7l-8.5 8.5a2 2 0 0 1-2.8-2.8L15 7.3" /></svg>

@@ -6,6 +6,8 @@
 
 import { useState } from 'react';
 import { summary, featured, gridReviews } from '@/lib/reviews';
+import { branches } from '@/lib/branches';
+import Select from './Select';
 
 function Stars({ n = 5, size = 16 }: { n?: number; size?: number }) {
   return (
@@ -45,6 +47,7 @@ export default function ReviewsView() {
   const [sortOpen, setSortOpen] = useState(false);
   const [shown, setShown] = useState(PAGE);
   const [formStars, setFormStars] = useState(5);
+  const [formBranch, setFormBranch] = useState('');
   const [sent, setSent] = useState(false);
 
   const filtered = gridReviews.filter((r) => filter === 'all' || r.stars === Number(filter));
@@ -169,9 +172,9 @@ export default function ReviewsView() {
           </div>
         </div>
 
-        <div className="rv-grid">
-          {visible.map((r) => (
-            <article key={r.name} className="rv-card">
+        <div className="rv-grid" key={`${filter}-${sort}`}>
+          {visible.map((r, i) => (
+            <article key={r.name} className="rv-card" style={{ animationDelay: `${Math.min(i % PAGE, 5) * 55}ms` }}>
               <div className="rv-card-head">
                 <Avatar initials={r.initials} />
                 <div>
@@ -273,8 +276,17 @@ export default function ReviewsView() {
                     </button>
                   ))}
                 </div>
-                <label className="rv-form-label" htmlFor="rv-branch">Branch Visited or Ordered From</label>
-                <input id="rv-branch" className="rv-input" defaultValue="Bondok Nasr City" />
+                <label className="rv-form-label">Branch Visited or Ordered From</label>
+                <Select
+                  ariaLabel="Branch visited or ordered from"
+                  className="rv-branch-select"
+                  value={formBranch}
+                  onChange={setFormBranch}
+                  options={[
+                    { value: '', label: 'Choose a restaurant location' },
+                    ...branches.map((b) => ({ value: b.id, label: b.name })),
+                  ]}
+                />
                 <label className="rv-form-label" htmlFor="rv-review">Your Review</label>
                 <textarea
                   id="rv-review"
