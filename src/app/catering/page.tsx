@@ -49,6 +49,12 @@ export default function Page() {
 
       {/* benefits */}
       <section id="benefits" className="cat-benefits">
+        {/* eslint-disable @next/next/no-img-element */}
+        <img className="cat-float cf-b1" src="/bondok/catering/f2.webp" alt="" aria-hidden="true" />
+        <img className="cat-float cf-b2" src="/bondok/catering/f8.webp" alt="" aria-hidden="true" />
+        <img className="cat-float cf-b3" src="/bondok/catering/f4.webp" alt="" aria-hidden="true" />
+        <img className="cat-float cf-b4" src="/bondok/catering/f7.webp" alt="" aria-hidden="true" />
+        {/* eslint-enable @next/next/no-img-element */}
         <div className="cat-benefits-inner">
           <h2>Feeding a Crowd? We Got You.</h2>
           <p className="cat-benefits-lead">
@@ -88,6 +94,11 @@ export default function Page() {
 
       {/* event types */}
       <section id="events" className="cat-events">
+        {/* eslint-disable @next/next/no-img-element */}
+        <img className="cat-float cf-e1" src="/bondok/catering/f6.webp" alt="" aria-hidden="true" />
+        <img className="cat-float cf-e2" src="/bondok/catering/f3.webp" alt="" aria-hidden="true" />
+        <img className="cat-float cf-e3" src="/bondok/catering/f1.webp" alt="" aria-hidden="true" />
+        {/* eslint-enable @next/next/no-img-element */}
         <div className="cat-events-inner">
           <h2>Ready for Any Celebration</h2>
           <p className="cat-events-sub">Perfect catering for any occasion, from birthdays to office events and more.</p>

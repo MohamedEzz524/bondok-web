@@ -2827,6 +2827,22 @@ main.page { flex: 1 0 auto; }
     linear-gradient(180deg, rgba(20,10,0,.35) 0%, rgba(20,10,0,0) 40%);
 }
 
+/* floating food decorations peeking from section edges (reference: Frame 38) */
+.cat-benefits, .cat-events { position: relative; overflow: hidden; }
+.cat-benefits-inner, .cat-events-inner { position: relative; z-index: 1; }
+.cat-float { position: absolute; z-index: 0; width: 130px; height: auto; pointer-events: none; user-select: none; -webkit-user-drag: none; animation: cat-bob 5s ease-in-out infinite; }
+@keyframes cat-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+@media (prefers-reduced-motion: reduce) { .cat-float { animation: none; } }
+/* benefits (cream band) */
+.cf-b1 { top: 34px;  left: -28px;  width: 122px; animation-delay: 0s; }
+.cf-b2 { top: 26px;  right: -18px; width: 104px; animation-delay: .9s; }
+.cf-b3 { bottom: -22px; left: 34px; width: 150px; animation-delay: 1.6s; }
+.cf-b4 { bottom: 8px; right: -26px; width: 120px; animation-delay: .4s; }
+/* events band */
+.cf-e1 { top: 54px;  left: -24px;  width: 120px; animation-delay: .6s; }
+.cf-e2 { top: 40px;  right: -20px; width: 130px; animation-delay: 1.2s; }
+.cf-e3 { bottom: -16px; left: 28px; width: 128px; animation-delay: 0s; }
+
 .cat-benefits { background: #fff5e1; padding: 90px 0; text-align: center; }
 .cat-benefits-inner, .cat-events-inner, .cat-faq-inner { max-width: 1184px; margin: 0 auto; padding: 0 16px; }
 .cat-benefits h2, .cat-events h2, .cat-faq h2 { font-family: var(--font-display); font-size: 32px; font-weight: 700; line-height: 36px; color: var(--text); }
