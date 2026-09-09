@@ -262,6 +262,17 @@ main.page { flex: 1 0 auto; }
 .auth-form input:focus { outline: 2px solid var(--orange); border-color: var(--orange); }
 .auth-submit { width: 100%; margin-top: 16px; padding: 13px; font-size: 15px; }
 .auth-note { margin-top: 12px; font-size: 12.5px; color: var(--text-muted); text-align: center; }
+.auth-back { position: absolute; left: -4px; top: -2px; width: 34px; height: 34px; border-radius: 8px; color: var(--text); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
+.auth-back:hover { background: rgba(0,0,0,.06); }
+.auth-phone { display: flex; align-items: center; gap: 8px; border: 1px solid var(--border-strong); border-radius: 8px; background: #fff; padding: 0 12px; }
+.auth-phone:focus-within { outline: 2px solid var(--orange); border-color: var(--orange); }
+.auth-phone-cc { flex: 0 0 auto; font-size: 15px; font-weight: 700; color: var(--text); white-space: nowrap; }
+.auth-phone input { flex: 1; min-width: 0; border: 0; outline: 0; background: none; padding: 12px 0; font-family: var(--font); font-size: 15px; color: var(--text); }
+.auth-hint { margin-top: 10px; font-size: 12.5px; color: var(--text-muted); }
+.auth-otp-to { font-size: 14px; color: var(--text); text-align: center; line-height: 1.5; margin-bottom: 6px; }
+.auth-otp { width: 100%; text-align: center; letter-spacing: 10px; text-indent: 10px; font-size: 26px; font-weight: 800; font-family: var(--font); color: var(--text); border: 1px solid var(--border-strong); border-radius: 10px; padding: 12px; margin-top: 4px; }
+.auth-otp:focus { outline: 2px solid var(--orange); border-color: var(--orange); }
+.auth-resend { margin-top: 12px; align-self: center; background: none; color: var(--orange); font-family: var(--font); font-weight: 700; font-size: 13.5px; cursor: pointer; text-decoration: underline; }
 
 .rewards-link { display: inline-flex; align-items: center; }
 .rewards-img { height: 20px; width: auto; display: block; }
@@ -740,6 +751,7 @@ main.page { flex: 1 0 auto; }
 .promo-mini img { width: 150px; height: 100%; object-fit: contain; border-radius: 10px; flex: 0 0 auto; align-self: stretch; }
 
 /* category tile launcher (landing view) - 5 across like the reference */
+.menu-cat-tiles { margin-top: 32px; }
 .cat-tiles {
   display: grid;
   grid-template-columns: repeat(5, 1fr);

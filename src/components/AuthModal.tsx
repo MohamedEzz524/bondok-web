@@ -1,8 +1,8 @@
 'use client';
 
-/* Sign Up / Log In popup - visual placeholder modeled on the reference
-   (Popeyes) auth popup. NOTE: the agreed Bondok flow is phone + OTP (no
-   email/password); this is a stand-in until that backend is wired. */
+/* Sign Up / Log In popup - phone + OTP, two steps (per the Bondok spec:
+   phone number -> OTP verify, no password). Placeholder flow: no real SMS
+   is sent yet; wiring to the SMS gateway lands with the backend. */
 
 import { useEffect, useState } from 'react';
 import { useUI } from './ui-context';
@@ -14,7 +14,6 @@ const AppleIcon = (
     <path fill="currentColor" d="M16.36 12.9c-.02-2.03 1.66-3 1.73-3.05-.94-1.38-2.4-1.57-2.93-1.59-1.25-.13-2.44.73-3.07.73-.63 0-1.6-.71-2.64-.69-1.36.02-2.61.79-3.31 2-1.41 2.45-.36 6.08 1.01 8.07.67.97 1.47 2.06 2.51 2.02 1.01-.04 1.39-.65 2.61-.65 1.22 0 1.56.65 2.63.63 1.09-.02 1.78-.99 2.44-1.97.77-1.12 1.09-2.21 1.11-2.27-.02-.01-2.13-.82-2.15-3.24zM14.4 6.86c.56-.68.94-1.62.83-2.56-.81.03-1.79.54-2.37 1.21-.52.6-.97 1.56-.85 2.48.9.07 1.83-.46 2.39-1.13z" />
   </svg>
 );
-
 const GoogleIcon = (
   <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
     <path fill="#4285F4" d="M21.6 12.23c0-.68-.06-1.34-.17-1.97H12v3.73h5.38a4.6 4.6 0 0 1-2 3.02v2.5h3.24c1.9-1.75 2.98-4.33 2.98-7.28z" />
@@ -26,49 +25,76 @@ const GoogleIcon = (
 
 export default function AuthModal() {
   const { authOpen, closeAuth } = useUI();
-  const [email, setEmail] = useState('');
+  const [step, setStep] = useState<'phone' | 'otp'>('phone');
+  const [phone, setPhone] = useState('');
+  const [code, setCode] = useState('');
   const [note, setNote] = useState('');
 
-  useEffect(() => { if (!authOpen) { setEmail(''); setNote(''); } }, [authOpen]);
+  useEffect(() => {
+    if (!authOpen) { setStep('phone'); setPhone(''); setCode(''); setNote(''); }
+  }, [authOpen]);
 
-  /* placeholder: real auth (phone + OTP) is not built yet */
-  const pending = () => setNote('Accounts launch soon - sign-in will use your phone number.');
+  const sendCode = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (phone.replace(/\D/g, '').length < 10) { setNote('Please enter a valid phone number.'); return; }
+    setNote('');
+    setStep('otp'); // placeholder: real OTP is sent once the SMS gateway is connected
+  };
+  const verify = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (code.length < 4) { setNote('Enter the code we sent you.'); return; }
+    setNote('Preview only - accounts go live with the loyalty program.');
+  };
 
   return (
     <Modal open={authOpen} onClose={closeAuth} label="Sign Up or Log In" overlayClass="auth-overlay" panelClass="auth-modal">
-        <div className="auth-head">
-          <h2>Sign Up / Log In</h2>
-          <button className="auth-close" aria-label="Close" onClick={closeAuth}>
-            <CloseIcon size={18} />
+      <div className="auth-head">
+        {step === 'otp' && (
+          <button className="auth-back" aria-label="Back" onClick={() => { setStep('phone'); setNote(''); }}>
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" d="m15 6-6 6 6 6" /></svg>
           </button>
-        </div>
+        )}
+        <h2>Sign Up / Log In</h2>
+        <button className="auth-close" aria-label="Close" onClick={closeAuth}><CloseIcon size={18} /></button>
+      </div>
 
-        <button className="auth-social auth-apple" onClick={pending}>
-          {AppleIcon}<span>Continue with Apple</span>
-        </button>
-        <button className="auth-social auth-google" onClick={pending}>
-          {GoogleIcon}<span>Continue with Google</span>
-        </button>
-
-        <div className="auth-or"><span>OR</span></div>
-
-        <form
-          className="auth-form"
-          onSubmit={(e) => { e.preventDefault(); pending(); }}
-        >
-          <label htmlFor="auth-email">Email Address<span aria-hidden="true">*</span></label>
+      {step === 'phone' ? (
+        <>
+          <button type="button" className="auth-social" onClick={() => setNote('Social sign-in arrives at launch.')}>
+            {AppleIcon}<span>Continue with Apple</span>
+          </button>
+          <button type="button" className="auth-social" onClick={() => setNote('Social sign-in arrives at launch.')}>
+            {GoogleIcon}<span>Continue with Google</span>
+          </button>
+          <div className="auth-or"><span>OR</span></div>
+          <form className="auth-form" onSubmit={sendCode}>
+            <label htmlFor="auth-phone">Phone Number<span aria-hidden="true">*</span></label>
+            <div className="auth-phone">
+              <span className="auth-phone-cc">🇪🇬 +20</span>
+              <input
+                id="auth-phone" type="tel" inputMode="tel" autoComplete="tel" required
+                placeholder="1XX XXX XXXX" value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+              />
+            </div>
+            <button type="submit" className="btn btn-solid auth-submit">Send Code</button>
+            <p className="auth-hint">We&apos;ll text you a 6-digit verification code.</p>
+          </form>
+        </>
+      ) : (
+        <form className="auth-form" onSubmit={verify}>
+          <p className="auth-otp-to">Enter the code we sent to<br /><strong>+20 {phone}</strong></p>
           <input
-            id="auth-email"
-            type="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            autoComplete="email"
+            className="auth-otp" type="text" inputMode="numeric" autoComplete="one-time-code"
+            maxLength={6} placeholder="------" aria-label="Verification code"
+            value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
           />
-          <button type="submit" className="btn btn-solid auth-submit">Sign Up / Log In</button>
+          <button type="submit" className="btn btn-solid auth-submit">Verify &amp; Continue</button>
+          <button type="button" className="auth-resend" onClick={() => setNote('Code resent.')}>Resend code</button>
         </form>
+      )}
 
-        {note && <p className="auth-note">{note}</p>}
+      {note && <p className="auth-note">{note}</p>}
     </Modal>
   );
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { flushSync } from 'react-dom';
 import { AnimatePresence, motion } from 'motion/react';
 import { useSearchParams } from 'next/navigation';
@@ -8,9 +8,7 @@ import { useCart } from './cart-context';
 import { useUI } from './ui-context';
 import LocationBar from './LocationBar';
 import { EVENTS, publish } from '@/lib/pubsub';
-import Link from 'next/link';
 import type { MenuCategory, Product, Protein, Size } from '@/lib/menu-data';
-import { heroSlides } from '@/lib/data';
 import CloseIcon from './CloseIcon';
 import ProductModal from './ProductModal';
 import FavButton from './FavButton';
@@ -116,7 +114,6 @@ export default function MenuBrowser({ categories }: Props) {
   const [subTab, setSubTab] = useState<SubTab>('All Items');
   const [selected, setSelected] = useState<{ cat: string; slug: string } | null>(null);
   const [favOnly, setFavOnly] = useState(() => searchParams.get('fav') === '1');
-  const promoRef = useRef<HTMLDivElement>(null);
 
   /* ---------- deep links: ?q= ?cat= ?item= ---------- */
   useEffect(() => {
@@ -461,42 +458,8 @@ export default function MenuBrowser({ categories }: Props) {
           exit={{ opacity: 0, y: -10 }}
           transition={{ duration: 0.22, ease: 'easeOut' }}
         >
-          {/* promo cards row (reference launcher structure);
-              becomes a carousel only when more than 3 promos exist */}
-          <div className="promo-wrap">
-            {heroSlides.length > 3 && (
-              <button
-                className="promo-arrow promo-arrow-prev"
-                aria-label="Previous promotions"
-                onClick={() => promoRef.current?.scrollBy({ left: -promoRef.current.clientWidth / 3, behavior: 'smooth' })}
-              >
-                <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M15.4 7.4 14 6l-6 6 6 6 1.4-1.4L10.8 12z" /></svg>
-              </button>
-            )}
-            <div className={`promo-row${heroSlides.length > 3 ? ' is-carousel' : ''}`} ref={promoRef}>
-              {heroSlides.map((s) => (
-                <Link key={s.title} href={s.href} className="promo-mini">
-                  <div className="promo-mini-text">
-                    <h3>{s.title}</h3>
-                    <p>{s.text}</p>
-                  </div>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={s.card ?? s.image} alt={s.alt} loading="lazy" />
-                </Link>
-              ))}
-            </div>
-            {heroSlides.length > 3 && (
-              <button
-                className="promo-arrow promo-arrow-next"
-                aria-label="More promotions"
-                onClick={() => promoRef.current?.scrollBy({ left: promoRef.current.clientWidth / 3, behavior: 'smooth' })}
-              >
-                <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8.6 7.4 10 6l6 6-6 6-1.4-1.4L13.2 12z" /></svg>
-              </button>
-            )}
-          </div>
-          {/* launcher: one tile per category (reference /menu structure) */}
-          <div className="cat-tiles">
+          {/* launcher: one tile per category (top promo/featured strip removed) */}
+          <div className="cat-tiles menu-cat-tiles">
             {categories.map((c) => (
               <button key={c.slug} className="cat-tile" onClick={() => openCategory(c.slug)}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
