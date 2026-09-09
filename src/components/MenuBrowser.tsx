@@ -15,6 +15,7 @@ import CloseIcon from './CloseIcon';
 import ProductModal from './ProductModal';
 import FavButton from './FavButton';
 import RecentlyViewed from './RecentlyViewed';
+import { useDragScroll } from './useDragScroll';
 import { usePrefs } from './prefs-context';
 import Select from './Select';
 
@@ -100,6 +101,8 @@ export default function MenuBrowser({ categories }: Props) {
   const { add } = useCart();
   const { openOrder } = useUI();
   const { favorites, recordView } = usePrefs();
+  const subtabsDrag = useDragScroll<HTMLDivElement>();
+  const popularDrag = useDragScroll<HTMLDivElement>();
   const searchParams = useSearchParams();
 
   const [view, setView] = useState<'launcher' | 'browse'>(() =>
@@ -560,7 +563,7 @@ export default function MenuBrowser({ categories }: Props) {
             {/* search card: search + sort + popular quick-picks */}
             <div className="menu-searchcard">
               {searchBar}
-              <div className="menu-popular">
+              <div className="menu-popular" ref={popularDrag.ref} {...popularDrag.dragProps}>
                 <span className="menu-popular-label">Popular:</span>
                 {POPULAR_TAGS.map((t) => (
                   <button key={t} className="menu-poptag" onClick={() => { setView('browse'); withFlip(() => setQuery(t)); }}>{t}</button>
@@ -580,7 +583,7 @@ export default function MenuBrowser({ categories }: Props) {
               </div>
               {shown.blurb && <p className="menu-headdesc">{shown.blurb}</p>}
               {shown.catMode && (
-                <div className="menu-subtabs">
+                <div className="menu-subtabs" ref={subtabsDrag.ref} {...subtabsDrag.dragProps}>
                   {SUB_TABS.map((t) => (
                     <button key={t} className={`menu-subtab${subTab === t ? ' is-on' : ''}`} onClick={() => withFlip(() => setSubTab(t))}>{t}</button>
                   ))}

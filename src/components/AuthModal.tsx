@@ -6,6 +6,7 @@
 
 import { useEffect, useState } from 'react';
 import { useUI } from './ui-context';
+import Modal from './Modal';
 import CloseIcon from './CloseIcon';
 
 const AppleIcon = (
@@ -28,24 +29,13 @@ export default function AuthModal() {
   const [email, setEmail] = useState('');
   const [note, setNote] = useState('');
 
-  useEffect(() => {
-    if (!authOpen) return;
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') closeAuth(); };
-    document.addEventListener('keydown', onKey);
-    document.body.style.overflow = 'hidden';
-    return () => { document.removeEventListener('keydown', onKey); document.body.style.overflow = ''; };
-  }, [authOpen, closeAuth]);
-
   useEffect(() => { if (!authOpen) { setEmail(''); setNote(''); } }, [authOpen]);
-
-  if (!authOpen) return null;
 
   /* placeholder: real auth (phone + OTP) is not built yet */
   const pending = () => setNote('Accounts launch soon - sign-in will use your phone number.');
 
   return (
-    <div className="auth-overlay" onClick={(e) => { if (e.target === e.currentTarget) closeAuth(); }}>
-      <div className="auth-modal" role="dialog" aria-modal="true" aria-label="Sign Up or Log In">
+    <Modal open={authOpen} onClose={closeAuth} label="Sign Up or Log In" overlayClass="auth-overlay" panelClass="auth-modal">
         <div className="auth-head">
           <h2>Sign Up / Log In</h2>
           <button className="auth-close" aria-label="Close" onClick={closeAuth}>
@@ -79,7 +69,6 @@ export default function AuthModal() {
         </form>
 
         {note && <p className="auth-note">{note}</p>}
-      </div>
-    </div>
+    </Modal>
   );
 }
