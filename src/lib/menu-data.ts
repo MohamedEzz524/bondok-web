@@ -26,8 +26,8 @@ export interface MenuCategory {
 }
 
 const img = (cat: string, slug: string) => `/bondok/menu/${cat}/${slug}.webp`;
-/* category tiles reuse the homepage "favorites" hero shots */
-const favImg = (name: string) => `/bondok/home/fav-${name}.webp`;
+/* category tiles: homepage "favorites" shots, trimmed + reframed to 4:3 */
+const favImg = (name: string) => `/bondok/menu-cat/${name}.webp`;
 
 const baseCategories: MenuCategory[] = [
   {

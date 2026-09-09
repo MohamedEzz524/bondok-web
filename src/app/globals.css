@@ -752,7 +752,7 @@ main.page { flex: 1 0 auto; }
   text-align: center; padding: 0;
   transition: box-shadow .15s ease;
 }
-.cat-tile img { width: 100%; aspect-ratio: 4 / 3; object-fit: contain; background: #fff; padding: 14px; }
+.cat-tile img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; background: #fff; }
 .cat-tile-body { padding: 4px 12px 20px; }
 .cat-tile-body h3 { font-size: 17px; font-weight: 800; color: var(--text); }
 
@@ -3132,9 +3132,9 @@ main.page { flex: 1 0 auto; }
 /* FAQ */
 .rwx-faq { max-width: 900px; margin: 0 auto; padding: 40px var(--pad-x) 90px; }
 .rwx-faq-tabs { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin: 8px 0 24px; }
-.rwx-faq-tab { background: var(--surface); border-radius: 999px; padding: 9px 20px; font-size: 13px; font-weight: 700; color: var(--text); font-family: var(--font); cursor: pointer; transition: background-color .12s, color .12s; }
-.rwx-faq-tab:hover { background: var(--surface-hover); }
-.rwx-faq-tab.is-active { background: var(--orange); color: #fff; }
+.rwx-faq-tab { background: #dcece9; border-radius: 999px; padding: 13px 26px; font-size: 15px; font-weight: 800; color: var(--text); font-family: var(--font); cursor: pointer; transition: background-color .15s ease, color .15s ease; }
+.rwx-faq-tab:hover { background: #cfe4e0; }
+.rwx-faq-tab.is-active { background: #01847e; color: #fff; }
 .rwx-faq-list { display: flex; flex-direction: column; gap: 12px; }
 .rwx-faq-item { background: var(--white); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
 .rwx-faq-item.is-open { border-color: var(--orange); }
