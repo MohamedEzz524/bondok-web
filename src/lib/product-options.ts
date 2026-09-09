@@ -27,9 +27,21 @@ export interface ProductConfig {
 const MAINS = new Set(['sandwiches', 'fillet', 'grilled', 'burgers', 'rolls']);
 const PLATTERS = new Set(['meals', 'kids-tenders']);
 
+const SIZE: OptionGroup = {
+  key: 'size',
+  label: 'Choose Size',
+  type: 'single',
+  defaultIdx: 0,
+  choices: [
+    { label: 'Regular', delta: 0 },
+    { label: 'Large', delta: 20 },
+    { label: 'Extra Large', delta: 35 },
+  ],
+};
+
 const HEAT: OptionGroup = {
   key: 'heat',
-  label: 'Heat Level',
+  label: 'Spicy Level',
   type: 'single',
   defaultIdx: 1,
   choices: [
@@ -42,7 +54,7 @@ const HEAT: OptionGroup = {
 
 const DIPS: OptionGroup = {
   key: 'dip',
-  label: 'Dip & Sauce',
+  label: 'Choose Your Sauce',
   type: 'single',
   defaultIdx: 0,
   choices: [
@@ -81,18 +93,20 @@ export function optionsFor(product: Product, catSlug: string): ProductConfig {
   let combo: ProductConfig['combo'];
   let badge: string | undefined;
 
-  if (product.spicy) {
-    badge = 'Hot & Spicy';
-    groups.push(HEAT);
-  }
+  if (product.spicy) badge = 'Hot & Spicy';
 
   if (MAINS.has(catSlug)) {
+    groups.push(SIZE);
+    if (product.spicy) groups.push(HEAT);
     groups.push(DIPS, ADDONS);
-    combo = { delta: 50, includes: 'Medium Fries + Coleslaw' };
+    combo = { delta: 80, includes: 'Medium Fries + Soft Drink' };
   } else if (PLATTERS.has(catSlug)) {
+    if (product.spicy) groups.push(HEAT);
     groups.push(DIPS, ADDONS);
   } else if (catSlug === 'sides' && !product.slug.includes('sauce')) {
     groups.push(SIDE_ADDONS);
+  } else if (product.spicy) {
+    groups.push(HEAT);
   }
 
   return { badge, combo, groups };

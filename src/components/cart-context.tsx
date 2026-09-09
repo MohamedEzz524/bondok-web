@@ -1,7 +1,8 @@
 'use client';
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { EVENTS, publish } from '@/lib/pubsub';
+import { priceOf } from '@/lib/menu-data';
 
 export interface CartItem {
   slug: string;          // product slug
@@ -16,6 +17,7 @@ export interface CartItem {
 
 /* line identity: same product with different options = separate lines */
 export const lineKey = (i: Pick<CartItem, 'slug' | 'key'>) => i.key ?? i.slug;
+const countOf = (list: CartItem[]) => list.reduce((s, i) => s + i.qty, 0);
 
 interface CartState {
   items: CartItem[];
@@ -33,6 +35,15 @@ const STORAGE_KEY = 'bondok-cart-v1';
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [loaded, setLoaded] = useState(false);
+  /* mirror of `items` so cart actions can compute the next state and fire
+     pubsub events synchronously in the event handler - never inside a
+     setState updater (that runs during render and would setState on the
+     Toaster/badge mid-render). */
+  const itemsRef = useRef<CartItem[]>([]);
+  const commit = useCallback((next: CartItem[]) => {
+    itemsRef.current = next;
+    setItems(next);
+  }, []);
 
   /* restore once on mount; persist on every change after that */
   useEffect(() => {
@@ -40,11 +51,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
         const list: CartItem[] = JSON.parse(raw);
-        setItems(list.map((i) => ({ ...i, key: i.key ?? i.slug })));
+        /* backfill price for lines saved before menu pricing existed */
+        commit(list.map((i) => ({ ...i, key: i.key ?? i.slug, price: i.price ?? priceOf(i.slug) })));
       }
     } catch { /* corrupted storage: start empty */ }
     setLoaded(true);
-  }, []);
+  }, [commit]);
 
   useEffect(() => {
     if (!loaded) return;
@@ -53,47 +65,44 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const add = useCallback((item: Omit<CartItem, 'qty'>, source = 'cart', qty = 1) => {
     if (qty <= 0) return;
-    setItems((prev) => {
-      const k = lineKey(item);
-      const existing = prev.find((i) => lineKey(i) === k);
-      const next = existing
-        ? prev.map((i) => (lineKey(i) === k ? { ...i, qty: i.qty + qty } : i))
-        : [...prev, { ...item, key: k, qty }];
-      const result = next.find((i) => lineKey(i) === k)!;
-      publish(EVENTS.cartItemAdd, { source, item: result, added: qty });
-      publish(EVENTS.cartUpdate, { source, items: next, count: next.reduce((s, i) => s + i.qty, 0) });
-      return next;
-    });
-  }, []);
+    const prev = itemsRef.current;
+    const k = lineKey(item);
+    const existing = prev.find((i) => lineKey(i) === k);
+    const next = existing
+      ? prev.map((i) => (lineKey(i) === k ? { ...i, qty: i.qty + qty } : i))
+      : [...prev, { ...item, key: k, qty }];
+    const result = next.find((i) => lineKey(i) === k)!;
+    commit(next);
+    publish(EVENTS.cartItemAdd, { source, item: result, added: qty });
+    publish(EVENTS.cartUpdate, { source, items: next, count: countOf(next) });
+  }, [commit]);
 
   const setQty = useCallback((slug: string, qty: number, source = 'cart') => {
-    setItems((prev) => {
-      const removed = qty <= 0 ? prev.find((i) => lineKey(i) === slug) : undefined;
-      const next = qty <= 0
-        ? prev.filter((i) => lineKey(i) !== slug)
-        : prev.map((i) => (lineKey(i) === slug ? { ...i, qty } : i));
-      if (removed) publish(EVENTS.cartItemRemove, { source, slug, item: removed });
-      else publish(EVENTS.quantityUpdate, { source, slug, qty });
-      publish(EVENTS.cartUpdate, { source, items: next, count: next.reduce((s, i) => s + i.qty, 0) });
-      return next;
-    });
-  }, []);
+    const prev = itemsRef.current;
+    const removed = qty <= 0 ? prev.find((i) => lineKey(i) === slug) : undefined;
+    const next = qty <= 0
+      ? prev.filter((i) => lineKey(i) !== slug)
+      : prev.map((i) => (lineKey(i) === slug ? { ...i, qty } : i));
+    commit(next);
+    if (removed) publish(EVENTS.cartItemRemove, { source, slug, item: removed });
+    else publish(EVENTS.quantityUpdate, { source, slug, qty });
+    publish(EVENTS.cartUpdate, { source, items: next, count: countOf(next) });
+  }, [commit]);
 
   const remove = useCallback((slug: string, source = 'cart') => {
-    setItems((prev) => {
-      const removed = prev.find((i) => lineKey(i) === slug);
-      const next = prev.filter((i) => lineKey(i) !== slug);
-      publish(EVENTS.cartItemRemove, { source, slug, item: removed });
-      publish(EVENTS.cartUpdate, { source, items: next, count: next.reduce((s, i) => s + i.qty, 0) });
-      return next;
-    });
-  }, []);
+    const prev = itemsRef.current;
+    const removed = prev.find((i) => lineKey(i) === slug);
+    const next = prev.filter((i) => lineKey(i) !== slug);
+    commit(next);
+    publish(EVENTS.cartItemRemove, { source, slug, item: removed });
+    publish(EVENTS.cartUpdate, { source, items: next, count: countOf(next) });
+  }, [commit]);
 
   const clear = useCallback((source = 'cart') => {
-    setItems([]);
+    commit([]);
     publish(EVENTS.cartCleared, { source });
     publish(EVENTS.cartUpdate, { source, items: [], count: 0 });
-  }, []);
+  }, [commit]);
 
   const count = useMemo(() => items.reduce((s, i) => s + i.qty, 0), [items]);
   const subtotal = useMemo(() => {

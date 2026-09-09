@@ -11,43 +11,6 @@ export const metadata: Metadata = {
    header + compact dark footer (global chrome is hidden on this route).
    All copy/images are Bondok placeholders. */
 
-/* white hand-drawn doodles (reference has whisk/trumpet/stars around the food) */
-const DOODLE_SHAPES = [
-  /* burst star */
-  <svg key="burst" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true">
-    <path d="M12 2v5M12 17v5M2 12h5M17 12h5M5 5l3.2 3.2M15.8 15.8 19 19M19 5l-3.2 3.2M8.2 15.8 5 19" />
-  </svg>,
-  /* 4-point sparkle */
-  <svg key="spark" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-    <path d="M12 1c1 5 3 8 11 11-8 3-10 6-11 11-1-5-3-8-11-11 8-3 10-6 11-11z" />
-  </svg>,
-  /* squiggle */
-  <svg key="squig" viewBox="0 0 32 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-    <path d="M1 8c4-8 6 6 10-2s6 6 10-2 6 4 10-2" />
-  </svg>,
-];
-
-/* hero collage - positions mirror the reference food spread:
-   items cut at the top edge, a big central platter, bowls on the right,
-   and a plate anchored to the bottom-right corner */
-const HERO_ART = [
-  { src: '/bondok/hero-12pcs.webp', style: { left: '29%', bottom: '-16%', width: '42%' } },
-  { src: '/bondok/hero-tenders.webp', style: { left: '44%', top: '-20%', width: '28%' } },
-  { src: '/bondok/hero-shrimp-roll.webp', style: { right: '-5%', top: '-10%', width: '27%' } },
-  { src: '/bondok/feat-sides.webp', style: { left: '52%', top: '30%', width: '16%' } },
-  { src: '/bondok/fav-cheddar-jalapeno.webp', style: { right: '1%', top: '46%', width: '14%' } },
-  { src: '/bondok/fav-tenders.webp', style: { right: '-8%', bottom: '-20%', width: '36%' } },
-];
-
-const DOODLES = [
-  { shape: 0, style: { left: '40%', top: '10%', width: 52, height: 52 } },
-  { shape: 1, style: { left: '76%', top: '6%', width: 34, height: 34 } },
-  { shape: 1, style: { left: '62%', top: '62%', width: 44, height: 44 } },
-  { shape: 2, style: { left: '66%', top: '40%', width: 64, height: 24 } },
-  { shape: 1, style: { left: '47%', top: '26%', width: 22, height: 22 } },
-  { shape: 0, style: { right: '2%', top: '28%', width: 36, height: 36 } },
-];
-
 export default function Page() {
   return (
     <div className="catering-page">
@@ -67,16 +30,12 @@ export default function Page() {
         </div>
       </header>
 
-      {/* orange hero with food collage */}
+      {/* hero with catering table banner */}
       <section className="cat-hero">
         <div className="cat-hero-art" aria-hidden="true">
-          {HERO_ART.map((a) => (
-            /* eslint-disable-next-line @next/next/no-img-element */
-            <img key={a.src} src={a.src} alt="" style={a.style} />
-          ))}
-          {DOODLES.map((d, i) => (
-            <span key={i} className="cat-doodle" style={d.style}>{DOODLE_SHAPES[d.shape]}</span>
-          ))}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img className="cat-hero-banner" src="/bondok/catering-hero.webp" alt="" />
+          <span className="cat-hero-scrim" />
         </div>
         <div className="cat-hero-inner">
           <div className="cat-hero-copy">

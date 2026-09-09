@@ -94,8 +94,7 @@ export default function BagView() {
                       const loc = findProduct(it.slug);
                       return loc ? (
                         <Link className="co-edit" href={`/menu/${loc.catSlug}/${it.slug}`} title="Edit options">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src="/icons/Icon-edit.svg" alt="" width="14" />
+                          <span className="co-edit-ic" aria-hidden="true" style={{ WebkitMaskImage: 'url(/icons/Icon-edit.svg)', maskImage: 'url(/icons/Icon-edit.svg)' }} />
                           Edit
                         </Link>
                       ) : null;

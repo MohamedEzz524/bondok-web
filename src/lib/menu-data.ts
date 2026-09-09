@@ -160,6 +160,38 @@ const baseCategories: MenuCategory[] = [
    Explicit values in the arrays above always win; client data can override later. */
 const SIZED_CATEGORIES = new Set(['sandwiches', 'fillet', 'grilled', 'burgers']);
 
+/* Real prices (EGP) from the Bondok Hadayek El Ahram printed menu.
+   Sandwich/single is the base price; the combo toggle adds the drink+fries
+   upcharge (see product-options COMBO delta). Client can override per branch. */
+const PRICE: Record<string, number> = {
+  // Specialty Sandwiches
+  'chicken-cheddar-jalapeno': 190, 'chicken-mozzarella': 190, 'chicken-mushroom': 175,
+  'chicken-chili-fire': 180, 'roast-beef-burger': 190, 'sweet-chili-burger': 180,
+  // Chicken Fillet
+  'chicken-fillet': 155, 'chicken-fillet-double': 245, 'chicken-fillet-triple': 310,
+  // Grilled & Turkey
+  'grilled-chicken': 155, 'grilled-chicken-double': 245, 'grilled-chicken-triple': 310,
+  'turkey-chicken': 165, 'turkey-chicken-double': 270, 'turkey-chicken-triple': 350,
+  // Burgers
+  'mushroom-burger': 175, 'mushroom-burger-double': 280, 'mushroom-burger-triple': 385,
+  'texas-and-beef-burger': 175, 'texas-and-beef-burger-double': 280, 'texas-and-beef-burger-triple': 385,
+  'western-bbq-burger': 175, 'western-bbq-burger-double': 280, 'western-bbq-burger-triple': 385,
+  // Rolls & More
+  'chicken-fillet-roll': 155, 'grilled-chicken-roll': 155, 'burger-roll': 175,
+  'shrimp-roll': 190, 'french-fries-roll': 60, 'five-star-burger': 215,
+  // Fried Chicken Meals
+  'bondok-meal': 660, 'classic-meal': 255, 'golden-meal': 330, 'mega-meal': 500,
+  'bite-meal': 165, '12-pcs-meal': 950, '16-pcs-family-meal': 1225, '20-pcs-family-meal': 1455,
+  // Kids, Rizo & Tenders
+  'fried-chicken-kids-meal': 130, 'chicken-fillet-kids-meal': 160, 'chicken-nuggets-kids-meal': 185,
+  'beef-burger-kids-meal': 180, 'plain-rizo': 45, 'chicken-rizo': 125, 'grilled-chicken-rizo': 140,
+  'shrimp-rizo': 175, '4-pcs-tenders': 225, '6-pcs-tenders': 315, '12-pcs-tenders': 655,
+  // Sides & Sauces
+  'french-fries': 50, 'cheese-fries': 90, 'mozzarella-sticks': 70, 'onion-rings': 60,
+  'coleslaw': 35, 'cheese-sauce': 30, 'cheezy-jalapeno-sauce': 30, 'jalapeno-sauce': 5,
+  'bbq-sauce': 15, 'ketchup': 15, 'mayo': 15, 'thoumeya-garlic-sauce': 15,
+};
+
 function enrich(p: Product, catSlug: string): Product {
   const n = p.name.toLowerCase();
 
@@ -180,6 +212,7 @@ function enrich(p: Product, catSlug: string): Product {
     ...p,
     size,
     protein,
+    price: p.price ?? PRICE[p.slug],
     spicy: p.spicy ?? /jalapeno|chili|fire/.test(n),
     cheesy: p.cheesy ?? /cheddar|mozzarella|cheese|cheezy/.test(n),
   };
@@ -189,3 +222,9 @@ export const menuCategories: MenuCategory[] = baseCategories.map((c) => ({
   ...c,
   products: c.products.map((p) => enrich(p, c.slug)),
 }));
+
+/* slug -> price lookup (used to backfill older cart lines that were saved
+   before prices existed, so nothing renders as a blank "—") */
+const priceMap = new Map<string, number>();
+for (const c of menuCategories) for (const p of c.products) if (p.price != null) priceMap.set(p.slug, p.price);
+export const priceOf = (slug: string): number | undefined => priceMap.get(slug);

@@ -35,24 +35,53 @@ const PROTEINS: { value: Protein; label: string }[] = [
   { value: 'turkey', label: 'Turkey' },
 ];
 
+/* per-category emoji glyphs for the sidebar (reference uses food emojis) */
+const CAT_EMOJI: Record<string, string> = {
+  sandwiches: '🍔', fillet: '🍗', grilled: '🥪', burgers: '🍔',
+  rolls: '🌯', meals: '🍗', 'kids-tenders': '🍟', sides: '🥔',
+};
+
+type Spice = 'mild' | 'medium' | 'hot' | 'extra-hot';
+const SPICE_LEVELS: { value: Spice; label: string }[] = [
+  { value: 'mild', label: 'Mild' },
+  { value: 'medium', label: 'Medium' },
+  { value: 'hot', label: 'Hot' },
+  { value: 'extra-hot', label: 'Extra Hot' },
+];
+/* non-mild picks mean "wants heat" -> match spicy products */
+const HEAT: Spice[] = ['medium', 'hot', 'extra-hot'];
+
+/* quick-search chips (reference "Popular:" row) - each seeds the search box */
+const POPULAR_TAGS = ['Chicken Fire', 'Cheddar Fries', 'Brioche Burgers', 'Mozzarella Crunch', 'Cold Brew', 'Family Box'];
+
+/* in-category quick tabs (reference header pills) */
+const SUB_TABS = ['All Items', 'Popular', 'Best Sellers', 'New In', 'Spicy', 'Combos & Value Meals'] as const;
+type SubTab = typeof SUB_TABS[number];
+
+const CAT_EYEBROW = 'Fresh on-demand prep • 100% signature ingredients';
+
 interface Filters {
   sizes: Set<Size>;
   proteins: Set<Protein>;
-  spicy: boolean;
-  cheesy: boolean;
+  spice: Set<Spice>;
+  priceMin: number | null;
   priceMax: number | null;
 }
 
 const emptyFilters = (): Filters => ({
-  sizes: new Set(), proteins: new Set(), spicy: false, cheesy: false, priceMax: null,
+  sizes: new Set(), proteins: new Set(), spice: new Set(), priceMin: null, priceMax: null,
 });
 
 function matches(p: Product, f: Filters, q: string): boolean {
   if (q && !p.name.toLowerCase().includes(q)) return false;
   if (f.sizes.size > 0 && (!p.size || !f.sizes.has(p.size))) return false;
   if (f.proteins.size > 0 && (!p.protein || !f.proteins.has(p.protein))) return false;
-  if (f.spicy && !p.spicy) return false;
-  if (f.cheesy && !p.cheesy) return false;
+  if (f.spice.size > 0) {
+    const wantsHeat = HEAT.some((s) => f.spice.has(s));
+    const wantsMild = f.spice.has('mild');
+    if (!((wantsHeat && p.spicy) || (wantsMild && !p.spicy))) return false;
+  }
+  if (f.priceMin !== null && (p.price === undefined || p.price < f.priceMin)) return false;
   if (f.priceMax !== null && (p.price === undefined || p.price > f.priceMax)) return false;
   return true;
 }
@@ -80,7 +109,8 @@ export default function MenuBrowser({ categories }: Props) {
   const [filters, setFilters] = useState<Filters>(emptyFilters);
   const [sheetOpen, setSheetOpen] = useState(false);          // mobile filters sheet
   const [sort, setSort] = useState<'default' | 'name-asc' | 'name-desc' | 'price-asc' | 'price-desc'>('default');
-  const [activeSection, setActiveSection] = useState<string>(categories[0]?.slug ?? '');
+  const [activeCat, setActiveCat] = useState<string>(() => searchParams.get('cat') ?? categories[0]?.slug ?? '');
+  const [subTab, setSubTab] = useState<SubTab>('All Items');
   const [selected, setSelected] = useState<{ cat: string; slug: string } | null>(null);
   const [favOnly, setFavOnly] = useState(() => searchParams.get('fav') === '1');
   const promoRef = useRef<HTMLDivElement>(null);
@@ -94,6 +124,7 @@ export default function MenuBrowser({ categories }: Props) {
       for (const c of categories) {
         if (c.products.some((p) => p.slug === item)) {
           setView('browse');
+          setActiveCat(c.slug);
           setSelected({ cat: c.slug, slug: item });
           break;
         }
@@ -103,7 +134,7 @@ export default function MenuBrowser({ categories }: Props) {
     const cat = searchParams.get('cat');
     if (cat && categories.some((c) => c.slug === cat)) {
       setView('browse');
-      setTimeout(() => document.getElementById(`sec-${cat}`)?.scrollIntoView({ behavior: 'smooth' }), 120);
+      setActiveCat(cat);
     }
   }, [searchParams, categories]);
 
@@ -122,35 +153,61 @@ export default function MenuBrowser({ categories }: Props) {
   }, [categories]);
 
   const activeCount =
-    filters.sizes.size + filters.proteins.size +
-    (filters.spicy ? 1 : 0) + (filters.cheesy ? 1 : 0) +
-    (filters.priceMax !== null ? 1 : 0);
+    filters.sizes.size + filters.proteins.size + filters.spice.size +
+    (filters.priceMin !== null || filters.priceMax !== null ? 1 : 0);
 
   const filtering = q.length > 0 || activeCount > 0 || favOnly;
+  const searching = q.length > 0;
 
-  const visible = useMemo(() => {
+  const activeCategory = useMemo(
+    () => categories.find((c) => c.slug === activeCat) ?? categories[0],
+    [categories, activeCat],
+  );
+
+  /* one focused collection at a time: search results (global), favorites, or
+     the selected category - matching the reference single-header layout */
+  const shown = useMemo(() => {
     const sorters: Record<string, (a: Product, b: Product) => number> = {
       'name-asc': (a, b) => a.name.localeCompare(b.name),
       'name-desc': (a, b) => b.name.localeCompare(a.name),
       'price-asc': (a, b) => (a.price ?? Infinity) - (b.price ?? Infinity),
       'price-desc': (a, b) => (b.price ?? -Infinity) - (a.price ?? -Infinity),
     };
-    return categories
-      .map((c) => {
-        const products = c.products.filter((p) => matches(p, filters, q) && (!favOnly || favorites.includes(p.slug)));
-        if (sort !== 'default') products.sort(sorters[sort]);
-        return { ...c, products };
-      })
-      .filter((c) => c.products.length > 0);
-  }, [categories, filters, q, sort, favOnly, favorites]);
+    let base: Product[];
+    let title: string;
+    let eyebrow = CAT_EYEBROW;
+    let blurb: string | undefined;
+    let catMode = false;
+    if (searching) {
+      base = categories.flatMap((c) => c.products);
+      title = `Results for “${query.trim()}”`;
+      blurb = 'Matches across the full Bondok menu.';
+    } else if (favOnly) {
+      base = categories.flatMap((c) => c.products).filter((p) => favorites.includes(p.slug));
+      title = 'My Favorites';
+      eyebrow = 'Saved by you';
+      blurb = 'Everything you tapped the heart on - ready to reorder.';
+    } else {
+      base = activeCategory?.products ?? [];
+      title = activeCategory?.name ?? '';
+      blurb = activeCategory?.blurb;
+      catMode = true;
+    }
+    const total = base.length;
+    let products = base.filter(
+      (p) => matches(p, filters, q) && (catMode && subTab === 'Spicy' ? p.spicy === true : true),
+    );
+    if (sort !== 'default') products = [...products].sort(sorters[sort]);
+    return { products, title, eyebrow, blurb, total, catMode };
+  }, [categories, activeCategory, filters, q, query, sort, favOnly, favorites, searching, subTab]);
 
-  const resultCount = visible.reduce((sum, c) => sum + c.products.length, 0);
+  const resultCount = shown.products.length;
 
   /* FLIP cost is per named element - cap tracking to the first 20 cards so
      large toggles (favorites, clear) stay instant; the rest crossfade */
   const flipBudget = useMemo(
-    () => new Set(visible.flatMap((c) => c.products).slice(0, 20).map((p) => p.slug)),
-    [visible],
+    () => new Set(shown.products.slice(0, 20).map((p) => p.slug)),
+    [shown],
   );
 
   useEffect(() => {
@@ -160,23 +217,10 @@ export default function MenuBrowser({ categories }: Props) {
     publish(EVENTS.filterChange, { source: 'menu-page', active: activeCount });
   }, [activeCount]);
 
-  /* ---------- scrollspy: highlight the section in view (reference sidebar behavior) ---------- */
-  useEffect(() => {
-    if (view !== 'browse') return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const e of entries) {
-          if (e.isIntersecting) setActiveSection(e.target.id.replace('sec-', ''));
-        }
-      },
-      { rootMargin: '-140px 0px -55% 0px' },
-    );
-    visible.forEach((c) => {
-      const el = document.getElementById(`sec-${c.slug}`);
-      if (el) observer.observe(el);
-    });
-    return () => observer.disconnect();
-  }, [view, visible]);
+  /* selecting a category scrolls the content back to the top of the list */
+  const scrollContentTop = useCallback(() => {
+    document.querySelector('.menu-content')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, []);
 
   /* keep ?fav=1 in the URL synced with the toggle, so the drawer link
      always works even after toggling off (same-URL clicks were no-ops) */
@@ -188,14 +232,18 @@ export default function MenuBrowser({ categories }: Props) {
     window.history.replaceState(null, '', url.toString());
   }, []);
 
-  const scrollToSection = useCallback((slug: string) => {
-    document.getElementById(`sec-${slug}`)?.scrollIntoView({ behavior: 'smooth' });
-  }, []);
+  const selectCategory = useCallback((slug: string) => {
+    const apply = () => { setFavOnlySynced(false); setActiveCat(slug); setSubTab('All Items'); setQuery(''); };
+    /* leaving a search replaces the whole collection; a view-transition
+       crossfade between two unrelated grids reads as a flicker, so when a
+       query is active swap instantly instead of animating. */
+    if (q) apply(); else withFlip(apply);
+    scrollContentTop();
+  }, [q, setFavOnlySynced, scrollContentTop]);
 
   const openCategory = (slug: string) => {
     setView('browse');
-    setActiveSection(slug);
-    setTimeout(() => scrollToSection(slug), 120);
+    setActiveCat(slug);
   };
 
   const toggleSize = (v: Size) =>
@@ -208,7 +256,27 @@ export default function MenuBrowser({ categories }: Props) {
       const s = new Set(f.proteins); if (s.has(v)) s.delete(v); else s.add(v);
       return { ...f, proteins: s };
     }));
+  const toggleSpice = (v: Spice) =>
+    withFlip(() => setFilters((f) => {
+      const s = new Set(f.spice); if (s.has(v)) s.delete(v); else s.add(v);
+      return { ...f, spice: s };
+    }));
   const clearAll = () => withFlip(() => { setFilters(emptyFilters()); setQuery(''); setFavOnlySynced(false); });
+
+  /* removable "applied" chips (reference sidebar summary) */
+  const appliedChips = useMemo(() => {
+    const chips: { label: string; remove: () => void }[] = [];
+    filters.proteins.forEach((p) =>
+      chips.push({ label: PROTEINS.find((x) => x.value === p)!.label, remove: () => toggleProtein(p) }));
+    filters.spice.forEach((s) =>
+      chips.push({ label: `${SPICE_LEVELS.find((x) => x.value === s)!.label} Spice`, remove: () => toggleSpice(s) }));
+    filters.sizes.forEach((s) =>
+      chips.push({ label: `${SIZES.find((x) => x.value === s)!.label} Build`, remove: () => toggleSize(s) }));
+    if (filters.priceMin !== null || filters.priceMax !== null)
+      chips.push({ label: `EGP ${filters.priceMin ?? 0}–${filters.priceMax ?? priceCeiling ?? 0}`, remove: () => withFlip(() => setFilters((f) => ({ ...f, priceMin: null, priceMax: null }))) });
+    return chips;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters, priceCeiling]);
 
   /* Esc closes the mobile filters sheet; lock scroll while open */
   useEffect(() => {
@@ -218,6 +286,13 @@ export default function MenuBrowser({ categories }: Props) {
     document.body.style.overflow = 'hidden';
     return () => { document.removeEventListener('keydown', onKey); document.body.style.overflow = ''; };
   }, [sheetOpen]);
+
+  /* slug -> category slug (shown products are a flat list now) */
+  const productCat = useMemo(() => {
+    const m = new Map<string, string>();
+    categories.forEach((c) => c.products.forEach((p) => m.set(p.slug, c.slug)));
+    return m;
+  }, [categories]);
 
   /* selected product + its variants for the popup */
   const selectedData = useMemo(() => {
@@ -231,8 +306,8 @@ export default function MenuBrowser({ categories }: Props) {
   const filterGroups = (
     <>
       <div className="fgroup">
-        <h4>Size</h4>
-        <div className="fchips">
+        <h4>Size / Build</h4>
+        <div className="fchips fchips-seg">
           {SIZES.map((s) => (
             <button key={s.value} className={`fchip${filters.sizes.has(s.value) ? ' is-on' : ''}`} onClick={() => toggleSize(s.value)}>
               {s.label}
@@ -241,38 +316,86 @@ export default function MenuBrowser({ categories }: Props) {
         </div>
       </div>
       <div className="fgroup">
-        <h4>Protein</h4>
+        <h4>Protein Selection</h4>
         <div className="fchips">
-          {PROTEINS.map((p) => (
-            <button key={p.value} className={`fchip${filters.proteins.has(p.value) ? ' is-on' : ''}`} onClick={() => toggleProtein(p.value)}>
-              {p.label}
+          {PROTEINS.map((p) => {
+            const on = filters.proteins.has(p.value);
+            return (
+              <button key={p.value} className={`fchip${on ? ' is-on is-soft' : ''}`} onClick={() => toggleProtein(p.value)}>
+                {on && <span className="fchip-check" aria-hidden="true">✓</span>}{p.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+      <div className="fgroup">
+        <h4>Spice Level</h4>
+        <div className="fchips fchips-grid">
+          {SPICE_LEVELS.map((s) => (
+            <button
+              key={s.value}
+              className={`fchip${filters.spice.has(s.value) ? (s.value === 'extra-hot' ? ' is-on is-hot' : ' is-on') : ''}`}
+              onClick={() => toggleSpice(s.value)}
+            >
+              {s.label}
             </button>
           ))}
         </div>
       </div>
-      <div className="fgroup">
-        <h4>Taste</h4>
-        <div className="fchips">
-          <button className={`fchip${filters.spicy ? ' is-on' : ''}`} onClick={() => withFlip(() => setFilters((f) => ({ ...f, spicy: !f.spicy })))}>
-            Spicy
-          </button>
-          <button className={`fchip${filters.cheesy ? ' is-on' : ''}`} onClick={() => withFlip(() => setFilters((f) => ({ ...f, cheesy: !f.cheesy })))}>
-            Cheesy
-          </button>
-        </div>
-      </div>
       {priceCeiling !== null && (
         <div className="fgroup">
-          <h4>Max price: {filters.priceMax ?? priceCeiling} EGP</h4>
-          <input
-            type="range" min={0} max={priceCeiling}
-            value={filters.priceMax ?? priceCeiling}
-            onChange={(e) => setFilters((f) => ({ ...f, priceMax: Number(e.target.value) }))}
-          />
+          <div className="fgroup-head">
+            <h4>Price Range</h4>
+            <span className="fprice-cap">EGP 0 — EGP {priceCeiling}</span>
+          </div>
+          <div className="fprice-track">
+            <span className="fprice-rail" aria-hidden="true" />
+            <span
+              className="fprice-fill"
+              aria-hidden="true"
+              style={{
+                left: `${((filters.priceMin ?? 0) / priceCeiling) * 100}%`,
+                right: `${100 - ((filters.priceMax ?? priceCeiling) / priceCeiling) * 100}%`,
+              }}
+            />
+            <input
+              type="range" min={0} max={priceCeiling} aria-label="Minimum price"
+              value={filters.priceMin ?? 0}
+              onChange={(e) => {
+                const v = Math.min(Number(e.target.value), filters.priceMax ?? priceCeiling);
+                setFilters((f) => ({ ...f, priceMin: v }));
+              }}
+            />
+            <input
+              type="range" min={0} max={priceCeiling} aria-label="Maximum price"
+              value={filters.priceMax ?? priceCeiling}
+              onChange={(e) => {
+                const v = Math.max(Number(e.target.value), filters.priceMin ?? 0);
+                setFilters((f) => ({ ...f, priceMax: v }));
+              }}
+            />
+          </div>
+          <div className="fprice-io">
+            <span className="fprice-chip"><em>MIN</em> EGP {filters.priceMin ?? 0}</span>
+            <span className="fprice-dash">—</span>
+            <span className="fprice-chip"><em>MAX</em> EGP {filters.priceMax ?? priceCeiling}</span>
+          </div>
         </div>
       )}
-      {activeCount > 0 && (
-        <button className="fclear" onClick={() => withFlip(() => setFilters(emptyFilters()))}>Clear filters ({activeCount})</button>
+      {appliedChips.length > 0 && (
+        <div className="fapplied">
+          <div className="fgroup-head">
+            <h4>Applied ({appliedChips.length})</h4>
+            <button className="freset" onClick={() => withFlip(() => setFilters(emptyFilters()))}>Reset</button>
+          </div>
+          <div className="fapplied-chips">
+            {appliedChips.map((c) => (
+              <button key={c.label} className="fapplied-chip" onClick={c.remove}>
+                {c.label} <span aria-hidden="true">✕</span>
+              </button>
+            ))}
+          </div>
+        </div>
       )}
     </>
   );
@@ -355,7 +478,7 @@ export default function MenuBrowser({ categories }: Props) {
                     <p>{s.text}</p>
                   </div>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={s.image} alt={s.alt} loading="lazy" />
+                  <img src={s.card ?? s.image} alt={s.alt} loading="lazy" />
                 </Link>
               ))}
             </div>
@@ -392,53 +515,80 @@ export default function MenuBrowser({ categories }: Props) {
           exit={{ opacity: 0, y: -10 }}
           transition={{ duration: 0.22, ease: 'easeOut' }}
         >
-          {/* sidebar: category scrollspy list (reference) + our filters */}
+          {/* sidebar: full-catalog list (emoji + counts) + filters */}
           <aside className="menu-side">
-            <button className="side-row side-row-top" onClick={() => { setView('launcher'); window.scrollTo({ top: 0 }); }}>
-              <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+            <button className="menu-catalog-back" onClick={() => { setView('launcher'); window.scrollTo({ top: 0 }); }}>
+              <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true">
                 <path fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" d="M15 6l-6 6 6 6" />
               </svg>
-              <span className="side-label">Full Menu</span>
+              Full Menu Catalog
             </button>
+
+            <p className="menu-side-label">Categories</p>
             <button
-              className={`side-row side-fav${favOnly ? ' is-active' : ''}`}
+              className={`cat-row cat-fav${favOnly ? ' is-active' : ''}`}
               onClick={() => withFlip(() => setFavOnlySynced(!favOnly))}
             >
-              <span className="side-thumb side-fav-ic">
-                <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-                  <path d="M12 21s-7.1-4.4-9.5-8.2C.7 9.9 1.6 6.4 4.7 5.3c2-.7 4 .1 5.8 2 .5.6 1 .6 1.5 0 1.8-1.9 3.8-2.7 5.8-2 3.1 1.1 4 4.6 2.2 7.5C17.1 16.6 12 21 12 21z" fill="currentColor" />
-                </svg>
-              </span>
-              <span className="side-label">My Favorites{favorites.length > 0 ? ` (${favorites.length})` : ''}</span>
+              <span className="cat-emoji" aria-hidden="true">❤️</span>
+              <span className="cat-name">My Favorites</span>
+              <span className="cat-count">{favorites.length}</span>
             </button>
-            {categories.map((c) => (
-              <button
-                key={c.slug}
-                className={`side-row${activeSection === c.slug ? ' is-active' : ''}`}
-                onClick={() => scrollToSection(c.slug)}
-              >
-                <span className="side-thumb">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={c.cover} alt="" loading="lazy" />
-                </span>
-                <span className="side-label">{c.name}</span>
-              </button>
-            ))}
+            {categories.map((c) => {
+              const on = !favOnly && !searching && activeCat === c.slug;
+              return (
+                <button key={c.slug} className={`cat-row${on ? ' is-active' : ''}`} onClick={() => selectCategory(c.slug)}>
+                  <span className="cat-emoji" aria-hidden="true">{CAT_EMOJI[c.slug] ?? '🍽️'}</span>
+                  <span className="cat-name">{c.name}</span>
+                  <span className="cat-count">{c.products.length}</span>
+                </button>
+              );
+            })}
+
             <div className="side-filters">
-              <h3>Filters</h3>
+              <div className="side-filters-head">
+                <h3>
+                  <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M3 5h18v2l-7 7v5l-4 2v-7L3 7z" /></svg>
+                  Filters
+                </h3>
+                {activeCount > 0 && <button className="side-clearall" onClick={clearAll}>Clear All</button>}
+              </div>
               {filterGroups}
             </div>
           </aside>
 
           <div className="menu-content">
-            {searchBar}
-            {filtering && (
-              <p className="menu-result-count" role="status">
-                {resultCount === 0 ? 'No items match your search.' : `${resultCount} item${resultCount === 1 ? '' : 's'} found`}
-              </p>
-            )}
+            {/* search card: search + sort + popular quick-picks */}
+            <div className="menu-searchcard">
+              {searchBar}
+              <div className="menu-popular">
+                <span className="menu-popular-label">Popular:</span>
+                {POPULAR_TAGS.map((t) => (
+                  <button key={t} className="menu-poptag" onClick={() => { setView('browse'); withFlip(() => setQuery(t)); }}>{t}</button>
+                ))}
+              </div>
+              <p className="menu-sample-hint">Popular picks &amp; quick tabs are sample placeholders until live bestseller data connects.</p>
+            </div>
 
-            {resultCount === 0 && filtering ? (
+            {/* collection header card */}
+            <div className="menu-headcard">
+              <p className="menu-eyebrow"><span className="menu-eyebrow-dot" aria-hidden="true" />{shown.eyebrow}</p>
+              <div className="menu-headrow">
+                <h1 className="menu-headtitle">{shown.title}</h1>
+                <span className="menu-headcount">
+                  Showing {resultCount} of {shown.total} items{filtering ? ' • Filtered Active' : ''}
+                </span>
+              </div>
+              {shown.blurb && <p className="menu-headdesc">{shown.blurb}</p>}
+              {shown.catMode && (
+                <div className="menu-subtabs">
+                  {SUB_TABS.map((t) => (
+                    <button key={t} className={`menu-subtab${subTab === t ? ' is-on' : ''}`} onClick={() => withFlip(() => setSubTab(t))}>{t}</button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {resultCount === 0 ? (
               <div className="menu-empty">
                 <svg viewBox="0 0 24 24" width="44" height="44" aria-hidden="true">
                   <path fill="none" stroke="#e09344" strokeWidth="1.6" d="M15.5 14h-.8l-.3-.3a6.5 6.5 0 1 0-.7.7l.3.3v.8l5 5 1.5-1.5zm-6 0a4.5 4.5 0 1 1 0-9 4.5 4.5 0 0 1 0 9z" />
@@ -448,39 +598,37 @@ export default function MenuBrowser({ categories }: Props) {
                 <button className="btn btn-solid" onClick={clearAll}>Show Full Menu</button>
               </div>
             ) : (
-              visible.map((cat) => (
-                <section key={cat.slug} id={`sec-${cat.slug}`} className="menu-section">
-                  <h2 className="menu-section-title">{cat.name}</h2>
-                  <div className="pcard-grid">
-                    {cat.products.map((p) => (
-                      <article
-                        key={p.slug}
-                        className="pcard"
-                        style={flipBudget.has(p.slug) ? { viewTransitionName: `p-${cat.slug}-${p.slug}` } : undefined}
-                        onClick={() => { recordView(p.slug); setSelected({ cat: cat.slug, slug: p.slug }); }}
-                      >
-                        <FavButton slug={p.slug} className="pcard-fav" />
-                        <div className="pcard-info">
-                          <h3>{p.name}</h3>
-                          <p>{p.description ?? cat.blurb}</p>
-                          {p.price !== undefined && <span className="product-price">EGP {p.price}</span>}
-                          <button
-                            className="btn btn-outline pcard-add"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              add({ slug: p.slug, name: p.name, image: p.image, price: p.price }, 'menu-page');
-                            }}
-                          >
-                            Add to Bag
-                          </button>
-                        </div>
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img className="pcard-img" src={p.image} alt={p.name} loading="lazy" />
-                      </article>
-                    ))}
-                  </div>
-                </section>
-              ))
+              <div className="pcard-grid">
+                {shown.products.map((p) => {
+                  const catSlug = productCat.get(p.slug) ?? activeCat;
+                  return (
+                    <article
+                      key={p.slug}
+                      className="pcard"
+                      style={flipBudget.has(p.slug) ? { viewTransitionName: `p-${catSlug}-${p.slug}` } : undefined}
+                      onClick={() => { recordView(p.slug); setSelected({ cat: catSlug, slug: p.slug }); }}
+                    >
+                      <FavButton slug={p.slug} className="pcard-fav" />
+                      <div className="pcard-info">
+                        <h3>{p.name}</h3>
+                        <p>{p.description ?? shown.blurb}</p>
+                        {p.price !== undefined && <span className="product-price">EGP {p.price}</span>}
+                        <button
+                          className="btn btn-solid pcard-add"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            add({ slug: p.slug, name: p.name, image: p.image, price: p.price }, 'menu-page');
+                          }}
+                        >
+                          Add to Bag
+                        </button>
+                      </div>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img className="pcard-img" src={p.image} alt={p.name} loading="lazy" />
+                    </article>
+                  );
+                })}
+              </div>
             )}
           </div>
         </motion.div>

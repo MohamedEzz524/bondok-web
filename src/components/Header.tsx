@@ -50,31 +50,13 @@ export default function Header() {
         </div>
 
         <div className="header-right">
-          <div className={`header-search${searchOpen ? ' is-open' : ''}`}>
-            <input
-              ref={searchRef}
-              type="search"
-              placeholder="Search the menu..."
-              aria-label="Search the menu"
-              value={searchValue}
-              onChange={(e) => setSearchValue(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') submitSearch();
-                if (e.key === 'Escape') { setSearchOpen(false); setSearchValue(''); }
-              }}
-            />
-            <button
-              className="icon-btn header-search-btn"
-              aria-label={searchOpen ? 'Submit search' : 'Search the menu'}
-              onClick={() => {
-                if (searchOpen) submitSearch();
-                else { setSearchOpen(true); setTimeout(() => searchRef.current?.focus(), 60); }
-              }}
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/icons/Icon-search.svg" alt="" width="20" height="20" />
-            </button>
-          </div>
+          <button
+            className="icon-btn header-search-trigger"
+            aria-label="Search the menu"
+            onClick={() => { setSearchOpen(true); setTimeout(() => searchRef.current?.focus(), 60); }}
+          >
+            <span className="header-search-ic" aria-hidden="true" style={{ WebkitMaskImage: 'url(/icons/Icon-search.svg)', maskImage: 'url(/icons/Icon-search.svg)' }} />
+          </button>
           <Link href="/rewards" className="rewards-link" aria-label="Bondok Rewards">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/bondok/rewards.webp" alt="Rewards" className="rewards-img" />
@@ -89,6 +71,35 @@ export default function Header() {
           </Link>
         </div>
       </div>
+
+      {searchOpen && (
+        <div className="hsearch-overlay" onClick={(e) => { if (e.target === e.currentTarget) { setSearchOpen(false); setSearchValue(''); } }}>
+          <div className="hsearch-panel">
+            <div className="hsearch-bar">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img className="hsearch-ic" src="/icons/Icon-search.svg" alt="" width="22" height="22" />
+              <input
+                ref={searchRef}
+                type="search"
+                className="hsearch-input"
+                placeholder="Search burgers, chicken, crispy meals, sides…"
+                aria-label="Search the menu"
+                value={searchValue}
+                onChange={(e) => setSearchValue(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') submitSearch();
+                  if (e.key === 'Escape') { setSearchOpen(false); setSearchValue(''); }
+                }}
+              />
+              <button className="hsearch-go" onClick={submitSearch}>Search</button>
+              <button className="hsearch-close" aria-label="Close search" onClick={() => { setSearchOpen(false); setSearchValue(''); }}>
+                <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" d="M6 6l12 12M18 6L6 18" /></svg>
+              </button>
+            </div>
+            <p className="hsearch-hint">Press Enter to see results · Esc to close</p>
+          </div>
+        </div>
+      )}
     </header>
   );
 }

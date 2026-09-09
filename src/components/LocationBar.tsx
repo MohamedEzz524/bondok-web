@@ -12,8 +12,9 @@ export default function LocationBar({ fullBleed = false }: { fullBleed?: boolean
       <div className="offers-locbar-inner">
         <button className="loc-bar-btn" onClick={() => openOrder('pickup')}>
           <p className="offers-loc-title">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/icons/Icon-location.svg" alt="" width="15" height="18" />
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
+              <path d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z" />
+            </svg>
             Choose a Location
           </p>
           <p className="offers-loc-sub">For availability and prices</p>

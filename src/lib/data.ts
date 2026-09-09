@@ -11,6 +11,8 @@ export interface HeroSlide {
   href: string;
   /* final marketing art with copy baked in - render image-only, no overlay */
   full?: boolean;
+  /* product cutout used by the menu promo cards (full banners crop badly there) */
+  card?: string;
 }
 
 export interface FavoriteItem {
@@ -38,6 +40,7 @@ export const heroSlides: HeroSlide[] = [
     cta: 'Order Now',
     image: '/bondok/home/banner-bucket.webp',
     full: true,
+    card: '/bondok/hero-12pcs.webp',
     alt: '12 Pcs Meal',
     href: '/menu/meals/12-pcs-meal',
   },
@@ -47,6 +50,7 @@ export const heroSlides: HeroSlide[] = [
     cta: 'Order Now',
     image: '/bondok/home/banner-shrimp-roll.webp',
     full: true,
+    card: '/bondok/hero-shrimp-roll.webp',
     alt: 'Shrimp Roll',
     href: '/menu/rolls/shrimp-roll',
   },
@@ -56,6 +60,7 @@ export const heroSlides: HeroSlide[] = [
     cta: 'Order Now',
     image: '/bondok/home/banner-tenders-feast.webp',
     full: true,
+    card: '/bondok/hero-tenders.webp',
     alt: '12 Pcs Tenders',
     href: '/menu/kids-tenders/12-pcs-tenders',
   },

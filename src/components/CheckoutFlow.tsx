@@ -100,7 +100,7 @@ export default function CheckoutFlow() {
   };
 
   const maskedPhone = ship.phone
-    ? `+20 ${ship.phone.slice(1, 3)}${ship.phone.slice(3, 4)} *** **${ship.phone.slice(-2)}`
+    ? `+2 ${ship.phone.slice(0, 4)} *** **${ship.phone.slice(-2)}`
     : 'your phone';
 
   const branchName = branches.find((b) => b.id === ship.branch)?.name;
@@ -180,10 +180,10 @@ export default function CheckoutFlow() {
                   <div className="ct-field">
                     <label className="ct-label" htmlFor="co-phone">Phone Number <span className="ct-req">*</span></label>
                     <div className="co-phone">
-                      <span>🇪🇬 +20</span>
+                      <span>🇪🇬 +2</span>
                       <input
                         id="co-phone" type="tel" inputMode="numeric" maxLength={11}
-                        placeholder="10 1234 5678" value={ship.phone}
+                        placeholder="010 1234 5678" value={ship.phone}
                         onChange={(e) => setShip({ ...ship, phone: e.target.value.replace(/\D/g, '') })}
                       />
                     </div>
@@ -296,38 +296,48 @@ export default function CheckoutFlow() {
                     </span>
                   </button>
                   <p className="co-payopt-desc">Fast, encrypted and secure checkout with 3D Secure verification</p>
-                  {pay === 'card' && (
-                    <div className="co-cardform ct-anim">
-                      <div className="ct-field">
-                        <label className="ct-label" htmlFor="co-cardno">Card Number</label>
-                        <input id="co-cardno" className="ct-input" inputMode="numeric" placeholder="4242 •••• •••• 4242" disabled title="Card processing activates with the payment gateway" />
-                      </div>
-                      <div className="ct-row">
+                  <AnimatePresence initial={false}>
+                    {pay === 'card' && (
+                      <motion.div
+                        key="cardform"
+                        className="co-cardform"
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.26, ease: 'easeInOut' }}
+                        style={{ overflow: 'hidden' }}
+                      >
                         <div className="ct-field">
-                          <label className="ct-label" htmlFor="co-exp">Expiry Date</label>
-                          <input id="co-exp" className="ct-input" placeholder="MM/YY" disabled />
+                          <label className="ct-label" htmlFor="co-cardno">Card Number</label>
+                          <input id="co-cardno" className="ct-input" inputMode="numeric" placeholder="4242 •••• •••• 4242" disabled title="Card processing activates with the payment gateway" />
+                        </div>
+                        <div className="ct-row">
+                          <div className="ct-field">
+                            <label className="ct-label" htmlFor="co-exp">Expiry Date</label>
+                            <input id="co-exp" className="ct-input" placeholder="MM/YY" disabled />
+                          </div>
+                          <div className="ct-field">
+                            <label className="ct-label" htmlFor="co-cvv">Security Code (CVV) <span className="ct-hint">3 Digits</span></label>
+                            <input id="co-cvv" className="ct-input" placeholder="•••" disabled />
+                          </div>
                         </div>
                         <div className="ct-field">
-                          <label className="ct-label" htmlFor="co-cvv">Security Code (CVV) <span className="ct-hint">3 Digits</span></label>
-                          <input id="co-cvv" className="ct-input" placeholder="•••" disabled />
+                          <label className="ct-label" htmlFor="co-holder">Cardholder Full Name</label>
+                          <input id="co-holder" className="ct-input" placeholder="Name on card" disabled />
                         </div>
-                      </div>
-                      <div className="ct-field">
-                        <label className="ct-label" htmlFor="co-holder">Cardholder Full Name</label>
-                        <input id="co-holder" className="ct-input" placeholder="Name on card" disabled />
-                      </div>
-                      <label className="ct-consent co-save">
-                        <input type="checkbox" checked={saveCard} onChange={(e) => setSaveCard(e.target.checked)} />
-                        <span>Save this card for 1-click checkout next time</span>
-                      </label>
-                      <p className="co-demo">Card fields activate with the payment gateway - demo orders use Cash on Delivery.</p>
-                      <div className="co-badgerow">
-                        <span>✔ 256-Bit Bank-Grade SSL</span>
-                        <span>🛡 Verified by VISA</span>
-                        <span>🔒 Mastercard ID Check</span>
-                      </div>
-                    </div>
-                  )}
+                        <label className="ct-consent co-save">
+                          <input type="checkbox" checked={saveCard} onChange={(e) => setSaveCard(e.target.checked)} />
+                          <span>Save this card for 1-click checkout next time</span>
+                        </label>
+                        <p className="co-demo">Card fields activate with the payment gateway - demo orders use Cash on Delivery.</p>
+                        <div className="co-badgerow">
+                          <span>✔ 256-Bit Bank-Grade SSL</span>
+                          <span>🛡 Verified by VISA</span>
+                          <span>🔒 Mastercard ID Check</span>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
 
                 <button className={`co-payopt co-payopt-btn${pay === 'cod' ? ' is-on' : ''}`} onClick={() => setPay('cod')}>
@@ -364,7 +374,7 @@ export default function CheckoutFlow() {
                     <span className="co-chip">{count} items</span>
                   </div>
                   <div className="co-paymethod-tag">
-                    <span className="co-paymethod-ic" aria-hidden="true"><img src="/icons/icon-wallet1.svg" alt="" width="20" /></span>
+                    <span className="co-paymethod-ic" aria-hidden="true" style={{ WebkitMaskImage: 'url(/icons/icon-wallet.svg)', maskImage: 'url(/icons/icon-wallet.svg)' }} />
                     <div>
                       <p><strong>{pay === 'card' ? 'Credit / Debit Card' : pay === 'cod' ? 'Cash on Delivery' : 'Digital Wallet'}</strong></p>
                       <p className="co-recap-desc">{pay === 'cod' ? 'Pay at your door' : 'Activates with payment gateway'}</p>

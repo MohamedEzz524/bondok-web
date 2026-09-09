@@ -215,7 +215,7 @@ export default function BranchesView() {
               <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="var(--orange)" strokeWidth="1.8"><circle cx="12" cy="12" r="9" /><path strokeLinejoin="round" d="m15 9-2 5-4 1 2-5 4-1z" /></svg>
             </button>
             <button className="br-map-btn br-map-btn-round">
-              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#333" strokeWidth="1.8"><path strokeLinejoin="round" d="m12 3 9 5-9 5-9-5 9-5zM3 13l9 5 9-5" /></svg>
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="var(--orange)" strokeWidth="1.8"><path strokeLinejoin="round" d="m12 3 9 5-9 5-9-5 9-5zM3 13l9 5 9-5" /></svg>
             </button>
           </div>
           <p className="br-map-pending">Live map connects once branch locations arrive</p>
