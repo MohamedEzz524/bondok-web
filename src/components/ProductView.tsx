@@ -111,7 +111,9 @@ export default function ProductView({ category, product, variants }: Props) {
   /* record view for "recently viewed" */
   useMemo(() => { recordView(product.slug); }, [product.slug, recordView]);
 
-  const numbered = config.groups.filter((g) => g.choices.length > 0);
+  /* when the product has variant sizes (Single/Double/Triple), drop the
+     duplicate customize "size" group so size isn't asked twice */
+  const numbered = config.groups.filter((g) => g.choices.length > 0 && !(variants && g.key === 'size'));
 
   return (
     <div className="pd-page">
@@ -201,7 +203,7 @@ export default function ProductView({ category, product, variants }: Props) {
             </p>
             <div className="pd-pricerow">
               <p className="pd-price">
-                {product.price != null ? <strong>EGP {product.price}</strong> : <strong className="pd-price-pending">Price with menu data</strong>}
+                {unitPrice != null ? <strong>EGP {unitPrice}</strong> : <strong className="pd-price-pending">Price with menu data</strong>}
                 <span>All taxes included</span>
               </p>
               <span className="co-qty">
