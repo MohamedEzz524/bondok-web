@@ -30,12 +30,14 @@ export default function Page() {
         </div>
       </header>
 
-      {/* hero with catering table banner */}
+      {/* hero: accent-orange with floating food (reference Frame 38) */}
       <section className="cat-hero">
         <div className="cat-hero-art" aria-hidden="true">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img className="cat-hero-banner" src="/bondok/catering-hero.webp" alt="" />
-          <span className="cat-hero-scrim" />
+          {/* eslint-disable @next/next/no-img-element */}
+          <img className="cat-float cf-h0" src="/bondok/catering/f0.webp" alt="" />
+          <img className="cat-float cf-h1" src="/bondok/catering/f5.webp" alt="" />
+          <img className="cat-float cf-h2" src="/bondok/catering/f2.webp" alt="" />
+          {/* eslint-enable @next/next/no-img-element */}
         </div>
         <div className="cat-hero-inner">
           <div className="cat-hero-copy">

@@ -350,10 +350,9 @@ main.page { flex: 1 0 auto; }
 }
 .favorites-nav button:hover { color: var(--orange); }
 /* 4-visible auto-rotating strip */
-.favorites-vp { overflow: hidden; }
-.favorites-track { display: flex; will-change: transform; }
+.favorites-grid { display: flex; gap: 16px; }
 .fav-card {
-  flex: 0 0 calc(25% - 12px); margin-right: 16px;
+  flex: 1 1 0; min-width: 0;
   background: var(--white); border-radius: 12px; box-shadow: var(--shadow-card);
   overflow: hidden; display: flex; flex-direction: column;
 }
@@ -2472,7 +2471,8 @@ main.page { flex: 1 0 auto; }
 
 /* combo toggle */
 .pd-combo { display: flex; align-items: center; gap: 14px; padding: 18px 20px; }
-.pd-combo-ic { flex: 0 0 auto; width: 42px; height: 42px; border-radius: 12px; background: #fdeee0; display: inline-flex; align-items: center; justify-content: center; overflow: hidden; }
+.pd-combo-ic { flex: 0 0 auto; width: 42px; height: 42px; display: inline-flex; overflow: hidden; }
+.pd-combo-ic img { width: 100%; height: 100%; object-fit: cover; }
 .pd-combo-body { flex: 1; }
 .pd-combo-title { display: flex; align-items: center; gap: 9px; font-size: 15px; font-weight: 800; text-transform: uppercase; color: var(--text); }
 .pd-combo-sub { font-size: var(--fs-small); color: var(--text-muted); margin-top: 3px; }
@@ -2819,29 +2819,25 @@ main.page { flex: 1 0 auto; }
 .cat-hero-btn:hover { background: #fff5e1; }
 .cat-hero-fine { font-size: 14px; line-height: 18px; margin-top: 8px; max-width: 320px; }
 .cat-hero-art { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
-.cat-hero-banner { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; }
-.cat-hero-scrim {
-  position: absolute; inset: 0;
-  background:
-    linear-gradient(90deg, rgba(20,10,0,.72) 0%, rgba(20,10,0,.5) 38%, rgba(20,10,0,.12) 70%, rgba(20,10,0,0) 100%),
-    linear-gradient(180deg, rgba(20,10,0,.35) 0%, rgba(20,10,0,0) 40%);
-}
 
 /* floating food decorations peeking from section edges (reference: Frame 38) */
 .cat-benefits, .cat-events { position: relative; overflow: hidden; }
 .cat-benefits-inner, .cat-events-inner { position: relative; z-index: 1; }
-.cat-float { position: absolute; z-index: 0; width: 130px; height: auto; pointer-events: none; user-select: none; -webkit-user-drag: none; animation: cat-bob 5s ease-in-out infinite; }
-@keyframes cat-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-@media (prefers-reduced-motion: reduce) { .cat-float { animation: none; } }
-/* benefits (cream band) */
-.cf-b1 { top: 34px;  left: -28px;  width: 122px; animation-delay: 0s; }
-.cf-b2 { top: 26px;  right: -18px; width: 104px; animation-delay: .9s; }
-.cf-b3 { bottom: -22px; left: 34px; width: 150px; animation-delay: 1.6s; }
-.cf-b4 { bottom: 8px; right: -26px; width: 120px; animation-delay: .4s; }
-/* events band */
-.cf-e1 { top: 54px;  left: -24px;  width: 120px; animation-delay: .6s; }
-.cf-e2 { top: 40px;  right: -20px; width: 130px; animation-delay: 1.2s; }
-.cf-e3 { bottom: -16px; left: 28px; width: 128px; animation-delay: 0s; }
+.cat-float { position: absolute; z-index: 0; width: 130px; height: auto; pointer-events: none; user-select: none; -webkit-user-drag: none; }
+/* edge images sit flush at left:0 / right:0 (no animation) */
+/* benefits (cream band): fries left, sauce right, mac bottom-left, fries bottom-right */
+.cf-b1 { top: 30px;  left: 0;   width: 120px; }
+.cf-b2 { top: 24px;  right: 0;  width: 104px; }
+.cf-b3 { bottom: 0;  left: 24px; width: 150px; }
+.cf-b4 { bottom: 8px; right: 0; width: 120px; }
+/* events band: tenders left, sauce right, burger bottom-left */
+.cf-e1 { top: 48px;  left: 0;   width: 120px; }
+.cf-e2 { top: 36px;  right: 0;  width: 130px; }
+.cf-e3 { bottom: 0;  left: 20px; width: 128px; }
+/* hero band (accent orange) - keep the left-middle clear for the copy */
+.cf-h0 { top: 20px;   right: 0;  width: 420px; }
+.cf-h1 { bottom: 40px; right: 30px; width: 190px; }
+.cf-h2 { bottom: 30px; left: 0;  width: 150px; }
 
 .cat-benefits { background: #fff5e1; padding: 90px 0; text-align: center; }
 .cat-benefits-inner, .cat-events-inner, .cat-faq-inner { max-width: 1184px; margin: 0 auto; padding: 0 16px; }
