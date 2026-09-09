@@ -33,11 +33,8 @@ export default function Page() {
       {/* hero: accent-orange with floating food (reference Frame 38) */}
       <section className="cat-hero">
         <div className="cat-hero-art" aria-hidden="true">
-          {/* eslint-disable @next/next/no-img-element */}
-          <img className="cat-float cf-h0" src="/bondok/catering/f0.webp" alt="" />
-          <img className="cat-float cf-h1" src="/bondok/catering/f5.webp" alt="" />
-          <img className="cat-float cf-h2" src="/bondok/catering/f2.webp" alt="" />
-          {/* eslint-enable @next/next/no-img-element */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img className="cat-float cf-f0" src="/bondok/catering/f0.webp" alt="" />
         </div>
         <div className="cat-hero-inner">
           <div className="cat-hero-copy">
@@ -52,10 +49,9 @@ export default function Page() {
       {/* benefits */}
       <section id="benefits" className="cat-benefits">
         {/* eslint-disable @next/next/no-img-element */}
-        <img className="cat-float cf-b1" src="/bondok/catering/f2.webp" alt="" aria-hidden="true" />
-        <img className="cat-float cf-b2" src="/bondok/catering/f8.webp" alt="" aria-hidden="true" />
-        <img className="cat-float cf-b3" src="/bondok/catering/f4.webp" alt="" aria-hidden="true" />
-        <img className="cat-float cf-b4" src="/bondok/catering/f7.webp" alt="" aria-hidden="true" />
+        <img className="cat-float cf-f5" src="/bondok/catering/f5.webp" alt="" aria-hidden="true" />
+        <img className="cat-float cf-f2" src="/bondok/catering/f2.webp" alt="" aria-hidden="true" />
+        <img className="cat-float cf-f3" src="/bondok/catering/f3.webp" alt="" aria-hidden="true" />
         {/* eslint-enable @next/next/no-img-element */}
         <div className="cat-benefits-inner">
           <h2>Feeding a Crowd? We Got You.</h2>
@@ -97,9 +93,9 @@ export default function Page() {
       {/* event types */}
       <section id="events" className="cat-events">
         {/* eslint-disable @next/next/no-img-element */}
-        <img className="cat-float cf-e1" src="/bondok/catering/f6.webp" alt="" aria-hidden="true" />
-        <img className="cat-float cf-e2" src="/bondok/catering/f3.webp" alt="" aria-hidden="true" />
-        <img className="cat-float cf-e3" src="/bondok/catering/f1.webp" alt="" aria-hidden="true" />
+        <img className="cat-float cf-f1" src="/bondok/catering/f1.webp" alt="" aria-hidden="true" />
+        <img className="cat-float cf-f8" src="/bondok/catering/f8.webp" alt="" aria-hidden="true" />
+        <img className="cat-float cf-f6" src="/bondok/catering/f6.webp" alt="" aria-hidden="true" />
         {/* eslint-enable @next/next/no-img-element */}
         <div className="cat-events-inner">
           <h2>Ready for Any Celebration</h2>
@@ -132,6 +128,10 @@ export default function Page() {
 
       {/* FAQ */}
       <section id="catering-faq" className="cat-faq">
+        {/* eslint-disable @next/next/no-img-element */}
+        <img className="cat-float cf-f4" src="/bondok/catering/f4.webp" alt="" aria-hidden="true" />
+        <img className="cat-float cf-f7" src="/bondok/catering/f7.webp" alt="" aria-hidden="true" />
+        {/* eslint-enable @next/next/no-img-element */}
         <div className="cat-faq-inner">
           <h2>FAQs</h2>
           <CateringFaq />

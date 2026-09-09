@@ -2808,7 +2808,7 @@ main.page { flex: 1 0 auto; }
 .cat-header-cta { font-size: 20px; line-height: 28px; padding: 10px 20px; }
 
 .cat-hero {
-  position: relative; overflow: hidden;
+  position: relative; overflow: visible;
   background: var(--orange); min-height: 700px;
   display: flex; align-items: flex-start;
 }
@@ -2821,24 +2821,25 @@ main.page { flex: 1 0 auto; }
 .cat-hero-fine { font-size: 14px; line-height: 18px; margin-top: 8px; max-width: 320px; }
 .cat-hero-art { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
 
-/* floating food decorations peeking from section edges (reference: Frame 38) */
-.cat-benefits, .cat-events { position: relative; overflow: hidden; }
-.cat-benefits-inner, .cat-events-inner { position: relative; z-index: 1; }
-.cat-float { position: absolute; z-index: 0; width: 130px; height: auto; pointer-events: none; user-select: none; -webkit-user-drag: none; }
-/* edge images sit flush at left:0 / right:0 (no animation) */
-/* benefits (cream band): fries left, sauce right, mac bottom-left, fries bottom-right */
-.cf-b1 { top: 30px;  left: 0;   width: 120px; }
-.cf-b2 { top: 24px;  right: 0;  width: 104px; }
-.cf-b3 { bottom: 0;  left: 24px; width: 150px; }
-.cf-b4 { bottom: 8px; right: 0; width: 120px; }
-/* events band: tenders left, sauce right, burger bottom-left */
-.cf-e1 { top: 48px;  left: 0;   width: 120px; }
-.cf-e2 { top: 36px;  right: 0;  width: 130px; }
-.cf-e3 { bottom: 0;  left: 20px; width: 128px; }
-/* hero band (accent orange) - keep the left-middle clear for the copy */
-.cf-h0 { top: 20px;   right: 0;  width: 420px; }
-.cf-h1 { bottom: 40px; right: 30px; width: 190px; }
-.cf-h2 { bottom: 30px; left: 0;  width: 150px; }
+/* floating food - whole-page map (reference image); sections overflow visible
+   so items can spill across section boundaries */
+.cat-benefits, .cat-events, .cat-faq { position: relative; overflow: visible; }
+.cat-benefits-inner, .cat-events-inner, .cat-faq-inner { position: relative; z-index: 2; }
+.cat-float { position: absolute; z-index: 1; height: auto; pointer-events: none; user-select: none; -webkit-user-drag: none; }
+/* every edge image sits flush: LEFT (left:0) = f1 f2 f4 f5 f8 ; RIGHT (right:0) = f0 f3 f6 f7 */
+/* hero: big cluster overflowing the bottom of the hero */
+.cf-f0 { bottom: -70px; right: 0; width: 520px; }
+/* benefits: tenders tray (spills above) + fries left, sauce right */
+.cf-f5 { top: -100px;  left: 0;  width: 170px; }  /* tenders tray */
+.cf-f2 { bottom: 20px; left: 0; width: 120px; }   /* fries */
+.cf-f3 { top: 40px;   right: 0; width: 100px; }   /* sauce */
+/* events: burger + sauce left, tenders+ketchup right */
+.cf-f1 { top: -100px; left: 0;  width: 150px; }   /* burger (spills above) */
+.cf-f8 { bottom: 20px; left: 0; width: 100px; }   /* sauce */
+.cf-f6 { top: 40px;   right: 0; width: 150px; }   /* tenders + ketchup */
+/* faq: mac left, fries box right (page bottom) */
+.cf-f4 { bottom: 0;   left: 0;  width: 160px; }   /* mac */
+.cf-f7 { bottom: 0;   right: 0; width: 130px; }   /* fries box */
 
 .cat-benefits { background: #fff5e1; padding: 90px 0; text-align: center; }
 .cat-benefits-inner, .cat-events-inner, .cat-faq-inner { max-width: 1184px; margin: 0 auto; padding: 0 16px; }
@@ -3186,17 +3187,16 @@ main.page { flex: 1 0 auto; }
   .offers-signup-text { flex: 1 1 150px; }
   .offers-signup-btn { order: 3; flex: 1 1 100%; height: 44px; }
 
-  /* catering floaters: small + tucked into corners so they don't cover text */
-  .cat-float { width: 70px; }
-  .cf-h0 { width: 132px; top: 4px; right: -16px; }
-  .cf-h1, .cf-h2 { display: none; }
-  .cf-b1 { width: 66px; top: 6px; }
-  .cf-b2 { width: 60px; top: 6px; }
-  .cf-b3 { width: 82px; bottom: 4px; }
-  .cf-b4 { width: 66px; bottom: 4px; }
-  .cf-e1 { width: 74px; top: 6px; }
-  .cf-e2 { width: 74px; top: 6px; }
-  .cf-e3 { width: 84px; bottom: 4px; }
+  /* catering floaters: smaller on mobile so they don't cover text */
+  .cf-f0 { width: 150px; }
+  .cf-f5 { width: 100px; }
+  .cf-f2 { width: 66px; }
+  .cf-f3 { width: 56px; }
+  .cf-f1 { width: 96px; }
+  .cf-f8 { width: 56px; }
+  .cf-f6 { width: 92px; }
+  .cf-f4 { width: 104px; }
+  .cf-f7 { width: 84px; }
   .cat-header-nav a:not(.btn) { display: none; }
   .cat-header-cta { font-size: 16px; line-height: 24px; }
   .cat-header .logo-img { height: 44px; }
