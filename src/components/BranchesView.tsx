@@ -142,7 +142,14 @@ export default function BranchesView() {
             const isSel = selected && b.id === selected.id;
             if (isSel) {
               return (
-                <motion.article layout transition={layoutSpring} key={b.id} className="br-card br-card-selected">
+                <motion.article
+                  layout
+                  key={b.id}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ ...layoutSpring, duration: 0.26, ease: 'easeOut' }}
+                  className="br-card br-card-selected"
+                >
                   <div className="br-sel-top">
                     <span className="br-sel-pill"><span className="br-sel-dot" aria-hidden="true" />Selected kitchen</span>
                   </div>

@@ -7,6 +7,7 @@
 
 import { useState } from 'react';
 import { motion, useReducedMotion } from 'motion/react';
+import { useUI } from './ui-context';
 
 const fadeUp = {
   initial: { opacity: 0, y: 26 },
@@ -98,6 +99,7 @@ const FAQ_CATS: Record<string, { q: string; a: string }[]> = {
 
 export default function RewardsView() {
   const reduced = useReducedMotion();
+  const { openAuth } = useUI();
   const [faqCat, setFaqCat] = useState('All Questions');
   const [openQ, setOpenQ] = useState<number | null>(0);
   const [menuFilter, setMenuFilter] = useState('All Entrees');
@@ -131,7 +133,7 @@ export default function RewardsView() {
         <motion.div className="rw-hero-media" {...fadeUp} transition={{ duration: 0.45, ease: 'easeOut' }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/bondok/rewards-banner.webp" alt="Bondok Rewards - earn points with every EGP you spend and unlock free food" />
-          <button type="button" className="rw-signup-hit" aria-label="Sign up for Bondok Rewards" />
+          <button type="button" className="rw-signup-hit" aria-label="Sign up for Bondok Rewards" onClick={openAuth} />
         </motion.div>
       </section>
 

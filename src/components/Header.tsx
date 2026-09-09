@@ -7,7 +7,7 @@ import { useUI } from './ui-context';
 import { useCart } from './cart-context';
 
 export default function Header() {
-  const { openDrawer } = useUI();
+  const { openDrawer, openAuth } = useUI();
   const { count } = useCart();
   const router = useRouter();
   const pathname = usePathname();
@@ -61,7 +61,7 @@ export default function Header() {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/bondok/rewards.webp" alt="Rewards" className="rewards-img" />
           </Link>
-          <button className="btn btn-outline btn-signup">Sign Up</button>
+          <button className="btn btn-outline btn-signup" onClick={openAuth}>Sign Up</button>
           <Link href="/bag" className="btn btn-solid btn-bag" aria-label="View shopping bag">
             <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
               <path fill="currentColor" d="M7 7V6a5 5 0 0 1 10 0v1h3v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7h3zm2 0h6V6a3 3 0 0 0-6 0v1z" />
@@ -96,7 +96,7 @@ export default function Header() {
                 <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" d="M6 6l12 12M18 6L6 18" /></svg>
               </button>
             </div>
-            <p className="hsearch-hint">Press Enter to see results · Esc to close</p>
+            <p className="hsearch-hint">Press Enter to see results</p>
           </div>
         </div>
       )}

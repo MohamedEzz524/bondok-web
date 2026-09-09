@@ -144,8 +144,8 @@ main.page { flex: 1 0 auto; }
   box-shadow: 0 1px 0 rgba(26,26,26,.06);
 }
 .header-inner { width: 100%; display: flex; align-items: center; justify-content: space-between; padding-inline: 12px; }
-.header-left  { display: flex; align-items: center; gap: 20px; padding-left: 12px; flex: 1; }
-.header-right { display: flex; align-items: center; gap: 12px; padding-right: 12px; flex: 1; justify-content: flex-end; }
+.header-left  { display: flex; align-items: center; gap: 20px; flex: 1; }
+.header-right { display: flex; align-items: center; gap: 12px; flex: 1; justify-content: flex-end; }
 .header-center{ margin: 0 16px; display: flex; justify-content: center; }
 
 .main-nav { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
@@ -193,6 +193,44 @@ main.page { flex: 1 0 auto; }
 .hsearch-close svg { display: block; }
 .hsearch-close:hover { background: var(--surface-hover); color: var(--text); }
 .hsearch-hint { max-width: 1000px; margin: 10px auto 0; font-size: 12.5px; color: var(--text-muted); }
+
+/* ============ AUTH POPUP (Sign Up / Log In) ============ */
+.auth-overlay {
+  position: fixed; inset: 0; z-index: 420;
+  background: rgba(20, 12, 4, .5);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px; animation: om-fade .18s ease;
+}
+.auth-modal {
+  width: min(440px, 100%); background: #faf6ef; border-radius: 16px;
+  box-shadow: 0 20px 50px rgba(0,0,0,.28); padding: 22px 22px 24px;
+  animation: hsearch-drop .24s ease-out;
+}
+.auth-head { position: relative; display: flex; align-items: center; justify-content: center; margin-bottom: 18px; }
+.auth-head h2 { font-size: 17px; font-weight: 800; color: var(--text); }
+.auth-close { position: absolute; right: -4px; top: -2px; width: 34px; height: 34px; border-radius: 8px; color: var(--orange); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
+.auth-close svg { display: block; }
+.auth-close:hover { background: rgba(0,0,0,.06); }
+.auth-social {
+  width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px;
+  background: #fff; border: 1px solid var(--border-strong); border-radius: 999px;
+  padding: 12px 16px; font-family: var(--font); font-size: 15px; font-weight: 700; color: var(--text);
+  cursor: pointer; margin-bottom: 12px; transition: border-color .15s ease, background-color .15s ease;
+}
+.auth-social:hover { border-color: var(--orange); background: #fff8ef; }
+.auth-or { display: flex; align-items: center; text-align: center; color: var(--text-muted); font-size: 12px; font-weight: 700; margin: 6px 0 14px; }
+.auth-or::before, .auth-or::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.auth-or span { padding: 0 12px; }
+.auth-form { display: flex; flex-direction: column; }
+.auth-form label { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+.auth-form label span { color: var(--orange); margin-left: 2px; }
+.auth-form input {
+  width: 100%; border: 1px solid var(--border-strong); border-radius: 8px; background: #fff;
+  padding: 12px 14px; font-family: var(--font); font-size: 15px; color: var(--text);
+}
+.auth-form input:focus { outline: 2px solid var(--orange); border-color: var(--orange); }
+.auth-submit { width: 100%; margin-top: 16px; padding: 13px; font-size: 15px; }
+.auth-note { margin-top: 12px; font-size: 12.5px; color: var(--text-muted); text-align: center; }
 
 .rewards-link { display: inline-flex; align-items: center; }
 .rewards-img { height: 20px; width: auto; display: block; }
@@ -1177,9 +1215,8 @@ main.page { flex: 1 0 auto; }
 .recent-row::-webkit-scrollbar { display: none; }
 /* dragging the strip must not select text or ghost-drag the card images */
 .recent-card, .recent-card img { -webkit-user-drag: none; user-select: none; -webkit-user-select: none; }
-/* track padding = page gutter, broken out so cards scroll to the content edges
-   (scoped to the menu page so the bag-page strip is unaffected) */
-.menu-page .recent-row { margin-inline: -32px; padding-inline: 32px; }
+/* desktop: align the strip to the content box (no breakout) so cards line up
+   with the grid above; the edge-to-edge breakout is applied on mobile only */
 .recent-card {
   flex: 0 0 150px; scroll-snap-align: start;
   background: var(--white); border-radius: 12px; box-shadow: var(--shadow-card);
@@ -2921,7 +2958,9 @@ main.page { flex: 1 0 auto; }
 /* clip (not hidden) so decorative overflow is cropped WITHOUT creating a
    scroll container that would break the sticky .rewards-subnav */
 .rewards-page { position: relative; overflow: clip; }
-.rewards-subnav { top: var(--header-h); }
+/* header actually renders ~80px tall (--header-h var is 72); +8px sits the
+   sticky bar flush under it with no orange sliver above */
+.rewards-subnav { top: calc(var(--header-h) + 8px); }
 .rwx-head { max-width: 640px; margin: 0 auto 40px; text-align: center; }
 .rwx-head-left { max-width: 720px; margin-inline: 0; text-align: left; }
 .rwx-eyebrow { font-size: 12px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; color: var(--orange); }
@@ -2979,7 +3018,7 @@ main.page { flex: 1 0 auto; }
 .rwx-first-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; margin-top: 8px; }
 .rwx-first-card { background: var(--white); border: 1px solid var(--border); border-radius: 18px; box-shadow: var(--shadow-card); padding: 16px; display: flex; flex-direction: column; }
 .rwx-first-img { position: relative; border-radius: 12px; overflow: hidden; background: var(--surface); aspect-ratio: 16 / 10; }
-.rwx-first-img img { width: 100%; height: 100%; object-fit: cover; }
+.rwx-first-img img { width: 100%; height: 100%; object-fit: contain; padding: 8px; }
 .rwx-free-badge { position: absolute; top: 12px; left: 12px; background: var(--orange); color: #fff; font-size: 11px; font-weight: 800; letter-spacing: .5px; border-radius: 8px; padding: 4px 10px; }
 .rwx-first-card h3 { font-size: 18px; font-weight: 800; color: var(--text); margin-top: 16px; }
 .rwx-first-card p { font-size: 13.5px; line-height: 1.5; color: var(--text-muted); margin-top: 8px; flex: 1; }
@@ -3080,7 +3119,7 @@ main.page { flex: 1 0 auto; }
   .docmodal-overlay { align-items: flex-end; }
   .docmodal-scroll { padding: 18px 16px 24px; }
   .subnav { gap: 16px; flex-wrap: wrap; top: 56px; }
-  .rewards-subnav { gap: 20px; padding: 8px 16px; }
+  .rewards-subnav { gap: 20px; padding: 8px 16px; top: 55px; }
   .offers-headrow { flex-direction: column; align-items: flex-start; gap: 4px; }
   .offers-locbar-inner { gap: 6px; }
   .offers-signup-card { flex-wrap: wrap; }
@@ -3162,10 +3201,12 @@ main.page { flex: 1 0 auto; }
   .header-right .rewards-link,
   .header-right .btn-bag { display: none; }
   .logo-img { height: 44px; }
-  /* full-width search popup: stack the submit button below on mobile */
+  /* full-width search popup: keep [icon | input | X] on row 1 (input shrinks
+     via flex-basis 0 so the X never wraps), Search button full-width on row 2 */
   .hsearch-bar { flex-wrap: wrap; padding: 8px; }
   .hsearch-ic { margin-left: 8px; }
-  .hsearch-input { flex: 1 1 auto; font-size: 16px; padding: 8px 0; }
+  .hsearch-input { flex: 1 1 0; min-width: 0; font-size: 16px; padding: 8px 0; }
+  .hsearch-close { order: 2; }
   .hsearch-go { order: 3; flex: 1 1 100%; }
 
   /* mobile hero: card 332x235 @390vw, 16px gap */

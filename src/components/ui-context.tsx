@@ -9,6 +9,7 @@ interface UIState {
   orderMode: OrderMode | null;      // null = order modal closed
   orderClosing: boolean;
   docKey: string | null;            // FAQ / legal doc popup (reference pattern)
+  authOpen: boolean;                // Sign Up / Log In popup
   openDrawer: () => void;
   closeDrawer: () => void;
   openOrder: (mode: OrderMode) => void;
@@ -16,6 +17,8 @@ interface UIState {
   closeOrder: () => void;
   openDoc: (key: string) => void;
   closeDoc: () => void;
+  openAuth: () => void;
+  closeAuth: () => void;
 }
 
 const UIContext = createContext<UIState | null>(null);
@@ -25,7 +28,10 @@ export function UIProvider({ children }: { children: ReactNode }) {
   const [orderMode, setOrderMode] = useState<OrderMode | null>(null);
   const [orderClosing, setOrderClosing] = useState(false);
   const [docKey, setDocKey] = useState<string | null>(null);
+  const [authOpen, setAuthOpen] = useState(false);
 
+  const openAuth = useCallback(() => setAuthOpen(true), []);
+  const closeAuth = useCallback(() => setAuthOpen(false), []);
   const openDrawer = useCallback(() => setDrawerOpen(true), []);
   const closeDrawer = useCallback(() => setDrawerOpen(false), []);
   const openOrder = useCallback((mode: OrderMode) => {
@@ -48,7 +54,7 @@ export function UIProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <UIContext.Provider value={{ drawerOpen, orderMode, orderClosing, docKey, openDrawer, closeDrawer, openOrder, switchOrder, closeOrder, openDoc, closeDoc }}>
+    <UIContext.Provider value={{ drawerOpen, orderMode, orderClosing, docKey, authOpen, openDrawer, closeDrawer, openOrder, switchOrder, closeOrder, openDoc, closeDoc, openAuth, closeAuth }}>
       {children}
     </UIContext.Provider>
   );
