@@ -7,6 +7,7 @@
 
 import type { Product } from '@/lib/menu-data';
 import { useCart } from './cart-context';
+import { useCatalog } from './catalog-context';
 
 interface Props {
   title: string;
@@ -18,6 +19,7 @@ interface Props {
 
 export default function UpsellRow({ title, products, source, selections, onSelect }: Props) {
   const { add } = useCart();
+  const { priceOf } = useCatalog();   // active-branch prices overlaid onto the passed products
   if (products.length === 0) return null;
   const selectMode = selections !== undefined && onSelect !== undefined;
 
@@ -27,12 +29,13 @@ export default function UpsellRow({ title, products, source, selections, onSelec
       <div className="upsell-row">
         {products.map((p) => {
           const qty = selectMode ? (selections[p.slug] ?? 0) : 0;
+          const price = priceOf(p.slug);
           return (
             <div key={p.slug} className={`upsell-card${qty > 0 ? ' is-selected' : ''}`}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={p.image} alt={p.name} loading="lazy" />
               <span className="upsell-name">{p.name}</span>
-              {p.price !== undefined && <span className="upsell-price">EGP {p.price}</span>}
+              {price !== undefined && <span className="upsell-price">EGP {price}</span>}
 
               {selectMode ? (
                 qty === 0 ? (
@@ -54,7 +57,7 @@ export default function UpsellRow({ title, products, source, selections, onSelec
                 <button
                   className="upsell-add"
                   aria-label={`Add ${p.name} to bag`}
-                  onClick={() => add({ slug: p.slug, name: p.name, image: p.image, price: p.price }, source)}
+                  onClick={() => add({ slug: p.slug, name: p.name, image: p.image, price }, source)}
                 >
                   +
                 </button>

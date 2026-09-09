@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { Product } from '@/lib/menu-data';
 import { useCart } from './cart-context';
+import { useCatalog } from './catalog-context';
 import CloseIcon from './CloseIcon';
 import FavButton from './FavButton';
 import { findProduct } from '@/lib/upsell';
@@ -24,6 +25,8 @@ const HINTS: Record<string, string> = {
 
 export default function ProductModal({ product, onClose }: Props) {
   const { add } = useCart();
+  const { priceOf } = useCatalog();
+  const branchPrice = priceOf(product.slug);   // active-branch base price; undefined until a branch is chosen
   const catSlug = findProduct(product.slug)?.catSlug ?? '';
   const config = useMemo(() => optionsFor(product, catSlug), [product, catSlug]);
 
@@ -63,7 +66,7 @@ export default function ProductModal({ product, onClose }: Props) {
       return { ...p, [key]: s };
     });
 
-  const base = product.price ?? 0;
+  const base = branchPrice ?? 0;
   const unitExtra = useMemo(() => {
     let x = combo && config.combo ? config.combo.delta : 0;
     for (const g of config.groups) {
@@ -112,7 +115,9 @@ export default function ProductModal({ product, onClose }: Props) {
         key: `${product.slug}#${opts.join(',')}#${note.trim()}`,
         name: product.name,
         image: product.image,
-        price: unit,
+        price: branchPrice != null ? unit : undefined,
+        basePrice: branchPrice,
+        optionsDelta: unitExtra,
         options: opts.length ? opts : undefined,
         note: note.trim() || undefined,
       },
@@ -145,8 +150,8 @@ export default function ProductModal({ product, onClose }: Props) {
               <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="var(--orange)" d="m12 17.3 6.2 3.7-1.6-7 5.4-4.7-7.1-.6L12 2 9.1 8.7 2 9.3l5.4 4.7-1.6 7z" /></svg>
               <strong>4.8</strong> <span>(1.2k reviews)</span>
             </p>
-            {product.price !== undefined && (
-              <p className="pmodal-price">EGP {product.price} <span>All taxes included</span></p>
+            {branchPrice !== undefined && (
+              <p className="pmodal-price">EGP {branchPrice} <span>All taxes included</span></p>
             )}
             <div className="pmodal-desc">
               <p>{product.description ?? 'Massive crispy fried chicken fillet, fresh garden lettuce and our signature Bondok glaze tucked inside a toasted buttered brioche bun.'}</p>
@@ -248,7 +253,7 @@ export default function ProductModal({ product, onClose }: Props) {
           </p>
           <button className="btn btn-solid pm-add" onClick={addToBag}>
             <img src="/icons/icon-cart.svg" alt="" width="18" aria-hidden="true" />
-            Add to Cart{product.price !== undefined ? ` — EGP ${total}` : ''}
+            Add to Cart{branchPrice !== undefined ? ` — EGP ${total}` : ''}
           </button>
         </div>
       </div>

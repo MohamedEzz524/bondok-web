@@ -6,13 +6,14 @@
    live-total Add to Cart on the right; you-may-also-like carousel below.
    Option groups + deltas are SAMPLE data until the client menu arrives. */
 
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import type { MenuCategory, Product } from '@/lib/menu-data';
 import { optionsFor } from '@/lib/product-options';
 import { suggestFor, findProduct } from '@/lib/upsell';
 import { useCart } from './cart-context';
+import { useCatalog } from './catalog-context';
 import { usePrefs } from './prefs-context';
 import FavButton from './FavButton';
 
@@ -27,6 +28,8 @@ const SIZE_LABEL: Record<string, string> = { single: 'Single', double: 'Double',
 export default function ProductView({ category, product, variants }: Props) {
   const router = useRouter();
   const { add } = useCart();
+  const { priceOf } = useCatalog();
+  const branchPrice = priceOf(product.slug);   // active-branch base price; undefined until a branch is chosen
   const { recordView } = usePrefs();
   const config = useMemo(() => optionsFor(product, category.slug), [product, category.slug]);
 
@@ -63,7 +66,7 @@ export default function ProductView({ category, product, variants }: Props) {
     return { optionLabels: labels, delta: d };
   }, [config, single, multi, combo]);
 
-  const unitPrice = product.price != null ? product.price + delta : null;
+  const unitPrice = branchPrice != null ? branchPrice + delta : null;
 
   const toggleMulti = (key: string, idx: number) => {
     setMulti((m) => {
@@ -80,6 +83,8 @@ export default function ProductView({ category, product, variants }: Props) {
       name: combo ? `${product.name} Combo` : product.name,
       image: product.image,
       price: unitPrice ?? undefined,
+      basePrice: branchPrice,
+      optionsDelta: delta,
       options: optionLabels.length ? optionLabels : undefined,
       note: note.trim() || undefined,
     }, 'pdp', qty);
@@ -98,18 +103,22 @@ export default function ProductView({ category, product, variants }: Props) {
     const extras = ['french-fries', 'coleslaw']
       .map((s) => findProduct(s)?.product)
       .filter((p): p is Product => !!p && p.slug !== product.slug);
-    return [product, ...extras];
-  }, [product]);
+    /* overlay active-branch prices onto the bundle products */
+    return [product, ...extras].map((p) => ({ ...p, price: priceOf(p.slug) }));
+  }, [product, priceOf]);
   const fbtTotal = fbt.every((p) => p.price != null) ? fbt.reduce((s, p) => s + (p.price ?? 0), 0) : null;
   const addBundle = () => {
     for (const p of fbt) add({ slug: p.slug, name: p.name, image: p.image, price: p.price }, 'pdp-bundle');
   };
 
-  const also = useMemo(() => suggestFor(product.slug, 6), [product.slug]);
+  const also = useMemo(
+    () => suggestFor(product.slug, 6).map((p) => ({ ...p, price: priceOf(p.slug) })),
+    [product.slug, priceOf],
+  );
   const scrollAlso = (dir: number) => alsoRef.current?.scrollBy({ left: dir * 300, behavior: 'smooth' });
 
-  /* record view for "recently viewed" */
-  useMemo(() => { recordView(product.slug); }, [product.slug, recordView]);
+  /* record view for "recently viewed" (effect, not render — recordView setStates PrefsProvider) */
+  useEffect(() => { recordView(product.slug); }, [product.slug, recordView]);
 
   /* when the product has variant sizes (Single/Double/Triple), drop the
      duplicate customize "size" group so size isn't asked twice */

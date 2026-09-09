@@ -189,7 +189,7 @@ main.page { flex: 1 0 auto; }
 /* header search: icon expands an inline input; Enter deep-links to /menu?q= */
 .header-search-trigger { min-width: 40px; min-height: 40px; color: var(--text); }
 .header-search-trigger:hover { color: var(--orange); }
-.header-search-ic { display: block; width: 20px; height: 20px; background: currentColor; -webkit-mask: center / contain no-repeat; mask: center / contain no-repeat; }
+.header-search-ic { display: block; width: 16px; height: 16px; background: currentColor; -webkit-mask: center / contain no-repeat; mask: center / contain no-repeat; }
 
 /* full-width search popup over the header */
 .hsearch-overlay {
@@ -265,7 +265,7 @@ main.page { flex: 1 0 auto; }
 .auth-back { position: absolute; left: -4px; top: -2px; width: 34px; height: 34px; border-radius: 8px; color: var(--text); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
 .auth-back:hover { background: rgba(0,0,0,.06); }
 .auth-phone { display: flex; align-items: center; gap: 8px; border: 1px solid var(--border-strong); border-radius: 8px; background: #fff; padding: 0 12px; }
-.auth-phone:focus-within { outline: 2px solid var(--orange); border-color: var(--orange); }
+.auth-phone:focus-within { outline: 2px solid var(--orange); border-color: transparent; }
 .auth-phone-cc { flex: 0 0 auto; font-size: 15px; font-weight: 700; color: var(--text); white-space: nowrap; }
 .auth-phone input { flex: 1; min-width: 0; border: 0; outline: 0; background: none; padding: 12px 0; font-family: var(--font); font-size: 15px; color: var(--text); }
 .auth-lead { font-size: 13.5px; line-height: 1.5; color: var(--text-muted); text-align: center; margin-bottom: 16px; }
@@ -275,8 +275,30 @@ main.page { flex: 1 0 auto; }
 .auth-otp:focus { outline: 2px solid var(--orange); border-color: var(--orange); }
 .auth-resend { margin-top: 12px; align-self: center; background: none; color: var(--orange); font-family: var(--font); font-weight: 700; font-size: 13.5px; cursor: pointer; text-decoration: underline; }
 
+/* ============ BRANCH PICKER ============ */
+.branch-overlay { position: fixed; inset: 0; z-index: var(--z-modal); background: var(--overlay); display: flex; align-items: center; justify-content: center; padding: 20px; animation: om-fade .18s ease; }
+.branch-modal { width: min(440px, 100%); max-height: 88vh; overflow-y: auto; background: #faf6ef; border-radius: var(--r-lg); box-shadow: var(--shadow-modal); padding: 22px; animation: hsearch-drop var(--t-slow) ease-out; }
+.branch-head { position: relative; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; }
+.branch-head h2 { font-size: 18px; font-weight: 800; color: var(--text); }
+.branch-close { position: absolute; right: -4px; top: -2px; width: 34px; height: 34px; border-radius: 8px; color: var(--orange); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
+.branch-close svg { display: block; }
+.branch-sub { font-size: 13px; line-height: 1.5; color: var(--text-muted); text-align: center; margin-bottom: 14px; }
+.branch-locate { width: 100%; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+.branch-note { font-size: 12.5px; color: var(--text-muted); margin: 10px 2px 4px; }
+.branch-list { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.branch-item { width: 100%; text-align: left; display: flex; flex-direction: column; gap: 2px; background: #fff; border: 1.5px solid var(--border); border-radius: 12px; padding: 12px 14px; cursor: pointer; transition: border-color .12s ease, background-color .12s ease; }
+.branch-item:hover { border-color: var(--orange); }
+.branch-item.is-on { border-color: var(--orange); background: #fdeee0; }
+.branch-item-name { font-size: 15px; font-weight: 800; color: var(--text); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.branch-item-area { font-size: 12.5px; color: var(--text-muted); }
+.branch-item.is-far { opacity: .72; }
+.branch-tag { font-size: 10.5px; font-weight: 800; letter-spacing: .02em; text-transform: uppercase; padding: 2px 7px; border-radius: 999px; line-height: 1.4; }
+.branch-tag-near { color: #1a7f45; background: #e4f6ea; }
+.branch-tag-far { color: var(--text-muted); background: var(--border); }
+.branch-skip { display: block; margin: 16px auto 0; background: none; color: var(--text-muted); font-family: var(--font); font-weight: 700; font-size: 13.5px; text-decoration: underline; cursor: pointer; }
+
 .rewards-link { display: inline-flex; align-items: center; }
-.rewards-img { height: 20px; width: auto; display: block; }
+.rewards-img { height: 30px; width: auto; display: block; }
 .btn-signup { font-size: 12px; }
 .btn-bag { font-size: 12px; }
 
@@ -513,6 +535,13 @@ main.page { flex: 1 0 auto; }
 .drawer-brand-rewards { color: var(--brand-orange); font-size: 34px; font-weight: 700; font-style: italic; }
 .drawer-rewards-img { height: 34px; width: auto; display: block; margin-top: 4px; }
 .drawer-tag { text-align: center; color: var(--text); font-size: 15px; font-weight: 700; margin: 4px 0 8px; }
+.drawer-loc { width: 100%; display: flex; align-items: center; gap: 12px; text-align: left; background: var(--white); border: 1.5px solid var(--border); border-radius: 12px; padding: 10px 14px; margin-bottom: 4px; cursor: pointer; transition: border-color .12s ease; }
+.drawer-loc:hover { border-color: var(--orange); }
+.drawer-loc-ic { color: var(--orange); display: inline-flex; flex-shrink: 0; }
+.drawer-loc-text { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+.drawer-loc-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; color: var(--text-muted); }
+.drawer-loc-name { font-size: 15px; font-weight: 800; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.drawer-loc-change { font-size: 13px; font-weight: 800; color: var(--orange); flex-shrink: 0; }
 .drawer-cta { width: 100%; font-size: 16px; padding: 12px; }
 .btn-solid.drawer-cta { color: var(--white); }
 .drawer-row { display: flex; align-items: center; gap: 12px; color: var(--text); font-size: 16px; font-weight: 700; padding: 10px 4px; }
@@ -2454,7 +2483,7 @@ main.page { flex: 1 0 auto; }
 .pd-fbt-item { display: flex; flex-direction: column; align-items: center; gap: 5px; text-align: center; position: relative; padding-left: 16px; }
 .pd-fbt-item:first-child { padding-left: 0; }
 .pd-fbt-plus { position: absolute; left: 0; top: 34px; font-size: 15px; font-weight: 700; color: var(--text-muted); }
-.pd-fbt-thumb { position: relative; width: 78px; height: 78px; background: var(--surface); border-radius: 14px; padding: 8px; }
+.pd-fbt-thumb { position: relative; width: 104px; height: 78px; background: var(--surface); border-radius: 14px; padding: 8px; }
 .pd-fbt-thumb > img { width: 100%; height: 100%; object-fit: contain; }
 .pd-fbt-check img { width: 20px; height: 20px; display: block; }
 .pd-fbt-check {
@@ -2465,6 +2494,9 @@ main.page { flex: 1 0 auto; }
 .pd-fbt-name { font-size: 12.5px; font-weight: 700; color: var(--text); max-width: 96px; }
 .pd-fbt-price { font-size: 12.5px; font-weight: 800; color: var(--text); }
 .pd-fbt-cta { text-align: right; margin-left: auto; }
+/* the label is display:flex, so it ignores text-align:right - push it to the
+   end so "Bundle price" lines up with the total below it */
+.pd-fbt-cta .ct-label { justify-content: flex-end; }
 .pd-fbt-total { font-family: var(--font-display); font-size: 25px; font-weight: 800; color: var(--text); margin: 2px 0 10px; }
 .pd-fbt-btn { font-size: 13.5px; font-weight: 800; text-transform: uppercase; padding: 12px 22px; }
 
@@ -2841,10 +2873,10 @@ main.page { flex: 1 0 auto; }
 .cat-float { position: absolute; z-index: 1; height: auto; pointer-events: none; user-select: none; -webkit-user-drag: none; }
 /* every edge image sits flush: LEFT (left:0) = f1 f2 f4 f5 f8 ; RIGHT (right:0) = f0 f3 f6 f7 */
 /* hero: big cluster overflowing the bottom of the hero */
-.cf-f0 { bottom: -70px; right: 0; width: 520px; }
+.cf-f0 { bottom: -70px; right: 0; width: 800px; }
 /* benefits: tenders tray (spills above) + fries left, sauce right */
 .cf-f5 { top: -100px;  left: 0;  width: 170px; }  /* tenders tray */
-.cf-f2 { bottom: 20px; left: 0; width: 120px; }   /* fries */
+.cf-f2 { bottom: 160px; left: 0; width: 120px; }   /* fries */
 .cf-f3 { top: 40px;   right: 0; width: 100px; }   /* sauce */
 /* events: burger + sauce left, tenders+ketchup right */
 .cf-f1 { top: -100px; left: 0;  width: 150px; }   /* burger (spills above) */
@@ -3201,7 +3233,7 @@ main.page { flex: 1 0 auto; }
   .offers-signup-btn { order: 3; flex: 1 1 100%; height: 44px; }
 
   /* catering floaters: smaller on mobile so they don't cover text */
-  .cf-f0 { width: 150px; }
+  .cf-f0 { width: 300px; }
   .cf-f5 { width: 100px; }
   .cf-f2 { width: 66px; }
   .cf-f3 { width: 56px; }

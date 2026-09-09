@@ -6,6 +6,7 @@
 import Link from 'next/link';
 import { AnimatePresence, motion } from 'motion/react';
 import { useCart } from './cart-context';
+import { useCatalog } from './catalog-context';
 import { suggestForCart, findProduct, FREE_DELIVERY_THRESHOLD } from '@/lib/upsell';
 import CheckoutSteps from './CheckoutSteps';
 import { useState } from 'react';
@@ -17,7 +18,8 @@ export default function BagView() {
   const [promo, setPromo] = useState('');
   const [promoMsg, setPromoMsg] = useState('');
 
-  const suggestions = suggestForCart(items.map((i) => i.slug), 4);
+  const { priceOf } = useCatalog();
+  const suggestions = suggestForCart(items.map((i) => i.slug), 4).map((p) => ({ ...p, price: priceOf(p.slug) }));
 
   const applyPromo = () => {
     if (!promo.trim()) return;

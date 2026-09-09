@@ -6,7 +6,7 @@
    loyalty program is defined with the client - flagged in the disclaimer. */
 
 import { useState } from 'react';
-import { motion, useReducedMotion } from 'motion/react';
+import { motion } from 'motion/react';
 import { useUI } from './ui-context';
 
 const fadeUp = {
@@ -15,16 +15,6 @@ const fadeUp = {
   viewport: { once: true, amount: 0.25 },
   transition: { duration: 0.45, ease: 'easeOut' as const },
 };
-
-/* floating Bondok mascots (the designer SVGs) bobbing across the hero -
-   the Popeyes-rewards-style animated icon layer */
-const FLOATERS = [
-  { src: 'Vector-1', left: '1%', top: '7%', size: 150, delay: 0 },
-  { src: 'Vector-4', left: '21%', top: '3%', size: 92, delay: 0.6 },
-  { src: 'Vector-2', left: '33%', top: '11%', size: 120, delay: 1.2 },
-  { src: 'Vector-5', left: '49%', top: '4%', size: 80, delay: 0.4 },
-  { src: 'Vector-3', left: '60%', top: '9%', size: 108, delay: 1.6 },
-];
 
 /* ---- benefit icons (inline, currentColor) ---- */
 const IC = {
@@ -98,7 +88,6 @@ const FAQ_CATS: Record<string, { q: string; a: string }[]> = {
 };
 
 export default function RewardsView() {
-  const reduced = useReducedMotion();
   const { openAuth } = useUI();
   const [faqCat, setFaqCat] = useState('All Questions');
   const [openQ, setOpenQ] = useState<number | null>(0);
@@ -117,19 +106,6 @@ export default function RewardsView() {
       {/* ===== banner hero - the artwork carries all the copy (brand, headline,
            mascots, Sign Up); we only overlay a live hit-area on the Sign Up ===== */}
       <section className="rw-hero">
-        {FLOATERS.map((f, i) => (
-          /* eslint-disable-next-line @next/next/no-img-element */
-          <motion.img
-            key={i}
-            className="rw-mascot"
-            src={`/bondok/rewards/${f.src}.svg`}
-            alt=""
-            aria-hidden="true"
-            style={{ left: f.left, top: f.top, width: f.size }}
-            animate={reduced ? undefined : { y: [0, -12, 0] }}
-            transition={{ duration: 4, repeat: Infinity, delay: f.delay, ease: 'easeInOut' }}
-          />
-        ))}
         <motion.div className="rw-hero-media" {...fadeUp} transition={{ duration: 0.45, ease: 'easeOut' }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/bondok/rewards-banner.webp" alt="Bondok Rewards - earn points with every EGP you spend and unlock free food" />
@@ -192,7 +168,7 @@ export default function RewardsView() {
               <span className="rwx-tier-mark" aria-hidden="true">
                 {t.state === 'locked'
                   ? <svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M6 10V7a6 6 0 0 1 12 0v3h1v11H5V10zm2 0h8V7a4 4 0 0 0-8 0z" /></svg>
-                  : <svg viewBox="0 0 24 24" width="16" height="16"><path fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" d="m5 12 5 5 9-11" /></svg>}
+                  : <svg viewBox="0 0 24 24" width="19" height="19"><path fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" d="M20 6.5 9.5 17 4 11.5" /></svg>}
               </span>
               {t.state === 'current' && <span className="rwx-tier-status">In Progress</span>}
               <h3>{t.name}</h3>

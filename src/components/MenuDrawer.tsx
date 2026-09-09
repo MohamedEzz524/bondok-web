@@ -3,10 +3,15 @@
 import { useEffect } from 'react';
 import Link from 'next/link';
 import { useUI } from './ui-context';
+import { useBranch } from './branch-context';
 import CloseIcon from './CloseIcon';
 
 export default function MenuDrawer() {
   const { drawerOpen, closeDrawer } = useUI();
+  const { selected, openBranchModal } = useBranch();
+
+  /* close the drawer, then open the shared branch picker */
+  const chooseLocation = () => { closeDrawer(); openBranchModal(); };
 
   useEffect(() => {
     if (!drawerOpen) return;
@@ -34,6 +39,17 @@ export default function MenuDrawer() {
           <img className="drawer-rewards-img" src="/bondok/rewards.webp" alt="Rewards" />
         </div>
         <p className="drawer-tag">More chicken, more smiles. Start earning rewards today!</p>
+
+        <button className="drawer-loc" onClick={chooseLocation}>
+          <span className="drawer-loc-ic">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5z" /></svg>
+          </span>
+          <span className="drawer-loc-text">
+            <span className="drawer-loc-label">{selected ? 'Delivering from' : 'Choose your location'}</span>
+            <span className="drawer-loc-name">{selected ? selected.name : 'Select a branch to see prices'}</span>
+          </span>
+          <span className="drawer-loc-change">{selected ? 'Change' : 'Choose'}</span>
+        </button>
 
         <button className="btn btn-solid drawer-cta">Log In</button>
         <button className="btn btn-outline drawer-cta">Sign Up</button>

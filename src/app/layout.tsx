@@ -1,8 +1,11 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { UIProvider } from '@/components/ui-context';
+import { BranchProvider } from '@/components/branch-context';
+import { CatalogProvider } from '@/components/catalog-context';
 import { CartProvider } from '@/components/cart-context';
 import { PrefsProvider } from '@/components/prefs-context';
+import BranchModal from '@/components/BranchModal';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import BottomTabs from '@/components/BottomTabs';
@@ -24,6 +27,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body>
         <UIProvider>
+          <BranchProvider>
+          <CatalogProvider>
           <CartProvider>
           <PrefsProvider>
             <Header />
@@ -37,8 +42,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <FloatingContact />
             <DocModal />
             <AuthModal />
+            <BranchModal />
           </PrefsProvider>
           </CartProvider>
+          </CatalogProvider>
+          </BranchProvider>
         </UIProvider>
       </body>
     </html>

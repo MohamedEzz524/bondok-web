@@ -122,6 +122,12 @@ export const branchSamples: Record<string, BranchSample> = {
   },
 };
 
+/* Delivery coverage radius, in km. PLACEHOLDER: one threshold applied to every
+   branch until the client / Cloud-Kitchen API sends real per-branch coverage
+   (radius or polygon). Used to tell a located visitor which branches actually
+   deliver to them vs. which are pickup-only / out of range. Tune freely. */
+export const DELIVERY_RADIUS_KM = 8;
+
 export const BRANCH_FILTERS = [
   { key: 'all', label: 'All Kitchens' },
   { key: 'late', label: 'Open Now (Late Night)' },

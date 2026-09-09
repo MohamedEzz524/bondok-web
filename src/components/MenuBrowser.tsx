@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from 'motion/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useCart } from './cart-context';
 import { useUI } from './ui-context';
+import { usePricedCategories } from './catalog-context';
 import LocationBar from './LocationBar';
 import { EVENTS, publish } from '@/lib/pubsub';
 import type { MenuCategory, Product, Protein, Size } from '@/lib/menu-data';
@@ -96,7 +97,9 @@ function variantsOf(cat: MenuCategory, p: Product): Product[] | null {
   return sibs.length > 1 ? sibs : null;
 }
 
-export default function MenuBrowser({ categories, initialCategory }: Props) {
+export default function MenuBrowser({ categories: baseCategories, initialCategory }: Props) {
+  /* overlay the active branch's prices onto the (price-less) menu structure */
+  const categories = usePricedCategories(baseCategories);
   const { add } = useCart();
   const { openOrder } = useUI();
   const { favorites, recordView } = usePrefs();

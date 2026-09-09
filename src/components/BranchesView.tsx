@@ -9,6 +9,7 @@ import Link from 'next/link';
 import { motion } from 'motion/react';
 import { branches } from '@/lib/branches';
 import { branchSamples, BRANCH_FILTERS } from '@/lib/branches-sample';
+import { useBranch } from './branch-context';
 
 /* great-circle distance in km between [lat, lng] pairs */
 function haversine([lat1, lng1]: [number, number], [lat2, lng2]: [number, number]) {
@@ -24,9 +25,15 @@ function haversine([lat1, lng1]: [number, number], [lat2, lng2]: [number, number
 const layoutSpring = { layout: { duration: 0.3, ease: 'easeOut' as const } };
 
 export default function BranchesView() {
+  /* selection is the shared branch context: the page defaults to the active
+     branch and committing here has the same effect as the popup (persists,
+     updates the location bar, strips ?branch=). Falls back to the first branch
+     only for display when nothing is chosen yet. */
+  const { selected: activeBranch, selectBranch } = useBranch();
+  const selectedId = activeBranch?.id ?? branches[0].id;
+
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState('all');
-  const [selectedId, setSelectedId] = useState(branches[0].id);
   const [locStatus, setLocStatus] = useState('');
   const [userPos, setUserPos] = useState<[number, number] | null>(null);
   const [sortKey, setSortKey] = useState<'near' | 'az'>('near');
@@ -61,7 +68,7 @@ export default function BranchesView() {
         const nearest = [...branches].sort(
           (a, b) => haversine(here, branchSamples[a.id].coords) - haversine(here, branchSamples[b.id].coords),
         )[0];
-        setSelectedId(nearest.id);
+        selectBranch(nearest.id);
         setLocStatus(`Nearest branch selected: ${nearest.name} (~${haversine(here, branchSamples[nearest.id].coords).toFixed(1)} km away).`);
       },
       () => setLocStatus('Location permission denied - you can still search by area name.'),
@@ -193,7 +200,7 @@ export default function BranchesView() {
               );
             }
             return (
-              <motion.button layout transition={layoutSpring} key={b.id} className="br-card br-card-compact" onClick={() => setSelectedId(b.id)}>
+              <motion.button layout transition={layoutSpring} key={b.id} className="br-card br-card-compact" onClick={() => selectBranch(b.id)}>
                 <span className="br-compact-head">
                   <h4>{b.name}</h4>
                   <span className="br-dist-chip">{distLabel(b.id)}</span>
