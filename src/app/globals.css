@@ -2726,9 +2726,9 @@ main.page { flex: 1 0 auto; }
 
 /* ============ OFFERS PAGE (reference geometry @1440) ============ */
 .offers-page { width: 100%; padding-bottom: 72px; }
-.offers-locbar { background: #01847e; color: #fff; padding: 12px 0 14px; }
+.offers-locbar { background: #fdf1dd; color: var(--orange); padding: 12px 0 14px; }
 .offers-locbar-bleed { margin-inline: calc(50% - 50vw); margin-bottom: 18px; }
-.loc-bar-btn { text-align: left; color: #fff; padding: 0; background: none; cursor: pointer; }
+.loc-bar-btn { text-align: left; color: var(--orange); padding: 0; background: none; cursor: pointer; }
 .loc-bar-btn:hover .offers-loc-title { text-decoration: underline; }
 .offers-loc-link { cursor: pointer; background: none; }
 .offers-locbar-inner {
@@ -2737,7 +2737,7 @@ main.page { flex: 1 0 auto; }
 }
 .offers-loc-title { display: flex; align-items: center; gap: 6px; font-size: 19px; font-weight: 700; line-height: 22px; }
 .offers-loc-sub { font-size: 16px; line-height: 20px; margin-top: 7px; }
-.offers-loc-link { color: #fff; font-size: 14px; font-weight: 700; text-decoration: underline; margin-top: 3px; white-space: nowrap; }
+.offers-loc-link { color: var(--orange); font-size: 14px; font-weight: 700; text-decoration: underline; margin-top: 3px; white-space: nowrap; }
 .offers-loc-link:hover { opacity: .85; }
 
 .offers-body { max-width: 1136px; margin: 0 auto; padding: 0 var(--pad-x); }
@@ -3166,6 +3166,9 @@ main.page { flex: 1 0 auto; }
   .offers-headrow { flex-direction: column; align-items: flex-start; gap: 4px; }
   .offers-locbar-inner { gap: 6px; }
   .offers-signup-card { flex-wrap: wrap; }
+  .offers-signup-card img { width: 76px; height: 56px; }
+  .offers-signup-text { flex: 1 1 150px; }
+  .offers-signup-btn { order: 3; flex: 1 1 100%; height: 44px; }
   .cat-header-nav a:not(.btn) { display: none; }
   .cat-header-cta { font-size: 16px; line-height: 24px; }
   .cat-header .logo-img { height: 44px; }
