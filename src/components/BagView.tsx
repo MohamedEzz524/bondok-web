@@ -6,7 +6,7 @@
 import Link from 'next/link';
 import { AnimatePresence, motion } from 'motion/react';
 import { useCart } from './cart-context';
-import { suggestForCart, FREE_DELIVERY_THRESHOLD } from '@/lib/upsell';
+import { suggestForCart, findProduct, FREE_DELIVERY_THRESHOLD } from '@/lib/upsell';
 import CheckoutSteps from './CheckoutSteps';
 import { useState } from 'react';
 
@@ -90,7 +90,16 @@ export default function BagView() {
                     <button className="co-qty-plus" aria-label="Increase quantity" onClick={() => setQty(it.key ?? it.slug, it.qty + 1, 'cart-page')}>+</button>
                   </span>
                   <span className="co-item-actions">
-                    {/* Edit-options button returns here once product customizations exist */}
+                    {(() => {
+                      const loc = findProduct(it.slug);
+                      return loc ? (
+                        <Link className="co-edit" href={`/menu/${loc.catSlug}/${it.slug}`} title="Edit options">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src="/icons/Icon-edit.svg" alt="" width="14" />
+                          Edit
+                        </Link>
+                      ) : null;
+                    })()}
                     <button className="co-trash" aria-label={`Remove ${it.name}`} onClick={() => remove(it.key ?? it.slug, 'cart-page')}>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src="/icons/icon-delete.svg" alt="" width="15" height="15" />
@@ -142,10 +151,9 @@ export default function BagView() {
             {promoMsg && <p className="co-voucher-msg">{promoMsg}</p>}
           </div>
           <p className="co-secure">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <span><img src="/icons/icon-secure.png" alt="" width="14" /> Encrypted Checkout</span>·
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <span><img src="/icons/icon-guarantee.svg" alt="" width="12" /> Contactless Handover</span>
+            <span><i className="co-secure-ic" style={{ WebkitMaskImage: 'url(/icons/Icon-security.svg)', maskImage: 'url(/icons/Icon-security.svg)' }} aria-hidden="true" /> Encrypted Checkout</span>
+            <span className="co-secure-dot" aria-hidden="true">·</span>
+            <span><i className="co-secure-ic" style={{ WebkitMaskImage: 'url(/icons/icon-guarantee.svg)', maskImage: 'url(/icons/icon-guarantee.svg)' }} aria-hidden="true" /> Contactless Handover</span>
           </p>
         </aside>
       </div>
