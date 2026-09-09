@@ -329,6 +329,9 @@ export default function RewardsView() {
         <p className="rwx-sample-note">Sample account preview - real balances and history connect once the loyalty program launches.</p>
       </section>
 
+      {/* ===== fixed parallax banner ===== */}
+      <section className="rwx-cta" role="img" aria-label="Bondok feast spread" />
+
       {/* ===== FAQ ===== */}
       <section id="rewards-faq" className="rwx-faq">
         <motion.header className="rwx-head" {...fadeUp}>
