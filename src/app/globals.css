@@ -268,6 +268,7 @@ main.page { flex: 1 0 auto; }
 .auth-phone:focus-within { outline: 2px solid var(--orange); border-color: var(--orange); }
 .auth-phone-cc { flex: 0 0 auto; font-size: 15px; font-weight: 700; color: var(--text); white-space: nowrap; }
 .auth-phone input { flex: 1; min-width: 0; border: 0; outline: 0; background: none; padding: 12px 0; font-family: var(--font); font-size: 15px; color: var(--text); }
+.auth-lead { font-size: 13.5px; line-height: 1.5; color: var(--text-muted); text-align: center; margin-bottom: 16px; }
 .auth-hint { margin-top: 10px; font-size: 12.5px; color: var(--text-muted); }
 .auth-otp-to { font-size: 14px; color: var(--text); text-align: center; line-height: 1.5; margin-bottom: 6px; }
 .auth-otp { width: 100%; text-align: center; letter-spacing: 10px; text-indent: 10px; font-size: 26px; font-weight: 800; font-family: var(--font); color: var(--text); border: 1px solid var(--border-strong); border-radius: 10px; padding: 12px; margin-top: 4px; }

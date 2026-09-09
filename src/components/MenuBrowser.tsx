@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { flushSync } from 'react-dom';
 import { AnimatePresence, motion } from 'motion/react';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useCart } from './cart-context';
 import { useUI } from './ui-context';
 import LocationBar from './LocationBar';
@@ -19,6 +19,7 @@ import Select from './Select';
 
 interface Props {
   categories: MenuCategory[];
+  initialCategory?: string;   // set when rendered at /menu/[category]
 }
 
 const SIZES: { value: Size; label: string }[] = [
@@ -95,22 +96,23 @@ function variantsOf(cat: MenuCategory, p: Product): Product[] | null {
   return sibs.length > 1 ? sibs : null;
 }
 
-export default function MenuBrowser({ categories }: Props) {
+export default function MenuBrowser({ categories, initialCategory }: Props) {
   const { add } = useCart();
   const { openOrder } = useUI();
   const { favorites, recordView } = usePrefs();
   const subtabsDrag = useDragScroll<HTMLDivElement>();
   const popularDrag = useDragScroll<HTMLDivElement>();
   const searchParams = useSearchParams();
+  const router = useRouter();
 
   const [view, setView] = useState<'launcher' | 'browse'>(() =>
-    searchParams.get('q') || searchParams.get('cat') || searchParams.get('item') ? 'browse' : 'launcher',
+    initialCategory || searchParams.get('q') || searchParams.get('cat') || searchParams.get('item') ? 'browse' : 'launcher',
   );
   const [query, setQuery] = useState(() => searchParams.get('q') ?? '');
   const [filters, setFilters] = useState<Filters>(emptyFilters);
   const [sheetOpen, setSheetOpen] = useState(false);          // mobile filters sheet
   const [sort, setSort] = useState<'default' | 'name-asc' | 'name-desc' | 'price-asc' | 'price-desc'>('default');
-  const [activeCat, setActiveCat] = useState<string>(() => searchParams.get('cat') ?? categories[0]?.slug ?? '');
+  const [activeCat, setActiveCat] = useState<string>(() => initialCategory ?? searchParams.get('cat') ?? categories[0]?.slug ?? '');
   const [subTab, setSubTab] = useState<SubTab>('All Items');
   const [selected, setSelected] = useState<{ cat: string; slug: string } | null>(null);
   const [favOnly, setFavOnly] = useState(() => searchParams.get('fav') === '1');
@@ -217,11 +219,6 @@ export default function MenuBrowser({ categories }: Props) {
     publish(EVENTS.filterChange, { source: 'menu-page', active: activeCount });
   }, [activeCount]);
 
-  /* selecting a category scrolls the content back to the top of the list */
-  const scrollContentTop = useCallback(() => {
-    document.querySelector('.menu-content')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }, []);
-
   /* keep ?fav=1 in the URL synced with the toggle, so the drawer link
      always works even after toggling off (same-URL clicks were no-ops) */
   const setFavOnlySynced = useCallback((v: boolean) => {
@@ -232,18 +229,15 @@ export default function MenuBrowser({ categories }: Props) {
     window.history.replaceState(null, '', url.toString());
   }, []);
 
+  /* categories are real routes now: /menu (catalog) and /menu/[category].
+     Navigating remounts the browser with the right initialCategory, so the
+     browser back button lands correctly (/menu/xxx -> /menu). */
   const selectCategory = useCallback((slug: string) => {
-    const apply = () => { setFavOnlySynced(false); setActiveCat(slug); setSubTab('All Items'); setQuery(''); };
-    /* leaving a search replaces the whole collection; a view-transition
-       crossfade between two unrelated grids reads as a flicker, so when a
-       query is active swap instantly instead of animating. */
-    if (q) apply(); else withFlip(apply);
-    scrollContentTop();
-  }, [q, setFavOnlySynced, scrollContentTop]);
+    router.push(`/menu/${slug}`);
+  }, [router]);
 
   const openCategory = (slug: string) => {
-    setView('browse');
-    setActiveCat(slug);
+    router.push(`/menu/${slug}`);
   };
 
   const toggleSize = (v: Size) =>
@@ -483,7 +477,7 @@ export default function MenuBrowser({ categories }: Props) {
         >
           {/* sidebar: full-catalog list (emoji + counts) + filters */}
           <aside className="menu-side">
-            <button className="menu-catalog-back" onClick={() => { setView('launcher'); window.scrollTo({ top: 0 }); }}>
+            <button className="menu-catalog-back" onClick={() => { setQuery(''); setView('launcher'); router.push('/menu'); window.scrollTo({ top: 0 }); }}>
               <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true">
                 <path fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" d="M15 6l-6 6 6 6" />
               </svg>
