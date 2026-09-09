@@ -3185,6 +3185,18 @@ main.page { flex: 1 0 auto; }
   .offers-signup-card img { width: 76px; height: 56px; }
   .offers-signup-text { flex: 1 1 150px; }
   .offers-signup-btn { order: 3; flex: 1 1 100%; height: 44px; }
+
+  /* catering floaters: small + tucked into corners so they don't cover text */
+  .cat-float { width: 70px; }
+  .cf-h0 { width: 132px; top: 4px; right: -16px; }
+  .cf-h1, .cf-h2 { display: none; }
+  .cf-b1 { width: 66px; top: 6px; }
+  .cf-b2 { width: 60px; top: 6px; }
+  .cf-b3 { width: 82px; bottom: 4px; }
+  .cf-b4 { width: 66px; bottom: 4px; }
+  .cf-e1 { width: 74px; top: 6px; }
+  .cf-e2 { width: 74px; top: 6px; }
+  .cf-e3 { width: 84px; bottom: 4px; }
   .cat-header-nav a:not(.btn) { display: none; }
   .cat-header-cta { font-size: 16px; line-height: 24px; }
   .cat-header .logo-img { height: 44px; }
