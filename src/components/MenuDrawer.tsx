@@ -30,7 +30,8 @@ export default function MenuDrawer() {
 
         <div className="drawer-brand">
           <span className="drawer-brand-top">Bondok</span>
-          <span className="drawer-brand-rewards">Rewards</span>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img className="drawer-rewards-img" src="/bondok/rewards.webp" alt="Rewards" />
         </div>
         <p className="drawer-tag">More chicken, more smiles. Start earning rewards today!</p>
 
