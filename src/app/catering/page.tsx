@@ -58,21 +58,24 @@ export default function Page() {
           </p>
           <div className="cat-benefit-row">
             <div className="cat-benefit">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="var(--orange)" strokeWidth="1.1" strokeLinecap="round" d="M4 8h16l-1.5 12h-13zM8 8a4 4 0 0 1 8 0M9 12v4m3-4v4m3-4v4" /></svg>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img className="cat-benefit-ic" src="/bondok/catering/icon1.webp" alt="" />
               <div className="cat-benefit-text">
                 <h3>Tasty Selection</h3>
                 <p>From fried chicken trays to rolls and sides - build the spread your crowd wants.</p>
               </div>
             </div>
             <div className="cat-benefit">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="var(--orange)" strokeWidth="1.1" /><path fill="none" stroke="var(--orange)" strokeWidth="1.1" strokeLinecap="round" d="M12 7v5l3.5 2M12 1.5v1M12 21.5v1M1.5 12h1m19 0h1" /></svg>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img className="cat-benefit-ic" src="/bondok/catering/icon2.webp" alt="" />
               <div className="cat-benefit-text">
                 <h3>Order Ahead</h3>
                 <p>Skip the stress - place your order in advance and pick your delivery or pickup time.</p>
               </div>
             </div>
             <div className="cat-benefit">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="var(--orange)" strokeWidth="1.1" strokeLinecap="round" d="M3 13h11v-2H3zm0 4h11v-2H3zm15-1 4-4-4-4v3h-3v2h3zM3 9h9V7H3z" /></svg>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img className="cat-benefit-ic" src="/bondok/catering/icon3.webp" alt="" />
               <div className="cat-benefit-text">
                 <h3>Fresh on Time</h3>
                 <p>Your branch preps everything to arrive hot and fresh right when your event starts.</p>

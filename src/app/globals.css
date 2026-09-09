@@ -2834,6 +2834,7 @@ main.page { flex: 1 0 auto; }
 .cat-benefit-row { display: grid; grid-template-columns: repeat(3, minmax(0, 300px)); justify-content: space-between; gap: 24px; margin-top: 60px; }
 .cat-benefit { display: flex; flex-direction: column; align-items: center; gap: 16px; min-height: 272px; }
 .cat-benefit svg { width: 138px; height: 135px; }
+.cat-benefit-ic { height: 138px; width: auto; object-fit: contain; }
 .cat-benefit-text { display: flex; flex-direction: column; gap: 4px; }
 .cat-benefit h3 { font-size: 24px; font-weight: 700; line-height: 28px; color: var(--text); }
 .cat-benefit p { font-size: 18px; line-height: 22px; color: var(--text); }
