@@ -30,17 +30,9 @@ const S = '/bondok/menu/sides/';   // sauces/sides thumbnails reused for options
 const MAINS = new Set(['sandwiches', 'fillet', 'grilled', 'burgers', 'rolls']);
 const PLATTERS = new Set(['meals', 'kids-tenders']);
 
-const SIZE: OptionGroup = {
-  key: 'size',
-  label: 'Choose Size',
-  type: 'single',
-  defaultIdx: 0,
-  choices: [
-    { label: 'Regular', delta: 0 },
-    { label: 'Large', delta: 20 },
-    { label: 'Extra Large', delta: 35 },
-  ],
-};
+/* NOTE: no generic portion-size group. Real sizes are the Single/Double/Triple
+   products, shown as the variant selector (with images) on the PDP. Items with
+   no size siblings simply have no size option. */
 
 const HEAT: OptionGroup = {
   key: 'heat',
@@ -99,7 +91,6 @@ export function optionsFor(product: Product, catSlug: string): ProductConfig {
   if (product.spicy) badge = 'Hot & Spicy';
 
   if (MAINS.has(catSlug)) {
-    groups.push(SIZE);
     if (product.spicy) groups.push(HEAT);
     groups.push(DIPS, ADDONS);
     combo = { delta: 80, includes: 'Medium Fries + Soft Drink', items: [{ label: 'Fries', image: S + 'french-fries.webp' }, { label: 'Soft Drink', image: S + 'soft-drink.webp' }] };

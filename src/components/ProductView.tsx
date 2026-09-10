@@ -248,10 +248,11 @@ export default function ProductView({ category, product, variants }: Props) {
             <div className="pd-card pd-combo">
               <span className="pd-combo-ic" aria-hidden="true">
                 {config.combo.items?.length
-                  ? config.combo.items.map((it) => (
+                  ? config.combo.items.flatMap((it, i) => [
+                      i > 0 ? <span key={`p${i}`} className="pd-combo-plus">+</span> : null,
                       /* eslint-disable-next-line @next/next/no-img-element */
-                      <img key={it.label} className="pd-combo-thumb" src={it.image} alt="" />
-                    ))
+                      <img key={it.label} className="pd-combo-thumb" src={it.image} alt="" />,
+                    ])
                   /* eslint-disable-next-line @next/next/no-img-element */
                   : <img src="/icons/HOT.png" alt="" width="26" />}
               </span>

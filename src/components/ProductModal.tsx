@@ -171,10 +171,11 @@ export default function ProductModal({ product, onClose }: Props) {
               <button className={`pm-combo${combo ? ' is-on' : ''}`} onClick={() => setCombo((c) => !c)} aria-pressed={combo}>
                 <span className="pm-combo-ic" aria-hidden="true">
                   {config.combo.items?.length
-                    ? config.combo.items.map((it) => (
+                    ? config.combo.items.flatMap((it, i) => [
+                        i > 0 ? <span key={`p${i}`} className="pm-combo-plus">+</span> : null,
                         /* eslint-disable-next-line @next/next/no-img-element */
-                        <img key={it.label} className="pm-combo-thumb" src={it.image} alt="" />
-                      ))
+                        <img key={it.label} className="pm-combo-thumb" src={it.image} alt="" />,
+                      ])
                     /* eslint-disable-next-line @next/next/no-img-element */
                     : <img src="/icons/HOT.png" alt="" width="22" />}
                 </span>

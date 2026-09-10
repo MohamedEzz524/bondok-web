@@ -619,10 +619,10 @@ main.page { flex: 1 0 auto; }
 /* ---- option / variant / combo thumbnails (PDP + quick-add) ---- */
 .pm-opt.pm-opt-img-on, .pd-pill.pd-pill-img { display: inline-flex; align-items: center; gap: 8px; padding-left: 8px; }
 .pm-opt-img, .pd-pill-thumb, .pm-addon-img, .pd-check-img,
-.pm-combo-thumb, .pd-combo-thumb { width: 30px; height: 30px; border-radius: 7px; object-fit: contain; background: var(--surface); flex: 0 0 auto; }
+.pm-combo-thumb, .pd-combo-thumb { width: 30px; height: 30px; border-radius: 7px; object-fit: contain; flex: 0 0 auto; }
 .pd-pill-thumb { width: 34px; height: 34px; }
-.pm-combo-thumb, .pd-combo-thumb { background: none; }
-.pm-combo-ic, .pd-combo-ic { display: inline-flex; align-items: center; gap: 3px; }
+.pm-combo-ic, .pd-combo-ic { display: inline-flex; align-items: center; gap: 2px; width: auto; flex: 0 0 auto; }
+.pm-combo-plus, .pd-combo-plus { font-weight: 800; color: var(--text-muted); font-size: 14px; }
 .pm-addon-img { margin-right: 2px; }
 .pd-check-img { margin: 0 4px 0 2px; }
 .omodal-card { background: #fff; border-radius: 12px; padding: 22px 24px; display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; }
@@ -816,7 +816,7 @@ main.page { flex: 1 0 auto; }
 
 .pm-combo { display: flex; align-items: center; gap: 14px; width: 100%; text-align: left; background: var(--white); border: 1.5px solid var(--border); border-radius: 16px; padding: 15px 18px; cursor: pointer; transition: border-color .15s, background-color .15s; }
 .pm-combo.is-on { border-color: var(--orange); background: #fff7ee; }
-.pm-combo-ic { width: 46px; height: 46px; border-radius: 12px; background: #fdecd9; display: flex; align-items: center; justify-content: center; flex: 0 0 auto; }
+.pm-combo-ic { width: auto; min-width: 46px; min-height: 46px; border-radius: 12px; background: #fdecd9; display: flex; align-items: center; justify-content: center; gap: 2px; padding: 5px 8px; flex: 0 0 auto; }
 .pm-combo-text { flex: 1; min-width: 0; }
 .pm-combo-text strong { display: flex; align-items: center; gap: 10px; font-size: 16px; font-weight: 800; color: var(--text); }
 .pm-combo-badge { font-style: normal; background: var(--orange); color: #fff; border-radius: 8px; padding: 2px 9px; font-size: 12.5px; font-weight: 800; }
@@ -2705,8 +2705,7 @@ main.page { flex: 1 0 auto; }
 
 /* combo toggle */
 .pd-combo { display: flex; align-items: center; gap: 14px; padding: 18px 20px; }
-.pd-combo-ic { flex: 0 0 auto; width: 42px; height: 42px; display: inline-flex; overflow: hidden; }
-.pd-combo-ic img { width: 100%; height: 100%; object-fit: cover; }
+.pd-combo-ic { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 2px; }
 .pd-combo-body { flex: 1; }
 .pd-combo-title { display: flex; align-items: center; gap: 9px; font-size: 15px; font-weight: 800; text-transform: uppercase; color: var(--text); }
 .pd-combo-sub { font-size: var(--fs-small); color: var(--text-muted); margin-top: 3px; }
@@ -3517,18 +3516,10 @@ main.page { flex: 1 0 auto; }
   .hsearch-close { order: 2; }
   .hsearch-go { order: 3; flex: 1 1 100%; }
 
-  /* mobile hero: square food crop + HTML copy overlay */
+  /* mobile hero: full portrait banner (headline + CTA baked in) */
   .hero { --hero-w: calc(100vw - 58px); --hero-gap: 16px; }
-  .hero-viewport { height: calc(var(--hero-w) + 10px); }
-  .hero-slide { height: var(--hero-w); }
-  .promo-full .promo-mcopy {
-    display: flex; flex-direction: column; align-items: flex-start; gap: 10px;
-    position: absolute; left: 0; right: 0; bottom: 0; z-index: 2;
-    padding: 46px 18px 16px;
-    background: linear-gradient(to top, rgba(88,44,8,.88), rgba(88,44,8,.42) 55%, transparent);
-  }
-  .promo-mcopy h2 { color: #fff; font-size: clamp(22px, 6.4vw, 34px); font-weight: 800; line-height: 1.06; }
-  .promo-mcopy .promo-btn { background: #fff; color: var(--orange); padding: 9px 22px; font-size: 15px; }
+  .hero-viewport { height: calc(var(--hero-w) * 1.4 + 10px); }
+  .hero-slide { height: calc(var(--hero-w) * 1.4); }
   .hero-arrow { width: 36px; height: 36px; }
   .hero-arrow svg { width: 24px; height: 24px; }
   .hero-prev { left: calc(50% - var(--hero-w) / 2 - 18px); }
