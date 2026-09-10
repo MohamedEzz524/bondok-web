@@ -321,6 +321,7 @@ main.page { flex: 1 0 auto; }
 .acct-links { display: flex; flex-direction: column; gap: 2px; margin-bottom: 14px; }
 .acct-link { display: flex; align-items: center; gap: 12px; padding: 12px 8px; border-radius: 10px; font-size: 15px; font-weight: 700; color: var(--text); }
 .acct-link:hover { background: var(--surface); color: var(--orange); }
+.acct-pts { margin-left: auto; font-size: 12.5px; font-weight: 800; color: var(--orange); background: #fff0e6; padding: 3px 10px; border-radius: 999px; }
 .acct-signout { width: 100%; padding: 11px; border: 1.5px solid var(--border-strong); border-radius: 10px; background: none; font-weight: 800; color: #c0392b; cursor: pointer; font-family: var(--font); }
 .acct-signout:hover { background: #fdecea; border-color: #c0392b; }
 @media (max-width: 720px) { .acct-grid { grid-template-columns: 1fr; } }
@@ -1390,6 +1391,15 @@ main.page { flex: 1 0 auto; }
 .co-item-gift { outline: 1.5px dashed #bfe6cd; outline-offset: -1px; background: #f4fbf6; }
 .co-free { color: #1a7f45; font-weight: 800; font-size: 16px; }
 .co-gift-tag { display: inline-flex; align-items: center; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; color: #1a7f45; background: #e4f6ea; padding: 5px 12px; border-radius: 999px; }
+.co-sumrow-discount strong, .co-sumrow-green strong, .ord-total-discount dd { color: #1a7f45; }
+.co-voucher-ok { color: #1a7f45; font-weight: 700; }
+.co-voucher-clear { background: none; border: 0; color: var(--orange); font-weight: 800; cursor: pointer; text-decoration: underline; font-family: var(--font); font-size: inherit; padding: 0; }
+.co-voucher-hint { font-size: 12px; color: var(--text-muted); margin-top: 6px; }
+.co-redeem { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; text-align: left; background: #fff6ec; border: 1.5px solid #f2d8bd; border-radius: 12px; padding: 12px 14px; margin: 12px 0; cursor: pointer; font-family: var(--font); }
+.co-redeem.is-on { border-color: var(--orange); background: #fff0e6; }
+.co-redeem-text { display: flex; flex-direction: column; gap: 2px; }
+.co-redeem-text strong { font-size: 14px; font-weight: 800; color: var(--text); }
+.co-redeem-text span { font-size: 12.5px; color: var(--text-muted); }
 
 .side-fav-ic { color: var(--red); border: none; background: transparent; }
 .side-fav.is-active { background: #fdeaea; }
@@ -2026,7 +2036,26 @@ main.page { flex: 1 0 auto; }
   position: sticky; top: calc(var(--header-h) + 24px);
   background: #dedbd6; border-radius: 22px; min-height: 640px;
   display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
 }
+.bmap { position: relative; }
+.br-map .bmap { position: absolute; inset: 0; }   /* fill the sticky branches-page map box */
+.bmap-svg { width: 100%; height: 100%; display: block; }
+
+/* checkout delivery-coverage check */
+.cov { margin: 6px 0 4px; }
+.cov-nobranch { color: var(--text-muted); font-size: 14px; }
+.cov-map { position: relative; height: 230px; border-radius: 14px; overflow: hidden; border: 1px solid var(--border); }
+.cov-body { margin-top: 12px; }
+.cov-loc { width: 100%; }
+.cov-note { font-size: 13px; color: var(--text-muted); margin-top: 8px; }
+.cov-ok { font-size: 13.5px; font-weight: 700; color: #1a7f45; background: #e9f7ee; border-radius: 10px; padding: 10px 12px; margin-top: 10px; }
+.cov-out { margin-top: 10px; }
+.cov-warn { font-size: 13.5px; font-weight: 700; color: #c0392b; background: #fdecea; border-radius: 10px; padding: 10px 12px; }
+.cov-switch-label { font-size: 12.5px; font-weight: 700; color: var(--text-muted); margin: 10px 0 6px; }
+.cov-switch { display: flex; flex-wrap: wrap; gap: 8px; }
+.cov-switch-btn { font-size: 13px; font-weight: 800; color: var(--orange); background: #fff0e6; border: 1.5px solid var(--orange); border-radius: 999px; padding: 7px 14px; cursor: pointer; font-family: var(--font); }
+.cov-switch-btn:hover { background: var(--orange); color: #fff; }
 .br-map-follow {
   position: absolute; top: 16px; left: 16px;
   display: inline-flex; align-items: center; gap: 9px;

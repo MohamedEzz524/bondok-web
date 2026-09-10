@@ -3,7 +3,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { EVENTS, publish } from '@/lib/pubsub';
 import { useCatalog } from './catalog-context';
-import { FREE_GIFT, FREE_GIFT_THRESHOLD, GIFT_KEY } from '@/lib/upsell';
+import { FREE_GIFT, FREE_GIFT_THRESHOLD, GIFT_KEY, PROMOS, validatePromo, promoSubtotalDiscount, type Promo } from '@/lib/upsell';
 
 export interface CartItem {
   slug: string;          // product slug
@@ -29,6 +29,11 @@ interface CartState {
   count: number;                       // total units
   subtotal: number | null;             // null while any item has no price
   hasUnavailable: boolean;             // some line isn't sold at the active branch
+  promo: Promo | null;                 // applied promo (if valid for current subtotal)
+  promoDiscount: number;               // EGP off the subtotal
+  promoFreeship: boolean;              // waive the delivery fee
+  applyPromo: (code: string) => { ok: boolean; message: string };
+  clearPromo: () => void;
   add: (item: Omit<CartItem, 'qty'>, source?: string, qty?: number) => void;
   setQty: (slug: string, qty: number, source?: string) => void;
   remove: (slug: string, source?: string) => void;
@@ -42,6 +47,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const { priceOf, branchId } = useCatalog();
   const [items, setItems] = useState<CartItem[]>([]);
   const [loaded, setLoaded] = useState(false);
+  const [promoCode, setPromoCode] = useState<string | null>(null);
   /* mirror of `items` so cart actions can compute the next state and fire
      pubsub events synchronously in the event handler - never inside a
      setState updater (that runs during render and would setState on the
@@ -155,6 +161,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const clear = useCallback((source = 'cart') => {
     commit([]);
+    setPromoCode(null);
     publish(EVENTS.cartCleared, { source });
     publish(EVENTS.cartUpdate, { source, items: [], count: 0 });
   }, [commit]);
@@ -169,8 +176,28 @@ export function CartProvider({ children }: { children: ReactNode }) {
     return charge.reduce((s, i) => s + (i.price ?? 0) * i.qty, 0);
   }, [items]);
 
+  /* promo: valid only while the cart still meets its minimum */
+  const promo = promoCode ? PROMOS[promoCode] ?? null : null;
+  const promoValid = !!promo && !(promo.min && (subtotal ?? 0) < promo.min);
+  const promoDiscount = useMemo(
+    () => (promoValid ? promoSubtotalDiscount(promo, subtotal ?? 0) : 0),
+    [promo, promoValid, subtotal],
+  );
+  const promoFreeship = promoValid && promo!.kind === 'freeship';
+
+  const applyPromo = useCallback((code: string) => {
+    const { promo: p, message } = validatePromo(code, subtotal ?? 0);
+    if (p) setPromoCode(p.code);
+    return { ok: !!p, message };
+  }, [subtotal]);
+  const clearPromo = useCallback(() => setPromoCode(null), []);
+
   return (
-    <CartContext.Provider value={{ items, count, subtotal, hasUnavailable, add, setQty, remove, clear }}>
+    <CartContext.Provider value={{
+      items, count, subtotal, hasUnavailable,
+      promo: promoValid ? promo : null, promoDiscount, promoFreeship, applyPromo, clearPromo,
+      add, setQty, remove, clear,
+    }}>
       {children}
     </CartContext.Provider>
   );

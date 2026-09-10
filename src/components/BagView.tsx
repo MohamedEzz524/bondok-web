@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { AnimatePresence, motion } from 'motion/react';
 import { useCart } from './cart-context';
 import { useCatalog } from './catalog-context';
-import { suggestForCart, findProduct, FREE_DELIVERY_THRESHOLD } from '@/lib/upsell';
+import { suggestForCart, findProduct, FREE_DELIVERY_THRESHOLD, DELIVERY_FEE } from '@/lib/upsell';
 import CheckoutSteps from './CheckoutSteps';
 import GiftBar from './GiftBar';
 import { useState } from 'react';
@@ -15,17 +15,21 @@ import { useState } from 'react';
 const fmt = (v: number | null | undefined) => (v == null ? '—' : `EGP ${v}`);
 
 export default function BagView() {
-  const { items, count, subtotal, add, setQty, remove } = useCart();
+  const { items, count, subtotal, add, setQty, remove, promo: appliedPromo, promoDiscount, promoFreeship, applyPromo, clearPromo } = useCart();
   const [promo, setPromo] = useState('');
   const [promoMsg, setPromoMsg] = useState('');
 
   const { priceOf } = useCatalog();
   const suggestions = suggestForCart(items.map((i) => i.slug), 4).map((p) => ({ ...p, price: priceOf(p.slug) }));
 
-  const applyPromo = () => {
+  const doApplyPromo = () => {
     if (!promo.trim()) return;
-    setPromoMsg('Promo codes activate with the offers engine at launch.');
+    setPromoMsg(applyPromo(promo).message);
   };
+
+  /* estimated delivery fee for the summary (waived by FREESHIP or over threshold) */
+  const effFee = subtotal == null ? null : (promoFreeship || subtotal >= FREE_DELIVERY_THRESHOLD ? 0 : DELIVERY_FEE);
+  const total = subtotal == null ? null : subtotal - promoDiscount + (effFee ?? 0);
 
   if (items.length === 0) {
     return (
@@ -132,20 +136,22 @@ export default function BagView() {
             <span className="co-chip">{count} items</span>
           </div>
           <p className="co-sumrow"><span>Subtotal</span><strong>{fmt(subtotal)}</strong></p>
-          <p className="co-sumrow"><span>Delivery Fee ⓘ</span><strong>with branch data</strong></p>
+          {promoDiscount > 0 && (
+            <p className="co-sumrow co-sumrow-discount"><span>Discount{appliedPromo ? ` (${appliedPromo.code})` : ''}</span><strong>− {fmt(promoDiscount)}</strong></p>
+          )}
+          <p className="co-sumrow"><span>Delivery Fee</span><strong>{effFee === null ? '—' : effFee === 0 ? 'Free' : fmt(effFee)}</strong></p>
           <p className="co-sumrow co-sumrow-promo">
             <span>
               <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path strokeLinejoin="round" d="m12 2 9 9-10 10-9-9V2h10z" /><circle cx="7.5" cy="7.5" r="1.4" fill="currentColor" stroke="none" /></svg>
-              Free delivery promo over EGP {FREE_DELIVERY_THRESHOLD}
+              {promoFreeship ? 'Free delivery applied' : `Free delivery over EGP ${FREE_DELIVERY_THRESHOLD}`}
             </span>
-            <strong>− EGP 0</strong>
           </p>
           <div className="co-total">
             <div>
               <p className="co-total-label">Total</p>
               <p className="co-total-sub">Inclusive of all local taxes</p>
             </div>
-            <p className="co-total-num">{fmt(subtotal)}</p>
+            <p className="co-total-num">{fmt(total)}</p>
           </div>
           <Link href="/checkout" className="btn btn-solid co-cta">
             Proceed to Shipping
@@ -160,9 +166,12 @@ export default function BagView() {
                 onChange={(e) => setPromo(e.target.value)}
                 aria-label="Promo code"
               />
-              <button onClick={applyPromo}>Apply</button>
+              <button onClick={doApplyPromo}>Apply</button>
             </div>
-            {promoMsg && <p className="co-voucher-msg">{promoMsg}</p>}
+            {appliedPromo
+              ? <p className="co-voucher-msg co-voucher-ok">{appliedPromo.code} applied — {appliedPromo.label}. <button className="co-voucher-clear" onClick={() => { clearPromo(); setPromo(''); setPromoMsg(''); }}>Remove</button></p>
+              : promoMsg && <p className="co-voucher-msg">{promoMsg}</p>}
+            <p className="co-voucher-hint">Try <strong>BONDOK10</strong>, <strong>WELCOME50</strong> or <strong>FREESHIP</strong></p>
           </div>
           <p className="co-secure">
             <span><i className="co-secure-ic" style={{ WebkitMaskImage: 'url(/icons/Icon-security.svg)', maskImage: 'url(/icons/Icon-security.svg)' }} aria-hidden="true" /> Encrypted Checkout</span>

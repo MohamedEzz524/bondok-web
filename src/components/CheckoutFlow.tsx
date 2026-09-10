@@ -10,10 +10,13 @@ import Link from 'next/link';
 import { AnimatePresence, motion } from 'motion/react';
 import { useCart } from './cart-context';
 import { useBranch } from './branch-context';
+import { useAuth } from './auth-context';
 import { branches } from '@/lib/branches';
 import { EVENTS, publish } from '@/lib/pubsub';
+import { DELIVERY_FEE, FREE_DELIVERY_THRESHOLD } from '@/lib/upsell';
 import { saveOrder, type Order } from '@/lib/orders';
 import CheckoutSteps from './CheckoutSteps';
+import DeliveryCoverage from './DeliveryCoverage';
 import Select from './Select';
 
 type Step = 'shipping' | 'payment' | 'done';
@@ -44,8 +47,9 @@ const slide = {
 const fmt = (v: number | null | undefined) => (v == null ? '—' : `EGP ${v}`);
 
 export default function CheckoutFlow() {
-  const { items, count, subtotal, clear } = useCart();
+  const { items, count, subtotal, clear, promo, promoDiscount, promoFreeship } = useCart();
   const { selected } = useBranch();
+  const { user, spendPoints } = useAuth();
   const [step, setStep] = useState<Step>('shipping');
   const [ship, setShip] = useState<Shipping>({
     mode: 'delivery', location: 'Home', name: '', phone: '',
@@ -54,6 +58,8 @@ export default function CheckoutFlow() {
   const [pay, setPay] = useState<'card' | 'cod' | 'wallet'>('card');
   const [saveCard, setSaveCard] = useState(true);
   const [error, setError] = useState('');
+  const [coverage, setCoverage] = useState<boolean | null>(null);   // delivery coverage check status
+  const [redeem, setRedeem] = useState(false);                      // redeem rewards points
   const [copied, setCopied] = useState(false);
   const [placed, setPlaced] = useState<{ items: typeof items; count: number; subtotal: number | null } | null>(null);
   const orderIdRef = useRef('');
@@ -64,6 +70,17 @@ export default function CheckoutFlow() {
   }, []);
 
   const go = (next: Step) => { setError(''); setStep(next); window.scrollTo({ top: 0 }); };
+
+  /* order totals (shared by summaries + placeOrder) */
+  const POINTS_RATE = 10;   // points per EGP
+  const pointsAvail = user?.points ?? 0;
+  const pointsValueEGP = Math.floor(pointsAvail / POINTS_RATE);
+  const deliveryFee = ship.mode === 'pickup' ? 0 : (promoFreeship || (subtotal ?? 0) >= FREE_DELIVERY_THRESHOLD ? 0 : DELIVERY_FEE);
+  const afterPromo = Math.max(0, (subtotal ?? 0) - promoDiscount);
+  const pointsDiscount = redeem ? Math.min(pointsValueEGP, afterPromo) : 0;
+  const pointsUsed = pointsDiscount * POINTS_RATE;
+  const orderTotal = afterPromo - pointsDiscount + deliveryFee;
+  const feeText = deliveryFee === 0 ? 'Free' : fmt(deliveryFee);
 
   if (items.length === 0 && step !== 'done') {
     return (
@@ -83,14 +100,13 @@ export default function CheckoutFlow() {
     if (!EG_PHONE.test(ship.phone)) { setError('Please enter a valid Egyptian mobile number (01X XXXX XXXX).'); return; }
     if (ship.mode === 'delivery') {
       if (!ship.address.trim() || !ship.building.trim()) { setError('Please fill your address and building details.'); return; }
+      if (coverage === false) { setError('This location is outside the selected branch’s delivery area — switch branch or choose pickup.'); return; }
     } else if (!ship.branch) { setError('Please choose a pickup branch.'); return; }
     try { localStorage.setItem('bondok-shipping-v1', JSON.stringify(ship)); } catch { /* ignore */ }
     go('payment');
   };
 
   const placeOrder = () => {
-    const deliveryFee = ship.mode === 'delivery' ? 25 : 0;   // demo flat fee; per-branch later
-    const sub = subtotal ?? 0;
     const order: Order = {
       id: orderId,
       createdAt: new Date().toISOString(),
@@ -102,12 +118,16 @@ export default function CheckoutFlow() {
       branch: ship.branch || selected?.id || undefined,
       payment: pay,
       items: items.map((i) => ({ slug: i.slug, name: i.name, image: i.image, qty: i.qty, price: i.price, isGift: i.isGift, options: i.options })),
-      subtotal: sub,
+      subtotal: subtotal ?? 0,
+      discount: promoDiscount,
+      promoCode: promo?.code,
+      pointsUsed: pointsUsed || undefined,
       deliveryFee,
-      total: sub + deliveryFee,
+      total: orderTotal,
       eta: ship.mode === 'delivery' ? '25–40 min' : '15–20 min',
     };
     saveOrder(order);
+    if (pointsUsed > 0) spendPoints(pointsUsed);
     setPlaced({ items: [...items], count, subtotal });
     publish(EVENTS.orderPlaced, { source: 'checkout', orderId, count, subtotal });
     clear('checkout');
@@ -145,11 +165,12 @@ export default function CheckoutFlow() {
         </div>
       ))}
       <p className="co-sumrow"><span>Subtotal</span><strong>{fmt(subtotal)}</strong></p>
-      <p className="co-sumrow"><span>Standard Delivery Fee</span><strong className="co-fee">with branch data</strong></p>
+      {promoDiscount > 0 && <p className="co-sumrow co-sumrow-green"><span>Discount{promo ? ` (${promo.code})` : ''}</span><strong>− {fmt(promoDiscount)}</strong></p>}
+      <p className="co-sumrow"><span>{ship.mode === 'pickup' ? 'Pickup' : 'Delivery Fee'}</span><strong className="co-fee">{feeText}</strong></p>
       <p className="co-sumrow"><span>Taxes &amp; Service Surcharge</span><strong>Included</strong></p>
       <div className="co-recap-total">
         <p>Total amount</p>
-        <strong>{fmt(subtotal)}</strong>
+        <strong>{fmt(orderTotal)}</strong>
       </div>
     </div>
   );
@@ -257,6 +278,8 @@ export default function CheckoutFlow() {
                     />
                   </div>
                 )}
+
+                {ship.mode === 'delivery' && <DeliveryCoverage onStatus={setCoverage} />}
 
                 {error && <p className="ct-error" role="alert">{error}</p>}
                 <button className="btn btn-solid co-cta" onClick={submitShipping}>
@@ -404,17 +427,29 @@ export default function CheckoutFlow() {
                     <span className="co-paymethod-ok" aria-hidden="true"><img src="/icons/icon-rounded-check.svg" alt="" width="17" /></span>
                   </div>
                   <p className="co-sumrow"><span>Subtotal ({count} items)</span><strong>{fmt(subtotal)}</strong></p>
-                  <p className="co-sumrow"><span>Priority Delivery</span><strong className="co-fee">with branch data</strong></p>
-                  <p className="co-sumrow co-sumrow-green"><span>Promo Discount</span><strong>− EGP 0</strong></p>
+                  {promoDiscount > 0 && <p className="co-sumrow co-sumrow-green"><span>Promo Discount{promo ? ` (${promo.code})` : ''}</span><strong>− {fmt(promoDiscount)}</strong></p>}
+                  {pointsDiscount > 0 && <p className="co-sumrow co-sumrow-green"><span>Points redeemed ({pointsUsed} pts)</span><strong>− {fmt(pointsDiscount)}</strong></p>}
+                  <p className="co-sumrow"><span>{ship.mode === 'pickup' ? 'Pickup' : 'Priority Delivery'}</span><strong className="co-fee">{feeText}</strong></p>
+
+                  {user && pointsValueEGP > 0 && (
+                    <button type="button" role="switch" aria-checked={redeem} className={`co-redeem${redeem ? ' is-on' : ''}`} onClick={() => setRedeem((v) => !v)}>
+                      <span className="co-redeem-text">
+                        <strong>Use my {pointsAvail} points</strong>
+                        <span>Save up to EGP {pointsValueEGP} on this order</span>
+                      </span>
+                      <span className="fswitch-track" aria-hidden="true"><span className="fswitch-knob" /></span>
+                    </button>
+                  )}
+
                   <div className="co-total">
                     <div>
                       <p className="co-total-label">Total due</p>
                       <p className="co-total-sub">Inclusive of VAT</p>
                     </div>
-                    <p className="co-total-num">{fmt(subtotal)}</p>
+                    <p className="co-total-num">{fmt(orderTotal)}</p>
                   </div>
                   <button className="btn btn-solid co-cta" onClick={placeOrder}>
-                    Place Order{subtotal != null ? ` — EGP ${subtotal}` : ''}
+                    Place Order{subtotal != null ? ` — EGP ${orderTotal}` : ''}
                     <svg viewBox="0 0 54 54" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M40.4 29.8H0v-6.6h40.4L21.8 4.6 26.5 0l26.6 26.5-26.6 26.5-4.7-4.6 18.6-18.6z" /></svg>
                   </button>
                   <p className="co-demo co-center">By placing your order you confirm your craving and agree to our Terms.</p>

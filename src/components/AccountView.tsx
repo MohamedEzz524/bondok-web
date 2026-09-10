@@ -61,7 +61,7 @@ export default function AccountView() {
           <nav className="acct-links">
             <Link href="/orders" className="acct-link"><span>🧾</span> Order history</Link>
             <Link href="/menu?fav=1" className="acct-link"><span>❤️</span> My favorites</Link>
-            <Link href="/rewards" className="acct-link"><span>🎁</span> Rewards &amp; points</Link>
+            <Link href="/rewards" className="acct-link"><span>🎁</span> Rewards &amp; points<span className="acct-pts">{user.points} pts</span></Link>
             <Link href="/branches" className="acct-link"><span>📍</span> Find a branch</Link>
           </nav>
           <button className="acct-signout" onClick={signOut}>Sign out</button>

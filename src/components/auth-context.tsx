@@ -12,7 +12,11 @@ export interface AuthUser {
   phone: string;       // digits, no country code
   name: string;        // display name (editable on the account page)
   joined: string;      // ISO date the demo account was created
+  points: number;      // demo rewards balance (10 pts = EGP 1 at checkout)
 }
+
+/* demo starting balance for a new session */
+export const DEMO_START_POINTS = 850;
 
 interface AuthState {
   user: AuthUser | null;
@@ -20,6 +24,7 @@ interface AuthState {
   login: (phone: string) => AuthUser;
   logout: () => void;
   updateName: (name: string) => void;
+  spendPoints: (n: number) => void;
 }
 
 const STORAGE_KEY = 'bondok-auth-v1';
@@ -39,14 +44,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) setUser(JSON.parse(raw));
+      if (raw) {
+        const u = JSON.parse(raw);
+        if (typeof u.points !== 'number') u.points = DEMO_START_POINTS;   // backfill older sessions
+        setUser(u);
+      }
     } catch { /* corrupt: stay logged out */ }
     setReady(true);
   }, []);
 
   const login = useCallback((phone: string) => {
     const digits = phone.replace(/\D/g, '');
-    const u: AuthUser = { phone: digits, name: '', joined: new Date().toISOString() };
+    const u: AuthUser = { phone: digits, name: '', joined: new Date().toISOString(), points: DEMO_START_POINTS };
     setUser(u);
     persist(u);
     return u;
@@ -63,8 +72,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  const spendPoints = useCallback((n: number) => {
+    setUser((prev) => {
+      if (!prev) return prev;
+      const u = { ...prev, points: Math.max(0, prev.points - Math.round(n)) };
+      persist(u);
+      return u;
+    });
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ user, ready, login, logout, updateName }}>
+    <AuthContext.Provider value={{ user, ready, login, logout, updateName, spendPoints }}>
       {children}
     </AuthContext.Provider>
   );

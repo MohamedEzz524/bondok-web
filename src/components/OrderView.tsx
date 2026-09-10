@@ -89,6 +89,8 @@ export default function OrderView() {
           </ul>
           <dl className="ord-totals">
             <div><dt>Subtotal</dt><dd>{fmt(order.subtotal)}</dd></div>
+            {order.discount > 0 && <div className="ord-total-discount"><dt>Discount{order.promoCode ? ` (${order.promoCode})` : ''}</dt><dd>− {fmt(order.discount)}</dd></div>}
+            {order.pointsUsed ? <div className="ord-total-discount"><dt>Points ({order.pointsUsed} pts)</dt><dd>− {fmt(order.pointsUsed / 10)}</dd></div> : null}
             <div><dt>{order.mode === 'pickup' ? 'Pickup' : 'Delivery'}</dt><dd>{order.deliveryFee ? fmt(order.deliveryFee) : 'Free'}</dd></div>
             <div className="ord-total"><dt>Total</dt><dd>{fmt(order.total)}</dd></div>
           </dl>

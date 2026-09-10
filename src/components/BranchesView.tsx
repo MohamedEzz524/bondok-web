@@ -10,6 +10,7 @@ import { motion } from 'motion/react';
 import { branches } from '@/lib/branches';
 import { branchSamples, BRANCH_FILTERS } from '@/lib/branches-sample';
 import { useBranch } from './branch-context';
+import BranchMap from './BranchMap';
 
 /* great-circle distance in km between [lat, lng] pairs */
 function haversine([lat1, lng1]: [number, number], [lat2, lng2]: [number, number]) {
@@ -216,32 +217,19 @@ export default function BranchesView() {
           })}
         </div>
 
-        {/* map placeholder (live map arrives with branch coordinates) */}
-        <div className="br-map" role="img" aria-label="Branches map placeholder">
-          <label className="br-map-follow">
-            <input type="checkbox" defaultChecked />
-            Search this area as map moves
-          </label>
-          <div className="br-map-controls" aria-hidden="true">
-            <button className="br-map-btn">+</button>
-            <button className="br-map-btn">−</button>
-            <button className="br-map-btn br-map-btn-round">
-              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="var(--orange)" strokeWidth="1.8"><circle cx="12" cy="12" r="9" /><path strokeLinejoin="round" d="m15 9-2 5-4 1 2-5 4-1z" /></svg>
-            </button>
-            <button className="br-map-btn br-map-btn-round">
-              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="var(--orange)" strokeWidth="1.8"><path strokeLinejoin="round" d="m12 3 9 5-9 5-9-5 9-5zM3 13l9 5 9-5" /></svg>
-            </button>
-          </div>
-          <p className="br-map-pending">Live map connects once branch locations arrive</p>
+        {/* custom-drawn branch map (stylised placeholder until a maps provider is wired) */}
+        <div className="br-map">
+          <BranchMap
+            points={list.map((b) => ({ id: b.id, name: b.name, coords: branchSamples[b.id].coords }))}
+            selectedId={selectedId}
+            userPos={userPos}
+            onSelect={selectBranch}
+          />
           <div className="br-map-legend" aria-hidden="true">
             <span><span className="br-legend-dot" />Bondok Store</span>
-            <span><span className="br-legend-dot br-legend-dot2" />Open Late</span>
-            <span className="br-legend-mute">Live Traffic: Smooth</span>
+            <span><span className="br-legend-dot br-legend-dot2" />Your location</span>
+            <span className="br-legend-mute">Tap a pin to choose</span>
           </div>
-          <button className="br-map-expand" title="Full map arrives with branch coordinates">
-            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path strokeLinecap="round" d="M9 4H4v5m11-5h5v5M9 20H4v-5m11 5h5v-5" /></svg>
-            Expand Map
-          </button>
         </div>
       </div>
 

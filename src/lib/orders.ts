@@ -26,6 +26,9 @@ export interface Order {
   payment: 'card' | 'cod' | 'wallet';
   items: OrderLine[];
   subtotal: number;
+  discount: number;               // promo discount off subtotal
+  promoCode?: string;
+  pointsUsed?: number;            // rewards points redeemed
   deliveryFee: number;
   total: number;
   eta: string;                    // e.g. "25–40 min"
