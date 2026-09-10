@@ -3,9 +3,12 @@
 /* Custom-drawn (SVG) map placeholder — projects branch lat/lng onto a stylised
    canvas with pins, an optional delivery-coverage ring, and a "you" marker.
    Not a real tile map; a believable stand-in until a maps provider is wired.
-   Branch coords come from branchSamples (see menu-data / branches-sample). */
 
-import { useMemo } from 'react';
+   The viewBox is sized to the container's actual pixel aspect ratio (measured
+   with a ResizeObserver) and drawn 1:1 with preserveAspectRatio="none", so pins
+   are never cropped or stretched regardless of how wide/short the box is. */
+
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 export interface MapPoint {
   id: string;
@@ -25,11 +28,27 @@ interface Props {
   className?: string;
 }
 
-const W = 640;
-const H = 440;
-const PAD = 0.13;
+const PAD = 0.14;
 
 export default function BranchMap({ points, selectedId, userPos, onSelect, radiusKm, center, fitRadiusKm, className = '' }: Props) {
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const [dims, setDims] = useState({ w: 640, h: 400 });
+
+  useEffect(() => {
+    const el = wrapRef.current;
+    if (!el || typeof ResizeObserver === 'undefined') return;
+    const update = () => {
+      const r = el.getBoundingClientRect();
+      if (r.width > 0 && r.height > 0) setDims({ w: Math.round(r.width), h: Math.round(r.height) });
+    };
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  const W = dims.w, H = dims.h;
+
   const geo = useMemo(() => {
     const centre = center ?? points.find((p) => p.id === selectedId)?.coords;
     const all: [number, number][] = [...points.map((p) => p.coords)];
@@ -38,7 +57,6 @@ export default function BranchMap({ points, selectedId, userPos, onSelect, radiu
 
     let minLat: number, maxLat: number, minLng: number, maxLng: number;
     if (fitRadiusKm && centre) {
-      /* zoom the viewport to ~fitRadiusKm around the centre so a coverage ring fits */
       const degLat = fitRadiusKm / 111;
       const degLng = fitRadiusKm / (111 * Math.cos((centre[0] * Math.PI) / 180));
       minLat = centre[0] - degLat; maxLat = centre[0] + degLat;
@@ -52,18 +70,19 @@ export default function BranchMap({ points, selectedId, userPos, onSelect, radiu
       if (maxLng - minLng < 0.02) { maxLng += 0.01; minLng -= 0.01; }
     }
 
+    const padX = PAD * W, padY = PAD * H;
     const proj = ([lat, lng]: [number, number]): [number, number] => {
       const fx = (lng - minLng) / (maxLng - minLng);
       const fy = (lat - minLat) / (maxLat - minLat);
-      return [(PAD + fx * (1 - 2 * PAD)) * W, (PAD + (1 - fy) * (1 - 2 * PAD)) * H];
+      return [padX + fx * (W - 2 * padX), padY + (1 - fy) * (H - 2 * padY)];
     };
 
     let ring: { cx: number; cy: number; rx: number; ry: number } | null = null;
     if (radiusKm && centre) {
       const midLat = (minLat + maxLat) / 2;
       const kmPerDegLng = 111 * Math.cos((midLat * Math.PI) / 180);
-      const pxPerDegX = ((1 - 2 * PAD) * W) / (maxLng - minLng);
-      const pxPerDegY = ((1 - 2 * PAD) * H) / (maxLat - minLat);
+      const pxPerDegX = (W - 2 * padX) / (maxLng - minLng);
+      const pxPerDegY = (H - 2 * padY) / (maxLat - minLat);
       const [cx, cy] = proj(centre);
       ring = { cx, cy, rx: (radiusKm / kmPerDegLng) * pxPerDegX, ry: (radiusKm / 111) * pxPerDegY };
     }
@@ -73,31 +92,30 @@ export default function BranchMap({ points, selectedId, userPos, onSelect, radiu
       user: userPos ? proj(userPos) : null,
       ring,
     };
-  }, [points, selectedId, userPos, radiusKm, center]);
+  }, [points, selectedId, userPos, radiusKm, center, fitRadiusKm, W, H]);
+
+  /* proportional decorative "roads" */
+  const road = (pts: [number, number][]) => 'M' + pts.map(([fx, fy]) => `${(fx * W).toFixed(1)} ${(fy * H).toFixed(1)}`).join(' L');
 
   return (
-    <div className={`bmap ${className}`.trim()}>
-      <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid slice" className="bmap-svg" role="img" aria-label="Branch locations map">
-        {/* stylised backdrop */}
+    <div className={`bmap ${className}`.trim()} ref={wrapRef}>
+      <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" className="bmap-svg" role="img" aria-label="Branch locations map">
         <rect x="0" y="0" width={W} height={H} fill="#eef3ec" />
         <g stroke="#dfe7db" strokeWidth="1">
           {Array.from({ length: 7 }, (_, i) => <line key={`v${i}`} x1={(i + 1) * (W / 8)} y1="0" x2={(i + 1) * (W / 8)} y2={H} />)}
           {Array.from({ length: 5 }, (_, i) => <line key={`h${i}`} x1="0" y1={(i + 1) * (H / 6)} x2={W} y2={(i + 1) * (H / 6)} />)}
         </g>
-        {/* faint "roads" */}
         <g stroke="#d3ddcf" strokeWidth="7" strokeLinecap="round" fill="none" opacity="0.8">
-          <path d="M-20 120 L300 180 L680 90" />
-          <path d="M80 -20 L200 240 L140 460" />
-          <path d="M-20 340 L360 300 L680 360" />
+          <path d={road([[-0.03, 0.27], [0.47, 0.41], [1.03, 0.2]])} />
+          <path d={road([[0.12, -0.05], [0.31, 0.55], [0.22, 1.05]])} />
+          <path d={road([[-0.03, 0.78], [0.56, 0.68], [1.03, 0.82]])} />
         </g>
 
-        {/* coverage ring */}
         {geo.ring && (
           <ellipse cx={geo.ring.cx} cy={geo.ring.cy} rx={geo.ring.rx} ry={geo.ring.ry}
-            fill="rgba(221,130,38,0.12)" stroke="var(--orange)" strokeWidth="2" strokeDasharray="6 5" />
+            fill="rgba(221,130,38,0.12)" stroke="var(--orange)" strokeWidth="2" strokeDasharray="6 5" vectorEffect="non-scaling-stroke" />
         )}
 
-        {/* user marker */}
         {geo.user && (
           <g transform={`translate(${geo.user[0]} ${geo.user[1]})`}>
             <circle r="12" fill="rgba(43,108,176,0.18)" />
@@ -105,7 +123,6 @@ export default function BranchMap({ points, selectedId, userPos, onSelect, radiu
           </g>
         )}
 
-        {/* branch pins */}
         {geo.pins.map((p) => {
           const isSel = p.id === selectedId;
           const color = p.inRange === false ? '#9aa0a6' : 'var(--orange)';
