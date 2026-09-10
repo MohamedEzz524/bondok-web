@@ -3516,10 +3516,10 @@ main.page { flex: 1 0 auto; }
   .hsearch-close { order: 2; }
   .hsearch-go { order: 3; flex: 1 1 100%; }
 
-  /* mobile hero: full portrait banner (headline + CTA baked in) */
+  /* mobile hero: original 332x235 card; mobile banner art is padded to match */
   .hero { --hero-w: calc(100vw - 58px); --hero-gap: 16px; }
-  .hero-viewport { height: calc(var(--hero-w) * 1.4 + 10px); }
-  .hero-slide { height: calc(var(--hero-w) * 1.4); }
+  .hero-viewport { height: calc(var(--hero-w) * 235 / 332 + 10px); }
+  .hero-slide { height: calc(var(--hero-w) * 235 / 332); }
   .hero-arrow { width: 36px; height: 36px; }
   .hero-arrow svg { width: 24px; height: 24px; }
   .hero-prev { left: calc(50% - var(--hero-w) / 2 - 18px); }
