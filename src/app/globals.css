@@ -1746,7 +1746,7 @@ main.page { flex: 1 0 auto; }
 /* final marketing slides: copy is baked into the art */
 .promo-full { position: relative; }
 .promo-full .promo-img {
-  position: absolute; inset: 0; width: 100%; height: 100%;
+  position: absolute; inset: 0; width: 100% !important; height: 100% !important;
   object-fit: cover; max-height: none; padding: 0;
 }
 
