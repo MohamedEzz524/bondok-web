@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { UIProvider } from '@/components/ui-context';
+import { AuthProvider } from '@/components/auth-context';
 import { BranchProvider } from '@/components/branch-context';
 import { CatalogProvider } from '@/components/catalog-context';
 import { CartProvider } from '@/components/cart-context';
@@ -27,6 +28,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body>
         <UIProvider>
+          <AuthProvider>
           <BranchProvider>
           <CatalogProvider>
           <CartProvider>
@@ -47,6 +49,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </CartProvider>
           </CatalogProvider>
           </BranchProvider>
+          </AuthProvider>
         </UIProvider>
       </body>
     </html>

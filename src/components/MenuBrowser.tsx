@@ -7,6 +7,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useCart } from './cart-context';
 import { useUI } from './ui-context';
 import { usePricedCategories } from './catalog-context';
+import ProductBadges from './ProductBadges';
 import LocationBar from './LocationBar';
 import { EVENTS, publish } from '@/lib/pubsub';
 import type { MenuCategory, Product, Protein, Size } from '@/lib/menu-data';
@@ -87,6 +88,18 @@ function matches(p: Product, f: Filters, q: string): boolean {
   return true;
 }
 
+/* sub-tab -> which products qualify (tags/flags from menu-data merchandising) */
+function matchesSubTab(p: Product, t: SubTab): boolean {
+  switch (t) {
+    case 'Popular':
+    case 'Best Sellers': return p.tags?.includes('bestseller') ?? false;
+    case 'New In': return p.tags?.includes('new') ?? false;
+    case 'Spicy': return p.spicy === true;
+    case 'Combos & Value Meals': return (p.margin ?? 0) >= 5;
+    default: return true;   // All Items
+  }
+}
+
 /* size-variant siblings (single/double/triple) inside the same category */
 function variantsOf(cat: MenuCategory, p: Product): Product[] | null {
   if (!p.size) return null;
@@ -117,6 +130,7 @@ export default function MenuBrowser({ categories: baseCategories, initialCategor
   const [sort, setSort] = useState<'default' | 'name-asc' | 'name-desc' | 'price-asc' | 'price-desc'>('default');
   const [activeCat, setActiveCat] = useState<string>(() => initialCategory ?? searchParams.get('cat') ?? categories[0]?.slug ?? '');
   const [subTab, setSubTab] = useState<SubTab>('All Items');
+  const [hotOnly, setHotOnly] = useState(false);   // "Today's Hot Deals" toggle
   const [selected, setSelected] = useState<{ cat: string; slug: string } | null>(null);
   const [favOnly, setFavOnly] = useState(() => searchParams.get('fav') === '1');
 
@@ -200,11 +214,14 @@ export default function MenuBrowser({ categories: baseCategories, initialCategor
     }
     const total = base.length;
     let products = base.filter(
-      (p) => matches(p, filters, q) && (catMode && subTab === 'Spicy' ? p.spicy === true : true),
+      (p) => matches(p, filters, q)
+        && (catMode ? matchesSubTab(p, subTab) : true)
+        && (!hotOnly || (p.tags?.includes('hot') ?? false)),
     );
     if (sort !== 'default') products = [...products].sort(sorters[sort]);
+    else if (catMode) products = [...products].sort((a, b) => (b.margin ?? 0) - (a.margin ?? 0));  // Featured = high-margin first (golden triangle)
     return { products, title, eyebrow, blurb, total, catMode };
-  }, [categories, activeCategory, filters, q, query, sort, favOnly, favorites, searching, subTab]);
+  }, [categories, activeCategory, filters, q, query, sort, favOnly, favorites, searching, subTab, hotOnly]);
 
   const resultCount = shown.products.length;
 
@@ -302,6 +319,18 @@ export default function MenuBrowser({ categories: baseCategories, initialCategor
 
   const filterGroups = (
     <>
+      <div className="fgroup fgroup-switch">
+        <button
+          type="button"
+          role="switch"
+          aria-checked={hotOnly}
+          className={`fswitch${hotOnly ? ' is-on' : ''}`}
+          onClick={() => setHotOnly((v) => !v)}
+        >
+          <span className="fswitch-label">🔥 Today&apos;s Hot Deals</span>
+          <span className="fswitch-track" aria-hidden="true"><span className="fswitch-knob" /></span>
+        </button>
+      </div>
       <div className="fgroup">
         <h4>Size / Build</h4>
         <div className="fchips fchips-seg">
@@ -529,7 +558,6 @@ export default function MenuBrowser({ categories: baseCategories, initialCategor
                   <button key={t} className="menu-poptag" onClick={() => { setView('browse'); withFlip(() => setQuery(t)); }}>{t}</button>
                 ))}
               </div>
-              <p className="menu-sample-hint">Popular picks &amp; quick tabs are sample placeholders until live bestseller data connects.</p>
             </div>
 
             {/* collection header card */}
@@ -567,10 +595,11 @@ export default function MenuBrowser({ categories: baseCategories, initialCategor
                   return (
                     <article
                       key={p.slug}
-                      className="pcard"
+                      className={`pcard${(p.margin ?? 0) >= 5 ? ' is-featured' : ''}`}
                       style={flipBudget.has(p.slug) ? { viewTransitionName: `p-${catSlug}-${p.slug}` } : undefined}
                       onClick={() => { recordView(p.slug); setSelected({ cat: catSlug, slug: p.slug }); }}
                     >
+                      <ProductBadges tags={p.tags} variant="ribbon" className="pcard-ribbon" />
                       <FavButton slug={p.slug} className="pcard-fav" />
                       <div className="pcard-info">
                         <h3>{p.name}</h3>

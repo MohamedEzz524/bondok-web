@@ -4,14 +4,17 @@ import { useEffect } from 'react';
 import Link from 'next/link';
 import { useUI } from './ui-context';
 import { useBranch } from './branch-context';
+import { useAuth } from './auth-context';
 import CloseIcon from './CloseIcon';
 
 export default function MenuDrawer() {
-  const { drawerOpen, closeDrawer } = useUI();
+  const { drawerOpen, closeDrawer, openAuth } = useUI();
   const { selected, openBranchModal } = useBranch();
+  const { user, logout } = useAuth();
 
   /* close the drawer, then open the shared branch picker */
   const chooseLocation = () => { closeDrawer(); openBranchModal(); };
+  const startAuth = () => { closeDrawer(); openAuth(); };
 
   useEffect(() => {
     if (!drawerOpen) return;
@@ -51,8 +54,17 @@ export default function MenuDrawer() {
           <span className="drawer-loc-change">{selected ? 'Change' : 'Choose'}</span>
         </button>
 
-        <button className="btn btn-solid drawer-cta">Log In</button>
-        <button className="btn btn-outline drawer-cta">Sign Up</button>
+        {user ? (
+          <>
+            <Link href="/account" className="btn btn-solid drawer-cta" onClick={closeDrawer}>My Account</Link>
+            <button className="btn btn-outline drawer-cta" onClick={() => { logout(); closeDrawer(); }}>Sign Out</button>
+          </>
+        ) : (
+          <>
+            <button className="btn btn-solid drawer-cta" onClick={startAuth}>Log In</button>
+            <button className="btn btn-outline drawer-cta" onClick={startAuth}>Sign Up</button>
+          </>
+        )}
 
         <Link className="drawer-row" href="/branches" onClick={closeDrawer}>
           <span className="drawer-ic">

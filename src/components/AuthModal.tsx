@@ -6,11 +6,16 @@
 
 import { useEffect, useState } from 'react';
 import { useUI } from './ui-context';
+import { useAuth } from './auth-context';
 import Modal from './Modal';
+import OtpInput from './OtpInput';
 import CloseIcon from './CloseIcon';
+
+const DEMO_CODE = '1234';   // demo OTP until the real SMS gateway is connected
 
 export default function AuthModal() {
   const { authOpen, closeAuth } = useUI();
+  const { login } = useAuth();
   const [step, setStep] = useState<'phone' | 'otp'>('phone');
   const [phone, setPhone] = useState('');
   const [code, setCode] = useState('');
@@ -24,13 +29,19 @@ export default function AuthModal() {
     e.preventDefault();
     if (phone.replace(/\D/g, '').length < 10) { setNote('Please enter a valid phone number.'); return; }
     setNote('');
-    setStep('otp'); // placeholder: real OTP is sent once the SMS gateway is connected
+    setCode('');
+    setStep('otp');
   };
-  const verify = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (code.length < 4) { setNote('Enter the code we sent you.'); return; }
-    setNote('Preview only - accounts go live with the loyalty program.');
+
+  const submitCode = (value: string) => {
+    if (value !== DEMO_CODE) {
+      setNote(value.length < 4 ? 'Enter the 4-digit code.' : 'Incorrect code — for this demo, enter 1234.');
+      return;
+    }
+    login(phone);   // persists the demo session
+    closeAuth();
   };
+  const verify = (e: React.FormEvent) => { e.preventDefault(); submitCode(code); };
 
   return (
     <Modal open={authOpen} onClose={closeAuth} label="Sign Up or Log In" overlayClass="auth-overlay" panelClass="auth-modal">
@@ -64,11 +75,8 @@ export default function AuthModal() {
       ) : (
         <form className="auth-form" onSubmit={verify}>
           <p className="auth-otp-to">Enter the code we sent to<br /><strong>+20 {phone}</strong></p>
-          <input
-            className="auth-otp" type="text" inputMode="numeric" autoComplete="one-time-code"
-            maxLength={6} placeholder="------" aria-label="Verification code"
-            value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
-          />
+          <OtpInput length={4} value={code} onChange={setCode} onComplete={submitCode} />
+          <p className="auth-demo-hint">Demo mode — enter <strong>1234</strong> to continue.</p>
           <button type="submit" className="btn btn-solid auth-submit">Verify &amp; Continue</button>
           <button type="button" className="auth-resend" onClick={() => setNote('Code resent.')}>Resend code</button>
         </form>

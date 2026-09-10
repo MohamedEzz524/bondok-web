@@ -9,6 +9,7 @@ import { useCart } from './cart-context';
 import { useCatalog } from './catalog-context';
 import { suggestForCart, findProduct, FREE_DELIVERY_THRESHOLD } from '@/lib/upsell';
 import CheckoutSteps from './CheckoutSteps';
+import GiftBar from './GiftBar';
 import { useState } from 'react';
 
 const fmt = (v: number | null | undefined) => (v == null ? '—' : `EGP ${v}`);
@@ -60,11 +61,12 @@ export default function BagView() {
 
       <div className="co-layout">
         <div className="co-items">
+          <GiftBar />
           <AnimatePresence initial={false}>
           {items.map((it) => (
             <motion.article
               key={it.key ?? it.slug}
-              className="co-item"
+              className={`co-item${it.isGift ? ' co-item-gift' : ''}`}
               layout
               exit={{ opacity: 0, x: -70, height: 0, paddingTop: 0, paddingBottom: 0, marginBottom: -18, overflow: 'hidden' }}
               transition={{ duration: 0.28, ease: 'easeOut' }}
@@ -76,36 +78,47 @@ export default function BagView() {
                   <div>
                     <h3>{it.name}</h3>
                     <p className="co-item-desc">
-                      {it.options?.length ? it.options.join(' · ') : 'No customizations'}
-                      {it.note ? ` · “${it.note}”` : ''}
+                      {it.isGift
+                        ? '🎁 Free gift — enjoy on us!'
+                        : `${it.options?.length ? it.options.join(' · ') : 'No customizations'}${it.note ? ` · “${it.note}”` : ''}`}
                     </p>
                   </div>
                   <div className="co-item-price">
-                    <strong>{fmt(it.price != null ? it.price * it.qty : null)}</strong>
-                    <span>{it.price != null ? `EGP ${it.price} / ea` : 'price with menu data'}</span>
+                    {it.isGift
+                      ? <strong className="co-free">FREE</strong>
+                      : <>
+                          <strong>{fmt(it.price != null ? it.price * it.qty : null)}</strong>
+                          <span>{it.price != null ? `EGP ${it.price} / ea` : 'price with menu data'}</span>
+                        </>}
                   </div>
                 </div>
                 <div className="co-item-botrow">
-                  <span className="co-qty">
-                    <button aria-label="Decrease quantity" onClick={() => setQty(it.key ?? it.slug, it.qty - 1, 'cart-page')}>−</button>
-                    <b>{it.qty}</b>
-                    <button className="co-qty-plus" aria-label="Increase quantity" onClick={() => setQty(it.key ?? it.slug, it.qty + 1, 'cart-page')}>+</button>
-                  </span>
-                  <span className="co-item-actions">
-                    {(() => {
-                      const loc = findProduct(it.slug);
-                      return loc ? (
-                        <Link className="co-edit" href={`/menu/${loc.catSlug}/${it.slug}`} title="Edit options">
-                          <span className="co-edit-ic" aria-hidden="true" style={{ WebkitMaskImage: 'url(/icons/Icon-edit.svg)', maskImage: 'url(/icons/Icon-edit.svg)' }} />
-                          Edit
-                        </Link>
-                      ) : null;
-                    })()}
-                    <button className="co-trash" aria-label={`Remove ${it.name}`} onClick={() => remove(it.key ?? it.slug, 'cart-page')}>
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src="/icons/icon-delete.svg" alt="" width="15" height="15" />
-                    </button>
-                  </span>
+                  {it.isGift ? (
+                    <span className="co-gift-tag">Free Gift</span>
+                  ) : (
+                    <>
+                      <span className="co-qty">
+                        <button aria-label="Decrease quantity" onClick={() => setQty(it.key ?? it.slug, it.qty - 1, 'cart-page')}>−</button>
+                        <b>{it.qty}</b>
+                        <button className="co-qty-plus" aria-label="Increase quantity" onClick={() => setQty(it.key ?? it.slug, it.qty + 1, 'cart-page')}>+</button>
+                      </span>
+                      <span className="co-item-actions">
+                        {(() => {
+                          const loc = findProduct(it.slug);
+                          return loc ? (
+                            <Link className="co-edit" href={`/menu/${loc.catSlug}/${it.slug}`} title="Edit options">
+                              <span className="co-edit-ic" aria-hidden="true" style={{ WebkitMaskImage: 'url(/icons/Icon-edit.svg)', maskImage: 'url(/icons/Icon-edit.svg)' }} />
+                              Edit
+                            </Link>
+                          ) : null;
+                        })()}
+                        <button className="co-trash" aria-label={`Remove ${it.name}`} onClick={() => remove(it.key ?? it.slug, 'cart-page')}>
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src="/icons/icon-delete.svg" alt="" width="15" height="15" />
+                        </button>
+                      </span>
+                    </>
+                  )}
                 </div>
               </div>
             </motion.article>

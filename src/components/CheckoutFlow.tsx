@@ -9,8 +9,10 @@ import { useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { AnimatePresence, motion } from 'motion/react';
 import { useCart } from './cart-context';
+import { useBranch } from './branch-context';
 import { branches } from '@/lib/branches';
 import { EVENTS, publish } from '@/lib/pubsub';
+import { saveOrder, type Order } from '@/lib/orders';
 import CheckoutSteps from './CheckoutSteps';
 import Select from './Select';
 
@@ -43,6 +45,7 @@ const fmt = (v: number | null | undefined) => (v == null ? '—' : `EGP ${v}`);
 
 export default function CheckoutFlow() {
   const { items, count, subtotal, clear } = useCart();
+  const { selected } = useBranch();
   const [step, setStep] = useState<Step>('shipping');
   const [ship, setShip] = useState<Shipping>({
     mode: 'delivery', location: 'Home', name: '', phone: '',
@@ -86,6 +89,25 @@ export default function CheckoutFlow() {
   };
 
   const placeOrder = () => {
+    const deliveryFee = ship.mode === 'delivery' ? 25 : 0;   // demo flat fee; per-branch later
+    const sub = subtotal ?? 0;
+    const order: Order = {
+      id: orderId,
+      createdAt: new Date().toISOString(),
+      status: 'confirmed',
+      mode: ship.mode,
+      name: ship.name,
+      phone: ship.phone,
+      address: ship.mode === 'delivery' ? [ship.building, ship.address, ship.city].filter(Boolean).join(', ') : undefined,
+      branch: ship.branch || selected?.id || undefined,
+      payment: pay,
+      items: items.map((i) => ({ slug: i.slug, name: i.name, image: i.image, qty: i.qty, price: i.price, isGift: i.isGift, options: i.options })),
+      subtotal: sub,
+      deliveryFee,
+      total: sub + deliveryFee,
+      eta: ship.mode === 'delivery' ? '25–40 min' : '15–20 min',
+    };
+    saveOrder(order);
     setPlaced({ items: [...items], count, subtotal });
     publish(EVENTS.orderPlaced, { source: 'checkout', orderId, count, subtotal });
     clear('checkout');
@@ -493,11 +515,11 @@ export default function CheckoutFlow() {
                   </p>
 
                   <div className="co-confirm-btns">
-                    <button className="btn btn-solid co-track" title="Live tracking arrives with the Cloud-Kitchen API">
+                    <Link href={`/order?id=${orderId}`} className="btn btn-solid co-track">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src="/icons/icon-track-your-order.svg" alt="" width="17" />
                       Track Your Order
-                    </button>
+                    </Link>
                     <Link href="/" className="co-home">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src="/icons/Icon-back-to-home.svg" alt="" width="17" />

@@ -16,6 +16,7 @@ import { useCart } from './cart-context';
 import { useCatalog } from './catalog-context';
 import { usePrefs } from './prefs-context';
 import FavButton from './FavButton';
+import ProductBadges from './ProductBadges';
 
 interface Props {
   category: MenuCategory;
@@ -131,6 +132,7 @@ export default function ProductView({ category, product, variants }: Props) {
         <div className="pd-left">
           <div className="pd-gallery">
             <div className="pd-stage">
+              <ProductBadges tags={product.tags} className="pd-badges" />
               {config.badge && <span className="pd-badge">{config.badge}</span>}
               <button className="pd-share" aria-label="Share this product" onClick={share}>
                 {shared ? <span className="pd-shared">Link copied!</span> : (

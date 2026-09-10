@@ -4,6 +4,9 @@
 
 export type Size = 'single' | 'double' | 'triple';
 export type Protein = 'chicken' | 'beef' | 'shrimp' | 'turkey';
+/* merchandising tags -> floating badges + "Today's Hot Deals" filter.
+   PLACEHOLDER assignments (MERCH below); real tags come from the CMS/client. */
+export type ProductTag = 'hot' | 'sale' | 'new' | 'bestseller';
 
 export interface Product {
   slug: string;
@@ -15,6 +18,8 @@ export interface Product {
   protein?: Protein;
   spicy?: boolean;
   cheesy?: boolean;
+  tags?: ProductTag[];   // merchandising badges (hot deal / sale / new / bestseller)
+  margin?: number;       // 1-5 merchandising priority (5 = top margin); drives Featured order + golden-triangle
 }
 
 export interface MenuCategory {
@@ -167,8 +172,58 @@ const SIZED_CATEGORIES = new Set(['sandwiches', 'fillet', 'grilled', 'burgers'])
    catalog (src/data/branches/*.json via branch-catalog.ts + useCatalog). The
    canonical seed prices live in src/data/seed-prices.json. Combo/size deltas
    (product-options COMBO) still apply on top of the branch base price. */
+/* PLACEHOLDER merchandising: which items carry deal/new/bestseller tags and
+   their margin rank. Real values come from the CMS/client. Items not listed
+   get a category-default margin (below) and no tags. */
+const MERCH: Record<string, { tags?: ProductTag[]; margin?: number }> = {
+  // Sandwiches
+  'chicken-cheddar-jalapeno': { tags: ['hot', 'bestseller'], margin: 5 },
+  'chicken-chili-fire': { tags: ['hot'], margin: 4 },
+  'chicken-mozzarella': { tags: ['bestseller'], margin: 4 },
+  // Chicken Fillet
+  'chicken-fillet': { tags: ['bestseller'], margin: 4 },
+  'chicken-fillet-double': { tags: ['hot'], margin: 5 },
+  // Grilled & Turkey
+  'grilled-chicken-double': { tags: ['hot'], margin: 5 },
+  'turkey-chicken': { tags: ['new'], margin: 3 },
+  // Burgers
+  'texas-and-beef-burger': { tags: ['hot', 'sale'], margin: 4 },
+  'western-bbq-burger': { tags: ['new', 'sale'], margin: 4 },
+  'mushroom-burger': { tags: ['bestseller'], margin: 4 },
+  // Rolls
+  'chicken-fillet-roll': { tags: ['hot'], margin: 4 },
+  'five-star-burger': { tags: ['new'], margin: 4 },
+  'shrimp-roll': { tags: ['bestseller'], margin: 4 },
+  'modern-shrimp': { tags: ['new'], margin: 3 },
+  // Meals
+  'bondok-meal': { tags: ['hot', 'bestseller'], margin: 5 },
+  'classic-meal': { tags: ['hot'], margin: 5 },
+  '12-pcs-meal': { tags: ['hot'], margin: 5 },
+  '16-pcs-family-meal': { tags: ['hot'], margin: 5 },
+  'mega-meal': { tags: ['sale'], margin: 5 },
+  'golden-meal': { tags: ['sale'], margin: 4 },
+  // Kids, Rizo & Tenders
+  '6-pcs-tenders': { tags: ['hot'], margin: 4 },
+  '12-pcs-tenders': { tags: ['bestseller'], margin: 4 },
+  'chicken-rizo': { tags: ['new'], margin: 3 },
+  // Sides & Sauces
+  'cheese-fries': { tags: ['hot', 'bestseller'], margin: 5 },
+  'mozzarella-sticks': { tags: ['bestseller'], margin: 4 },
+  'onion-rings': { tags: ['new'], margin: 4 },
+};
+
+/* category-default margin when a slug isn't in MERCH (sauces are lowest) */
+function defaultMargin(p: Product, catSlug: string): number {
+  if (/sauce|ketchup|mayo|thoumeya/.test(p.slug)) return 1;
+  if (catSlug === 'meals') return 4;
+  if (catSlug === 'sides' || catSlug === 'sandwiches' || catSlug === 'burgers') return 4;
+  if (catSlug === 'rolls' || catSlug === 'kids-tenders') return 3;
+  return 2;
+}
+
 function enrich(p: Product, catSlug: string): Product {
   const n = p.name.toLowerCase();
+  const merch = MERCH[p.slug] ?? {};
 
   let size = p.size;
   if (!size && SIZED_CATEGORIES.has(catSlug)) {
@@ -189,6 +244,8 @@ function enrich(p: Product, catSlug: string): Product {
     protein,
     spicy: p.spicy ?? /jalapeno|chili|fire/.test(n),
     cheesy: p.cheesy ?? /cheddar|mozzarella|cheese|cheezy/.test(n),
+    tags: p.tags ?? merch.tags,
+    margin: p.margin ?? merch.margin ?? defaultMargin(p, catSlug),
   };
 }
 

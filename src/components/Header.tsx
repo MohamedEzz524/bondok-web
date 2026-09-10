@@ -5,10 +5,12 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useRef, useState } from 'react';
 import { useUI } from './ui-context';
 import { useCart } from './cart-context';
+import { useAuth } from './auth-context';
 
 export default function Header() {
   const { openDrawer, openAuth } = useUI();
   const { count } = useCart();
+  const { user } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   const [searchOpen, setSearchOpen] = useState(false);
@@ -61,7 +63,14 @@ export default function Header() {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/bondok/rewards.webp" alt="Rewards" className="rewards-img" />
           </Link>
-          <button className="btn btn-outline btn-signup" onClick={openAuth}>Sign Up</button>
+          {user ? (
+            <Link href="/account" className="btn btn-outline btn-account" aria-label="Your account">
+              <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10zm0 2c-5 0-9 2.5-9 6v1h18v-1c0-3.5-4-6-9-6z" /></svg>
+              <span>{user.name ? user.name.split(' ')[0] : 'Account'}</span>
+            </Link>
+          ) : (
+            <button className="btn btn-outline btn-signup" onClick={openAuth}>Sign Up</button>
+          )}
           <Link href="/bag" className="btn btn-solid btn-bag" aria-label="View shopping bag">
             <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
               <path fill="currentColor" d="M7 7V6a5 5 0 0 1 10 0v1h3v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7h3zm2 0h6V6a3 3 0 0 0-6 0v1z" />

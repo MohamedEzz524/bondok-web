@@ -27,15 +27,22 @@ export function useDragScroll<T extends HTMLElement = HTMLDivElement>() {
     st.current.startX = e.clientX;
     st.current.scroll = el.scrollLeft;
     st.current.v = 0;
-    el.style.scrollSnapType = 'none';
-    el.setPointerCapture(e.pointerId);
+    /* NOTE: do NOT capture the pointer or disable snap here — a plain click must
+       reach the button underneath. Pointer capture on pointerdown makes the
+       browser fire `click` on this container instead of the target (breaks
+       tabs/chips). We upgrade to a drag only once the pointer actually moves. */
   }, []);
 
   const onPointerMove = useCallback((e: React.PointerEvent<T>) => {
     const el = ref.current;
     if (!el || !st.current.down) return;
     const dx = e.clientX - st.current.startX;
-    if (Math.abs(dx) > 4) st.current.moved = true;
+    if (!st.current.moved) {
+      if (Math.abs(dx) <= 4) return;            // still a potential click — leave it alone
+      st.current.moved = true;                  // now it's a drag: capture + free-scroll
+      el.style.scrollSnapType = 'none';
+      try { el.setPointerCapture(e.pointerId); } catch { /* capture unsupported */ }
+    }
     const prev = el.scrollLeft;
     el.scrollLeft = st.current.scroll - dx;
     st.current.v = el.scrollLeft - prev; // px/frame-ish, for inertia
@@ -46,6 +53,7 @@ export function useDragScroll<T extends HTMLElement = HTMLDivElement>() {
     if (!el || !st.current.down) return;
     st.current.down = false;
     if (el.hasPointerCapture(e.pointerId)) el.releasePointerCapture(e.pointerId);
+    if (!st.current.moved) return;              // plain click: nothing captured/snapped to undo
     const restoreSnap = () => { el.style.scrollSnapType = ''; };
     let v = st.current.v;
     if (Math.abs(v) < 1) { restoreSnap(); return; }

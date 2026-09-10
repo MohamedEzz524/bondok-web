@@ -3,6 +3,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { EVENTS, publish } from '@/lib/pubsub';
 import { useCatalog } from './catalog-context';
+import { FREE_GIFT, FREE_GIFT_THRESHOLD, GIFT_KEY } from '@/lib/upsell';
 
 export interface CartItem {
   slug: string;          // product slug
@@ -13,6 +14,7 @@ export interface CartItem {
   basePrice?: number;    // branch base price of the slug (without option upcharges)
   optionsDelta?: number; // upcharge from combo/size/add-ons - branch-invariant, so price reprices cleanly on branch change
   unavailable?: boolean; // true when the active branch doesn't sell this slug
+  isGift?: boolean;      // auto-added free-gift line (price 0, not repriced, excluded from subtotal)
   options?: string[];    // human-readable customization summary
   note?: string;         // kitchen note
   qty: number;
@@ -79,6 +81,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     if (cur.length === 0) return;
     let changed = false;
     const next = cur.map((i) => {
+      if (i.isGift) return i;                        // gift stays free, never repriced
       const delta = i.optionsDelta ?? 0;
       const base = branchId ? priceOf(i.slug) : undefined;
       const price = base === undefined ? undefined : base + delta;
@@ -92,6 +95,28 @@ export function CartProvider({ children }: { children: ReactNode }) {
       publish(EVENTS.cartUpdate, { source: 'branch-reprice', items: next, count: countOf(next) });
     }
   }, [priceOf, branchId, loaded, commit]);
+
+  /* Free gift: once the priced (non-gift) subtotal reaches the threshold, a free
+     gift line is auto-added; it's auto-removed if the cart drops back below. */
+  useEffect(() => {
+    if (!loaded) return;
+    const cur = itemsRef.current;
+    const hasGift = cur.some((i) => i.isGift);
+    const paid = cur.filter((i) => !i.isGift && !i.unavailable);
+    const priced = paid.length > 0 && paid.every((i) => i.price !== undefined);
+    const sub = priced ? paid.reduce((s, i) => s + (i.price ?? 0) * i.qty, 0) : 0;
+    const qualifies = !!branchId && priced && sub >= FREE_GIFT_THRESHOLD;
+
+    if (qualifies && !hasGift) {
+      const next = [...cur, { slug: FREE_GIFT.slug, key: GIFT_KEY, name: FREE_GIFT.name, image: FREE_GIFT.image, price: 0, isGift: true, qty: 1 }];
+      commit(next);
+      publish(EVENTS.cartUpdate, { source: 'free-gift', items: next, count: countOf(next) });
+    } else if (!qualifies && hasGift) {
+      const next = cur.filter((i) => !i.isGift);
+      commit(next);
+      publish(EVENTS.cartUpdate, { source: 'free-gift-removed', items: next, count: countOf(next) });
+    }
+  }, [items, branchId, loaded, commit]);
 
   const add = useCallback((item: Omit<CartItem, 'qty'>, source = 'cart', qty = 1) => {
     if (qty <= 0) return;
@@ -134,11 +159,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
     publish(EVENTS.cartUpdate, { source, items: [], count: 0 });
   }, [commit]);
 
-  const count = useMemo(() => items.reduce((s, i) => s + i.qty, 0), [items]);
+  const count = useMemo(() => items.reduce((s, i) => s + (i.isGift ? 0 : i.qty), 0), [items]);
   const hasUnavailable = useMemo(() => items.some((i) => i.unavailable), [items]);
   const subtotal = useMemo(() => {
     if (items.length === 0) return 0;
-    const charge = items.filter((i) => !i.unavailable);
+    const charge = items.filter((i) => !i.unavailable && !i.isGift);
     if (charge.length === 0) return null;                        // everything unavailable at this branch
     if (charge.some((i) => i.price === undefined)) return null;  // no branch chosen / prices pending
     return charge.reduce((s, i) => s + (i.price ?? 0) * i.qty, 0);

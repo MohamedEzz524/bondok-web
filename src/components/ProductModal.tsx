@@ -5,6 +5,7 @@ import type { Product } from '@/lib/menu-data';
 import { useCart } from './cart-context';
 import { useCatalog } from './catalog-context';
 import CloseIcon from './CloseIcon';
+import ProductBadges from './ProductBadges';
 import FavButton from './FavButton';
 import { findProduct } from '@/lib/upsell';
 import { optionsFor } from '@/lib/product-options';
@@ -141,6 +142,7 @@ export default function ProductModal({ product, onClose }: Props) {
           {/* LEFT: image + identity */}
           <div className="pmodal-left">
             <div className="pmodal-imgwrap">
+              <ProductBadges tags={product.tags} className="pmodal-badges" />
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img className="pmodal-img" src={product.image} alt={product.name} />
               <FavButton slug={product.slug} size={20} className="pmodal-fav" />

@@ -8,6 +8,17 @@ import { menuCategories, type Product } from './menu-data';
    once cart items carry real prices; value is CMS-configurable later. */
 export const FREE_DELIVERY_THRESHOLD = 300;
 
+/* free-gift threshold (EGP): spend this much (excluding the gift itself) and a
+   free item is auto-added to the cart. PLACEHOLDER gift + value — CMS-driven,
+   per-branch later. GIFT_KEY keeps the gift a distinct, non-mergeable line. */
+export const FREE_GIFT_THRESHOLD = 450;
+export const GIFT_KEY = '__free_gift__';
+export const FREE_GIFT = {
+  slug: 'french-fries',
+  name: 'Free French Fries',
+  image: '/bondok/menu/sides/french-fries.webp',
+};
+
 const bySlug = new Map<string, { catSlug: string; product: Product }>();
 for (const c of menuCategories) {
   for (const p of c.products) bySlug.set(p.slug, { catSlug: c.slug, product: p });
