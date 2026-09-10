@@ -5,7 +5,7 @@
    branch data / Cloud-Kitchen API, card processing with the payment
    gateway. Orders publish a bus event and clear the cart. */
 
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { AnimatePresence, motion } from 'motion/react';
 import { useCart } from './cart-context';
@@ -67,6 +67,14 @@ export default function CheckoutFlow() {
   const orderId = useMemo(() => {
     if (!orderIdRef.current) orderIdRef.current = 'BD-' + String(Math.floor(100000 + Math.random() * 900000));
     return orderIdRef.current;
+  }, []);
+
+  /* carry the fulfilment mode chosen in the order popup */
+  useEffect(() => {
+    try {
+      const f = localStorage.getItem('bondok-fulfillment-v1');
+      if (f === 'pickup' || f === 'delivery') setShip((s) => ({ ...s, mode: f }));
+    } catch { /* ignore */ }
   }, []);
 
   const go = (next: Step) => { setError(''); setStep(next); window.scrollTo({ top: 0 }); };

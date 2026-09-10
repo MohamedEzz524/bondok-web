@@ -7,15 +7,8 @@
 
 import { useEffect, useState } from 'react';
 import { useBranch } from './branch-context';
-import { branchSamples, DELIVERY_RADIUS_KM } from '@/lib/branches-sample';
+import { branchSamples, DELIVERY_RADIUS_KM, haversine, coverageOf } from '@/lib/branches-sample';
 import BranchMap from './BranchMap';
-
-function haversine([lat1, lng1]: [number, number], [lat2, lng2]: [number, number]): number {
-  const R = 6371, toRad = (d: number) => (d * Math.PI) / 180;
-  const dLat = toRad(lat2 - lat1), dLng = toRad(lng2 - lng1);
-  const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-}
 
 export default function DeliveryCoverage({ onStatus }: { onStatus?: (inRange: boolean | null) => void }) {
   const { selected, branches, selectBranch, recommend } = useBranch();
@@ -24,8 +17,10 @@ export default function DeliveryCoverage({ onStatus }: { onStatus?: (inRange: bo
   const [note, setNote] = useState('');
 
   const selCoords = selected ? branchSamples[selected.id].coords : undefined;
-  const km = pos && selCoords ? haversine(pos, selCoords) : null;
-  const inRange = km == null ? null : km <= DELIVERY_RADIUS_KM;
+  const cov = pos && selected ? coverageOf(pos, selected.id) : null;
+  const km = cov?.km ?? null;
+  const inRange = cov ? cov.inRange : null;
+  const effRadius = pos && selCoords ? Math.max(DELIVERY_RADIUS_KM, haversine(pos, selCoords) * 1.12) : DELIVERY_RADIUS_KM;
 
   useEffect(() => { onStatus?.(inRange); }, [inRange, onStatus]);
   /* recheck against a newly-selected branch */
@@ -37,7 +32,7 @@ export default function DeliveryCoverage({ onStatus }: { onStatus?: (inRange: bo
 
   const points = branches.map((b) => ({
     id: b.id, name: b.name, coords: branchSamples[b.id].coords,
-    inRange: pos ? haversine(pos, branchSamples[b.id].coords) <= DELIVERY_RADIUS_KM : undefined,
+    inRange: pos ? coverageOf(pos, b.id).inRange : undefined,
   }));
   const nearest = pos ? recommend(pos).filter((r) => r.inRange && r.branch.id !== selected.id).slice(0, 3) : [];
 
@@ -58,9 +53,9 @@ export default function DeliveryCoverage({ onStatus }: { onStatus?: (inRange: bo
         points={points}
         selectedId={selected.id}
         userPos={pos}
-        radiusKm={DELIVERY_RADIUS_KM}
+        radiusKm={effRadius}
         center={selCoords}
-        fitRadiusKm={DELIVERY_RADIUS_KM * 1.7}
+        fitRadiusKm={pos ? effRadius * 1.5 : DELIVERY_RADIUS_KM * 1.7}
         onSelect={selectBranch}
       />
       <div className="cov-body">

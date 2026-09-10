@@ -588,6 +588,31 @@ main.page { flex: 1 0 auto; }
 .omodal-map span { color: #90a08a; font-size: 22px; font-weight: 700; }
 .omodal-sheet { position: relative; background: var(--bg); border-radius: 12px 12px 0 0; margin-top: -8px; padding: 20px 16px 24px; }
 .omodal-grabber { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); width: 56px; height: 4px; border-radius: 4px; background: #cfcac6; }
+
+/* ---- rebuilt order modal (unified body + scroll + footer) ---- */
+.omodal[data-mode="pickup"], .omodal[data-mode="delivery"] { width: min(720px, 94vw); height: auto; max-height: 92vh; margin-top: 0; }
+.omodal-body { flex: 1; overflow-y: auto; padding: 16px 20px; display: flex; flex-direction: column; gap: 12px; }
+.omodal-body .omodal-search { position: static; margin: 0; }
+.omodal-body .omodal-map { flex: none; height: 220px; border-radius: 12px; overflow: hidden; position: relative; background: none; }
+.omodal-locate { width: 100%; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+.omodal-note-sm { font-size: 13px; color: var(--text-muted); }
+.omodal-warn { font-size: 13px; font-weight: 700; color: #c0392b; background: #fdecea; border-radius: 10px; padding: 10px 12px; }
+.omodal-saved { font-size: 13px; color: var(--text-muted); }
+.omodal-signin-link { color: var(--orange); font-weight: 800; text-decoration: underline; background: none; border: 0; cursor: pointer; padding: 0; font: inherit; }
+.omodal-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.omodal-branch { width: 100%; display: flex; align-items: center; gap: 10px; text-align: left; background: #fff; border: 1.5px solid var(--border); border-radius: 12px; padding: 11px 14px; cursor: pointer; transition: border-color .12s ease; }
+.omodal-branch:hover { border-color: var(--orange); }
+.omodal-branch.is-on { border-color: var(--orange); background: #fdeee0; }
+.omodal-branch-main { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.omodal-branch-name { font-weight: 800; font-size: 15px; color: var(--text); }
+.omodal-branch-area { font-size: 12.5px; color: var(--text-muted); }
+.omodal-tag { flex: 0 0 auto; font-size: 10.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .02em; padding: 2px 8px; border-radius: 999px; }
+.omodal-tag-ok { color: #1a7f45; background: #e4f6ea; }
+.omodal-tag-far { color: var(--text-muted); background: var(--surface); }
+.omodal-tick { flex: 0 0 auto; color: var(--orange); font-weight: 800; }
+.omodal-foot { padding: 14px 20px; border-top: 1px solid var(--border); background: var(--bg); }
+.omodal-cta { width: 100%; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+.omodal-cta:disabled { opacity: .55; cursor: not-allowed; }
 .omodal-card { background: #fff; border-radius: 12px; padding: 22px 24px; display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; }
 .omodal-card h3 { font-size: 22px; font-weight: 700; color: var(--text); }
 .omodal-card p { font-size: 15px; color: var(--text); }

@@ -122,11 +122,30 @@ export const branchSamples: Record<string, BranchSample> = {
   },
 };
 
-/* Delivery coverage radius, in km. PLACEHOLDER: one threshold applied to every
-   branch until the client / Cloud-Kitchen API sends real per-branch coverage
-   (radius or polygon). Used to tell a located visitor which branches actually
-   deliver to them vs. which are pickup-only / out of range. Tune freely. */
-export const DELIVERY_RADIUS_KM = 8;
+/* Delivery coverage radius, in km. PLACEHOLDER until the client / Cloud-Kitchen
+   API sends real per-branch coverage (radius or polygon). */
+export const DELIVERY_RADIUS_KM = 15;
+
+export function haversine([lat1, lng1]: [number, number], [lat2, lng2]: [number, number]): number {
+  const R = 6371, toRad = (d: number) => (d * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1), dLng = toRad(lng2 - lng1);
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+export function nearestBranchId(coords: [number, number]): string {
+  const ids = Object.keys(branchSamples);
+  return ids.reduce((n, x) => (haversine(coords, branchSamples[x].coords) < haversine(coords, branchSamples[n].coords) ? x : n), ids[0]);
+}
+
+/* DEMO coverage rule: a branch delivers if within DELIVERY_RADIUS_KM — OR it is
+   the visitor's single NEAREST branch. That keeps the demo testable from
+   anywhere (your closest branch always delivers) while farther branches still
+   show as pickup-only. Real per-branch coverage replaces this. */
+export function coverageOf(coords: [number, number], id: string): { km: number; inRange: boolean } {
+  const km = haversine(coords, branchSamples[id].coords);
+  return { km, inRange: km <= DELIVERY_RADIUS_KM || id === nearestBranchId(coords) };
+}
 
 export const BRANCH_FILTERS = [
   { key: 'all', label: 'All Kitchens' },

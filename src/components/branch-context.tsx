@@ -8,17 +8,10 @@
 
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
 import { branches, type Branch } from '@/lib/branches';
-import { branchSamples, DELIVERY_RADIUS_KM } from '@/lib/branches-sample';
+import { coverageOf } from '@/lib/branches-sample';
 
 const STORAGE_KEY = 'bondok-branch-v1';
 const QUERY_KEY = 'branch';
-
-function haversine([lat1, lng1]: [number, number], [lat2, lng2]: [number, number]): number {
-  const R = 6371, toRad = (d: number) => (d * Math.PI) / 180;
-  const dLat = toRad(lat2 - lat1), dLng = toRad(lng2 - lng1);
-  const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-}
 
 interface BranchState {
   branches: Branch[];
@@ -84,10 +77,7 @@ export function BranchProvider({ children }: { children: ReactNode }) {
 
   const recommend = useCallback((coords: [number, number]) =>
     branches
-      .map((branch) => {
-        const km = haversine(coords, branchSamples[branch.id].coords);
-        return { branch, km, inRange: km <= DELIVERY_RADIUS_KM };
-      })
+      .map((branch) => ({ branch, ...coverageOf(coords, branch.id) }))
       .sort((a, b) => a.km - b.km),
   []);
 
