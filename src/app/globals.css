@@ -423,6 +423,7 @@ main.page { flex: 1 0 auto; }
 .promo-copy p { font-size: clamp(14px, 1.4vw, 20px); line-height: 1.4; max-width: 34ch; }
 .promo-btn { background: #fff; color: var(--orange); border-radius: 999px; padding: 10px 26px; font-size: clamp(13px, 1.2vw, 17px); font-weight: 700; }
 .promo-img { flex: 1; min-width: 0; width: auto !important; height: 100% !important; object-fit: contain; padding: 3%; }
+.promo-mcopy { display: none; }   /* mobile-only overlay (see 768px block) */
 
 .hero-arrow {
   position: absolute; top: 50%; transform: translateY(-50%);
@@ -3506,10 +3507,18 @@ main.page { flex: 1 0 auto; }
   .hsearch-close { order: 2; }
   .hsearch-go { order: 3; flex: 1 1 100%; }
 
-  /* mobile hero: card 332x235 @390vw, 16px gap */
+  /* mobile hero: square food crop + HTML copy overlay */
   .hero { --hero-w: calc(100vw - 58px); --hero-gap: 16px; }
-  .hero-viewport { height: calc(var(--hero-w) * 235 / 332 + 10px); }
-  .hero-slide { height: calc(var(--hero-w) * 235 / 332); }
+  .hero-viewport { height: calc(var(--hero-w) + 10px); }
+  .hero-slide { height: var(--hero-w); }
+  .promo-full .promo-mcopy {
+    display: flex; flex-direction: column; align-items: flex-start; gap: 10px;
+    position: absolute; left: 0; right: 0; bottom: 0; z-index: 2;
+    padding: 46px 18px 16px;
+    background: linear-gradient(to top, rgba(88,44,8,.88), rgba(88,44,8,.42) 55%, transparent);
+  }
+  .promo-mcopy h2 { color: #fff; font-size: clamp(22px, 6.4vw, 34px); font-weight: 800; line-height: 1.06; }
+  .promo-mcopy .promo-btn { background: #fff; color: var(--orange); padding: 9px 22px; font-size: 15px; }
   .hero-arrow { width: 36px; height: 36px; }
   .hero-arrow svg { width: 24px; height: 24px; }
   .hero-prev { left: calc(50% - var(--hero-w) / 2 - 18px); }

@@ -13,6 +13,9 @@ export interface HeroSlide {
   full?: boolean;
   /* product cutout used by the menu promo cards (full banners crop badly there) */
   card?: string;
+  /* square, food-focused crop for mobile (wide banner crops badly on phones);
+     mobile shows this + an HTML title/CTA overlay */
+  mobileImage?: string;
 }
 
 export interface FavoriteItem {
@@ -39,6 +42,7 @@ export const heroSlides: HeroSlide[] = [
     text: 'Golden, crispy fried chicken - made for sharing with the whole family.',
     cta: 'Order Now',
     image: '/bondok/home/banner-bucket.webp',
+    mobileImage: '/bondok/home/banner-bucket-mobile.webp',
     full: true,
     card: '/bondok/hero-12pcs.webp',
     alt: '12 Pcs Meal',
@@ -49,6 +53,7 @@ export const heroSlides: HeroSlide[] = [
     text: 'Crunchy shrimp, bold sauce, soft roll. Try it today.',
     cta: 'Order Now',
     image: '/bondok/home/banner-shrimp-roll.webp',
+    mobileImage: '/bondok/home/banner-shrimp-roll-mobile.webp',
     full: true,
     card: '/bondok/hero-shrimp-roll.webp',
     alt: 'Shrimp Roll',
@@ -59,6 +64,7 @@ export const heroSlides: HeroSlide[] = [
     text: 'Crispy tenders stacked high - dip into every flavor.',
     cta: 'Order Now',
     image: '/bondok/home/banner-tenders-feast.webp',
+    mobileImage: '/bondok/home/banner-tenders-feast-mobile.webp',
     full: true,
     card: '/bondok/hero-tenders.webp',
     alt: '12 Pcs Tenders',

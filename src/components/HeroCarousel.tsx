@@ -140,8 +140,19 @@ export default function HeroCarousel() {
                     <span className="promo-btn">{s.cta}</span>
                   </div>
                 )}
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img className="promo-img" src={s.image} alt={s.title} draggable={false} />
+                {/* wide banner on desktop; square food crop on mobile */}
+                <picture>
+                  {s.mobileImage && <source media="(max-width: 768px)" srcSet={s.mobileImage} />}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img className="promo-img" src={s.image} alt={s.title} draggable={false} />
+                </picture>
+                {/* mobile-only headline + CTA over the food crop */}
+                {s.full && s.mobileImage && (
+                  <div className="promo-mcopy">
+                    <h2>{s.title}</h2>
+                    <span className="promo-btn">{s.cta}</span>
+                  </div>
+                )}
               </div>
             </Link>
           ))}
