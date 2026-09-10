@@ -87,8 +87,35 @@ export default function BranchMap({ points, selectedId, userPos, onSelect, radiu
       ring = { cx, cy, rx: (radiusKm / kmPerDegLng) * pxPerDegX, ry: (radiusKm / 111) * pxPerDegY };
     }
 
+    /* Declustering: real branch coords bunch up (e.g. several in Cairo), so nudge
+       overlapping pins apart on screen for readability. Purely visual — distance
+       and coverage always use the true coords. The selected pin is anchored so it
+       stays centred under its coverage ring. */
+    const xy = points.map((p) => proj(p.coords));
+    const MIN = Math.min(70, Math.max(44, Math.min(W, H) * 0.17));
+    const anchor = points.findIndex((p) => p.id === selectedId);
+    for (let it = 0; it < 120; it++) {
+      let moved = false;
+      for (let i = 0; i < xy.length; i++) {
+        for (let j = i + 1; j < xy.length; j++) {
+          let dx = xy[j][0] - xy[i][0], dy = xy[j][1] - xy[i][1];
+          let d = Math.hypot(dx, dy);
+          if (d >= MIN) continue;
+          if (d < 0.01) { dx = Math.cos(i * 2.4); dy = Math.sin(i * 2.4); d = 1; }
+          const off = (MIN - d) / d;
+          if (i === anchor) { xy[j][0] += dx * off; xy[j][1] += dy * off; }
+          else if (j === anchor) { xy[i][0] -= dx * off; xy[i][1] -= dy * off; }
+          else { xy[i][0] -= dx * off / 2; xy[i][1] -= dy * off / 2; xy[j][0] += dx * off / 2; xy[j][1] += dy * off / 2; }
+          moved = true;
+        }
+      }
+      if (!moved) break;
+    }
+    const clampX = (v: number) => Math.max(PAD * W, Math.min(W - PAD * W, v));
+    const clampY = (v: number) => Math.max(PAD * H + 26, Math.min(H - PAD * H, v));
+
     return {
-      pins: points.map((p) => ({ ...p, xy: proj(p.coords) })),
+      pins: points.map((p, i) => ({ ...p, xy: [clampX(xy[i][0]), clampY(xy[i][1])] as [number, number] })),
       user: userPos ? proj(userPos) : null,
       ring,
     };
