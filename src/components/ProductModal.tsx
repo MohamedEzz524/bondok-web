@@ -170,8 +170,13 @@ export default function ProductModal({ product, onClose }: Props) {
             {config.combo && (
               <button className={`pm-combo${combo ? ' is-on' : ''}`} onClick={() => setCombo((c) => !c)} aria-pressed={combo}>
                 <span className="pm-combo-ic" aria-hidden="true">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src="/icons/HOT.png" alt="" width="22" />
+                  {config.combo.items?.length
+                    ? config.combo.items.map((it) => (
+                        /* eslint-disable-next-line @next/next/no-img-element */
+                        <img key={it.label} className="pm-combo-thumb" src={it.image} alt="" />
+                      ))
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    : <img src="/icons/HOT.png" alt="" width="22" />}
                 </span>
                 <span className="pm-combo-text">
                   <strong>Make it a Combo <em className="pm-combo-badge">+ EGP {config.combo.delta}</em></strong>
@@ -194,8 +199,10 @@ export default function ProductModal({ product, onClose }: Props) {
                     </div>
                     <div className={`pm-opts pm-opts-${g.choices.length}`}>
                       {g.choices.map((c, i) => (
-                        <button key={c.label} className={`pm-opt${i === sel ? ' is-on' : ''}`} onClick={() => setSingle(g.key, i)}>
-                          {c.label}{c.delta > 0 && <span className="pm-opt-delta"> (+{c.delta})</span>}
+                        <button key={c.label} className={`pm-opt${i === sel ? ' is-on' : ''}${c.image ? ' pm-opt-img-on' : ''}`} onClick={() => setSingle(g.key, i)}>
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          {c.image && <img className="pm-opt-img" src={c.image} alt="" />}
+                          <span>{c.label}{c.delta > 0 && <span className="pm-opt-delta"> (+{c.delta})</span>}</span>
                         </button>
                       ))}
                     </div>
@@ -216,6 +223,8 @@ export default function ProductModal({ product, onClose }: Props) {
                       return (
                         <button key={c.label} className={`pm-addon${on ? ' is-on' : ''}`} onClick={() => toggleMulti(g.key, i)} role="checkbox" aria-checked={on}>
                           <span className="pm-check" aria-hidden="true">{on && '✓'}</span>
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          {c.image && <img className="pm-addon-img" src={c.image} alt="" />}
                           <span className="pm-addon-name">{c.label}</span>
                           <span className="pm-addon-price">+ EGP {c.delta}</span>
                         </button>

@@ -232,10 +232,12 @@ export default function ProductView({ category, product, variants }: Props) {
                 {variants.map((v) => (
                   <button
                     key={v.slug}
-                    className={`pd-pill${v.slug === product.slug ? ' is-on' : ''}`}
+                    className={`pd-pill pd-pill-img${v.slug === product.slug ? ' is-on' : ''}`}
                     onClick={() => v.slug !== product.slug && router.push(`/menu/${category.slug}/${v.slug}`)}
                   >
-                    {SIZE_LABEL[v.size ?? 'single'] ?? v.name}
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img className="pd-pill-thumb" src={v.image} alt="" />
+                    <span>{SIZE_LABEL[v.size ?? 'single'] ?? v.name}</span>
                   </button>
                 ))}
               </div>
@@ -245,8 +247,13 @@ export default function ProductView({ category, product, variants }: Props) {
           {config.combo && (
             <div className="pd-card pd-combo">
               <span className="pd-combo-ic" aria-hidden="true">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/icons/HOT.png" alt="" width="26" />
+                {config.combo.items?.length
+                  ? config.combo.items.map((it) => (
+                      /* eslint-disable-next-line @next/next/no-img-element */
+                      <img key={it.label} className="pd-combo-thumb" src={it.image} alt="" />
+                    ))
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  : <img src="/icons/HOT.png" alt="" width="26" />}
               </span>
               <div className="pd-combo-body">
                 <p className="pd-combo-title">
@@ -288,10 +295,12 @@ export default function ProductView({ category, product, variants }: Props) {
                       {g.choices.map((c, i) => (
                         <button
                           key={c.label}
-                          className={`pd-pill${(single[g.key] ?? g.defaultIdx ?? 0) === i ? ' is-on' : ''}`}
+                          className={`pd-pill${(single[g.key] ?? g.defaultIdx ?? 0) === i ? ' is-on' : ''}${c.image ? ' pd-pill-img' : ''}`}
                           onClick={() => setSingle({ ...single, [g.key]: i })}
                         >
-                          {c.label}{c.delta > 0 ? ` (+${c.delta})` : ''}
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          {c.image && <img className="pd-pill-thumb" src={c.image} alt="" />}
+                          <span>{c.label}{c.delta > 0 ? ` (+${c.delta})` : ''}</span>
                         </button>
                       ))}
                     </div>
@@ -305,6 +314,8 @@ export default function ProductView({ category, product, variants }: Props) {
                             <span className="pd-check-box" aria-hidden="true">
                               {on && <svg viewBox="0 0 24 24" width="13" height="13"><path fill="none" stroke="#fff" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" d="m5.5 12.5 4.2 4.2 8.8-9.4" /></svg>}
                             </span>
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            {c.image && <img className="pd-check-img" src={c.image} alt="" />}
                             <span className="pd-check-label">{c.label}</span>
                             <strong>+ EGP {c.delta}</strong>
                           </label>

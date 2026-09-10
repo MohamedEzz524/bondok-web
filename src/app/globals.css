@@ -615,6 +615,16 @@ main.page { flex: 1 0 auto; }
 .omodal-foot { padding: 14px 20px; border-top: 1px solid var(--border); background: var(--bg); }
 .omodal-cta { width: 100%; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
 .omodal-cta:disabled { opacity: .55; cursor: not-allowed; }
+
+/* ---- option / variant / combo thumbnails (PDP + quick-add) ---- */
+.pm-opt.pm-opt-img-on, .pd-pill.pd-pill-img { display: inline-flex; align-items: center; gap: 8px; padding-left: 8px; }
+.pm-opt-img, .pd-pill-thumb, .pm-addon-img, .pd-check-img,
+.pm-combo-thumb, .pd-combo-thumb { width: 30px; height: 30px; border-radius: 7px; object-fit: contain; background: var(--surface); flex: 0 0 auto; }
+.pd-pill-thumb { width: 34px; height: 34px; }
+.pm-combo-thumb, .pd-combo-thumb { background: none; }
+.pm-combo-ic, .pd-combo-ic { display: inline-flex; align-items: center; gap: 3px; }
+.pm-addon-img { margin-right: 2px; }
+.pd-check-img { margin: 0 4px 0 2px; }
 .omodal-card { background: #fff; border-radius: 12px; padding: 22px 24px; display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; }
 .omodal-card h3 { font-size: 22px; font-weight: 700; color: var(--text); }
 .omodal-card p { font-size: 15px; color: var(--text); }

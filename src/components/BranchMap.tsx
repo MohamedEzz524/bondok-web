@@ -92,9 +92,9 @@ export default function BranchMap({ points, selectedId, userPos, onSelect, radiu
        and coverage always use the true coords. The selected pin is anchored so it
        stays centred under its coverage ring. */
     const xy = points.map((p) => proj(p.coords));
-    const MIN = Math.min(70, Math.max(44, Math.min(W, H) * 0.17));
+    const MIN = Math.min(86, Math.max(58, Math.min(W, H) * 0.2));
     const anchor = points.findIndex((p) => p.id === selectedId);
-    for (let it = 0; it < 120; it++) {
+    for (let it = 0; it < 240; it++) {
       let moved = false;
       for (let i = 0; i < xy.length; i++) {
         for (let j = i + 1; j < xy.length; j++) {
