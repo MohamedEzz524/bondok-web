@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import { flushSync } from 'react-dom';
 import { AnimatePresence, motion } from 'motion/react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -16,6 +16,11 @@ import ProductModal from './ProductModal';
 import FavButton from './FavButton';
 import RecentlyViewed from './RecentlyViewed';
 import { useDragScroll } from './useDragScroll';
+import { useCarousel, CarouselArrows } from './Carousel';
+
+/* run before paint on the client (avoids the carousel flashing at scrollLeft 0
+   before we center the active pill); falls back to useEffect during SSR */
+const useIsoLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 import { usePrefs } from './prefs-context';
 import Select from './Select';
 
@@ -43,6 +48,12 @@ const CAT_EMOJI: Record<string, string> = {
   rolls: '🌯', meals: '🍗', 'kids-tenders': '🍟', sides: '🥔',
 };
 
+/* short labels for the mobile category carousel pills */
+const CAT_SHORT: Record<string, string> = {
+  sandwiches: 'Specialty', fillet: 'Fillet', grilled: 'Grilled', burgers: 'Burgers',
+  rolls: 'Rolls', meals: 'Meals', 'kids-tenders': 'Kids', sides: 'Sides',
+};
+
 type Spice = 'mild' | 'medium' | 'hot' | 'extra-hot';
 const SPICE_LEVELS: { value: Spice; label: string }[] = [
   { value: 'mild', label: 'Mild' },
@@ -54,7 +65,7 @@ const SPICE_LEVELS: { value: Spice; label: string }[] = [
 const HEAT: Spice[] = ['medium', 'hot', 'extra-hot'];
 
 /* quick-search chips (reference "Popular:" row) - each seeds the search box */
-const POPULAR_TAGS = ['Chicken Fire', 'Cheddar Fries', 'Brioche Burgers', 'Mozzarella Crunch', 'Cold Brew', 'Family Box'];
+const POPULAR_TAGS = ['Chicken Fillet', 'Cheese Fries', 'Mushroom Burger', 'Mozzarella', 'Shrimp Roll', 'Family Meal'];
 
 /* in-category quick tabs (reference header pills) */
 const SUB_TABS = ['All Items', 'Popular', 'Best Sellers', 'New In', 'Spicy', 'Combos & Value Meals'] as const;
@@ -118,6 +129,7 @@ export default function MenuBrowser({ categories: baseCategories, initialCategor
   const { favorites, recordView } = usePrefs();
   const subtabsDrag = useDragScroll<HTMLDivElement>();
   const popularDrag = useDragScroll<HTMLDivElement>();
+  const cats = useCarousel<HTMLDivElement>();   // mobile category carousel
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -156,6 +168,18 @@ export default function MenuBrowser({ categories: baseCategories, initialCategor
       setActiveCat(cat);
     }
   }, [searchParams, categories]);
+
+  /* mobile category carousel: center the active pill. Instant + before paint so a
+     route change (which remounts this component) doesn't visibly jump from the start. */
+  useIsoLayoutEffect(() => {
+    if (view !== 'browse') return;
+    const el = cats.ref.current;
+    if (!el || el.offsetParent === null) return;   // hidden on desktop -> skip
+    const active = el.querySelector<HTMLElement>('.mcat-pill.is-active');
+    if (active) el.scrollLeft = active.offsetLeft - el.clientWidth / 2 + active.clientWidth / 2;
+    cats.update();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeCat, favOnly, view]);
 
   /* FLIP reordering via the View Transitions API (native FLIP); no-op fallback */
   const withFlip = (fn: () => void) => {
@@ -327,7 +351,11 @@ export default function MenuBrowser({ categories: baseCategories, initialCategor
           className={`fswitch${hotOnly ? ' is-on' : ''}`}
           onClick={() => setHotOnly((v) => !v)}
         >
-          <span className="fswitch-label">🔥 Today&apos;s Hot Deals</span>
+          <span className="fswitch-label">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img className="fswitch-ic" src="/icons/hot-deal.webp" alt="" width="13" height="20" />
+            Today&apos;s Hot Deals
+          </span>
           <span className="fswitch-track" aria-hidden="true"><span className="fswitch-knob" /></span>
         </button>
       </div>
@@ -521,7 +549,8 @@ export default function MenuBrowser({ categories: baseCategories, initialCategor
               className={`cat-row cat-fav${favOnly ? ' is-active' : ''}`}
               onClick={() => withFlip(() => setFavOnlySynced(!favOnly))}
             >
-              <span className="cat-emoji" aria-hidden="true">❤️</span>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img className="cat-emoji cat-emoji-img" src="/icons/heart-fill.webp" alt="" aria-hidden="true" />
               <span className="cat-name">My Favorites</span>
               <span className="cat-count">{favorites.length}</span>
             </button>
@@ -549,31 +578,45 @@ export default function MenuBrowser({ categories: baseCategories, initialCategor
           </aside>
 
           <div className="menu-content">
-            {/* search card: search + sort + popular quick-picks */}
+            {/* mobile-only category carousel (sidebar is hidden < 768px) */}
+            <div className="menu-cats-wrap crsl-wrap">
+              <CarouselArrows nav={cats.nav} onNav={cats.scrollByPage} className="mcat-arrow" />
+              <div className="menu-cats-bar" ref={cats.ref} {...cats.dragProps}>
+                <button
+                  className={`mcat-pill mcat-fav${favOnly ? ' is-active' : ''}`}
+                  onClick={() => withFlip(() => setFavOnlySynced(!favOnly))}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <span className="mcat-ic"><img src="/icons/heart-fill.webp" alt="" /></span>
+                  <span className="mcat-name">Favorites</span>
+                </button>
+                {categories.map((c) => {
+                  const on = !favOnly && !searching && activeCat === c.slug;
+                  return (
+                    <button key={c.slug} className={`mcat-pill${on ? ' is-active' : ''}`} onClick={() => selectCategory(c.slug)}>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <span className="mcat-ic"><img src={c.cover} alt="" loading="lazy" /></span>
+                      <span className="mcat-name">{CAT_SHORT[c.slug] ?? c.name}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* search card: search + popular searches + quick filters */}
             <div className="menu-searchcard">
               {searchBar}
               <div className="menu-popular" ref={popularDrag.ref} {...popularDrag.dragProps}>
-                <span className="menu-popular-label">Popular:</span>
+                <span className="menu-popular-label">Popular Searches:</span>
                 {POPULAR_TAGS.map((t) => (
                   <button key={t} className="menu-poptag" onClick={() => { setView('browse'); withFlip(() => setQuery(t)); }}>{t}</button>
                 ))}
               </div>
-            </div>
-
-            {/* collection header card */}
-            <div className="menu-headcard">
-              <p className="menu-eyebrow"><span className="menu-eyebrow-dot" aria-hidden="true" />{shown.eyebrow}</p>
-              <div className="menu-headrow">
-                <h1 className="menu-headtitle">{shown.title}</h1>
-                <span className="menu-headcount">
-                  Showing {resultCount} of {shown.total} items{filtering ? ' • Filtered Active' : ''}
-                </span>
-              </div>
-              {shown.blurb && <p className="menu-headdesc">{shown.blurb}</p>}
               {shown.catMode && (
-                <div className="menu-subtabs" ref={subtabsDrag.ref} {...subtabsDrag.dragProps}>
+                <div className="menu-popular menu-qfrow" ref={subtabsDrag.ref} {...subtabsDrag.dragProps}>
+                  <span className="menu-popular-label">Quick Filters:</span>
                   {SUB_TABS.map((t) => (
-                    <button key={t} className={`menu-subtab${subTab === t ? ' is-on' : ''}`} onClick={() => withFlip(() => setSubTab(t))}>{t}</button>
+                    <button key={t} className={`menu-poptag${subTab === t ? ' is-on' : ''}`} onClick={() => withFlip(() => setSubTab(t))}>{t}</button>
                   ))}
                 </div>
               )}

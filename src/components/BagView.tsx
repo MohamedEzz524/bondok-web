@@ -10,6 +10,7 @@ import { useCatalog } from './catalog-context';
 import { suggestForCart, findProduct, FREE_DELIVERY_THRESHOLD, DELIVERY_FEE } from '@/lib/upsell';
 import CheckoutSteps from './CheckoutSteps';
 import GiftBar from './GiftBar';
+import ProductBadges from './ProductBadges';
 import { useState } from 'react';
 
 const fmt = (v: number | null | undefined) => (v == null ? '—' : `EGP ${v}`);
@@ -67,7 +68,9 @@ export default function BagView() {
         <div className="co-items">
           <GiftBar />
           <AnimatePresence initial={false}>
-          {items.map((it) => (
+          {items.map((it) => {
+            const tags = it.isGift ? undefined : findProduct(it.slug)?.product.tags;
+            return (
             <motion.article
               key={it.key ?? it.slug}
               className={`co-item${it.isGift ? ' co-item-gift' : ''}`}
@@ -75,8 +78,11 @@ export default function BagView() {
               exit={{ opacity: 0, x: -70, height: 0, paddingTop: 0, paddingBottom: 0, marginBottom: -18, overflow: 'hidden' }}
               transition={{ duration: 0.28, ease: 'easeOut' }}
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img className="co-item-img" src={it.image} alt="" />
+              <span className="co-item-media">
+                <ProductBadges tags={tags} variant="ribbon" className="co-item-ribbon" />
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img className="co-item-img" src={it.image} alt="" />
+              </span>
               <div className="co-item-main">
                 <div className="co-item-toprow">
                   <div>
@@ -126,7 +132,8 @@ export default function BagView() {
                 </div>
               </div>
             </motion.article>
-          ))}
+            );
+          })}
           </AnimatePresence>
         </div>
 

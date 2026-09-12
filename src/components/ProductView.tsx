@@ -6,7 +6,7 @@
    live-total Add to Cart on the right; you-may-also-like carousel below.
    Option groups + deltas are SAMPLE data until the client menu arrives. */
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import type { MenuCategory, Product } from '@/lib/menu-data';
@@ -17,6 +17,8 @@ import { useCatalog } from './catalog-context';
 import { usePrefs } from './prefs-context';
 import FavButton from './FavButton';
 import ProductBadges from './ProductBadges';
+import { useDragScroll } from './useDragScroll';
+import { useCarousel, CarouselArrows } from './Carousel';
 
 interface Props {
   category: MenuCategory;
@@ -32,6 +34,7 @@ export default function ProductView({ category, product, variants }: Props) {
   const { priceOf } = useCatalog();
   const branchPrice = priceOf(product.slug);   // active-branch base price; undefined until a branch is chosen
   const { recordView } = usePrefs();
+  const fbtDrag = useDragScroll<HTMLDivElement>();   // drag-to-scroll the "bought together" strip
   const config = useMemo(() => optionsFor(product, category.slug), [product, category.slug]);
 
   const [qty, setQty] = useState(1);
@@ -43,7 +46,7 @@ export default function ProductView({ category, product, variants }: Props) {
   const [note, setNote] = useState('');
   const [imgIdx, setImgIdx] = useState(0);
   const [shared, setShared] = useState(false);
-  const alsoRef = useRef<HTMLDivElement>(null);
+  const alsoCr = useCarousel<HTMLDivElement>();   // "you may also like" carousel
 
   /* gallery: single image today; the array shape is API-ready */
   const images = [product.image];
@@ -116,7 +119,6 @@ export default function ProductView({ category, product, variants }: Props) {
     () => suggestFor(product.slug, 6).map((p) => ({ ...p, price: priceOf(p.slug) })),
     [product.slug, priceOf],
   );
-  const scrollAlso = (dir: number) => alsoRef.current?.scrollBy({ left: dir * 300, behavior: 'smooth' });
 
   /* record view for "recently viewed" (effect, not render — recordView setStates PrefsProvider) */
   useEffect(() => { recordView(product.slug); }, [product.slug, recordView]);
@@ -170,7 +172,7 @@ export default function ProductView({ category, product, variants }: Props) {
                 <span className="pd-save-chip">Bundle deal</span>
               </div>
               <div className="pd-fbt-row">
-                <div className="pd-fbt-items">
+                <div className="pd-fbt-items" ref={fbtDrag.ref} {...fbtDrag.dragProps}>
                   {fbt.map((p, i) => (
                     <div key={p.slug} className="pd-fbt-item">
                       {i > 0 && <span className="pd-fbt-plus" aria-hidden="true">+</span>}
@@ -355,19 +357,18 @@ export default function ProductView({ category, product, variants }: Props) {
         <section className="pd-also">
           <div className="pd-also-head">
             <h2>You may also like</h2>
-            <div className="pd-also-nav">
-              <button aria-label="Scroll back" onClick={() => scrollAlso(-1)}>‹</button>
-              <button aria-label="Scroll forward" onClick={() => scrollAlso(1)}>›</button>
-            </div>
           </div>
-          <div className="pd-also-row" ref={alsoRef}>
+          <div className="pd-also-wrap crsl-wrap">
+            <CarouselArrows nav={alsoCr.nav} onNav={alsoCr.scrollByPage} />
+            <div className="pd-also-row" ref={alsoCr.ref} {...alsoCr.dragProps}>
             {also.map((p) => {
               const loc = findProduct(p.slug);
               return (
                 <article key={p.slug} className="pd-also-card">
+                  <ProductBadges tags={p.tags} variant="ribbon" className="pd-also-ribbon" />
                   <Link href={loc ? `/menu/${loc.catSlug}/${p.slug}` : '/menu'} className="pd-also-media">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={p.image} alt={p.name} loading="lazy" />
+                    <img src={p.image} alt={p.name} loading="lazy" draggable={false} />
                   </Link>
                   <span className="pd-also-fav"><FavButton slug={p.slug} /></span>
                   <div className="pd-also-body">
@@ -383,6 +384,7 @@ export default function ProductView({ category, product, variants }: Props) {
                 </article>
               );
             })}
+            </div>
           </div>
         </section>
       )}

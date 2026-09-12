@@ -6,7 +6,8 @@
 
 import Link from 'next/link';
 import { usePrefs } from './prefs-context';
-import { useDragScroll } from './useDragScroll';
+import { useCarousel, CarouselArrows } from './Carousel';
+import ProductBadges from './ProductBadges';
 import { menuCategories } from '@/lib/menu-data';
 import type { MenuCategory, Product } from '@/lib/menu-data';
 
@@ -18,7 +19,7 @@ for (const cat of menuCategories) {
 
 export default function RecentlyViewed({ title = 'Recently viewed' }: { title?: string }) {
   const { recent } = usePrefs();
-  const { ref, dragProps } = useDragScroll<HTMLDivElement>();
+  const cr = useCarousel<HTMLDivElement>();
   const items = recent
     .map((slug) => lookup.get(slug))
     .filter((x): x is { cat: MenuCategory; p: Product } => Boolean(x));
@@ -28,14 +29,18 @@ export default function RecentlyViewed({ title = 'Recently viewed' }: { title?: 
   return (
     <section className="recent-strip" aria-label={title}>
       <h2>{title}</h2>
-      <div className="recent-row" ref={ref} {...dragProps}>
-        {items.map(({ cat, p }) => (
-          <Link key={p.slug} href={`/menu/${cat.slug}/${p.slug}`} className="recent-card" draggable={false}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={p.image} alt={p.name} loading="lazy" draggable={false} />
-            <span>{p.name}</span>
-          </Link>
-        ))}
+      <div className="recent-wrap crsl-wrap">
+        <CarouselArrows nav={cr.nav} onNav={cr.scrollByPage} />
+        <div className="recent-row" ref={cr.ref} {...cr.dragProps}>
+          {items.map(({ cat, p }) => (
+            <Link key={p.slug} href={`/menu/${cat.slug}/${p.slug}`} className="recent-card" draggable={false}>
+              <ProductBadges tags={p.tags} variant="ribbon" className="recent-ribbon" />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={p.image} alt={p.name} loading="lazy" draggable={false} />
+              <span>{p.name}</span>
+            </Link>
+          ))}
+        </div>
       </div>
     </section>
   );

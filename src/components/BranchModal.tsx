@@ -65,12 +65,17 @@ export default function BranchModal() {
               onMouseEnter={() => prefetchBranchCatalog(branch.id)}
               onFocus={() => prefetchBranchCatalog(branch.id)}
             >
-              <span className="branch-item-name">
-                {branch.name}
-                {inRange === true && <span className="branch-tag branch-tag-near">Delivers to you</span>}
-                {inRange === false && <span className="branch-tag branch-tag-far">Pickup only</span>}
+              <span className="branch-item-pin" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5z" /></svg>
               </span>
-              <span className="branch-item-area">{branch.area}{km != null ? ` · ${km.toFixed(1)} km` : ''}</span>
+              <span className="branch-item-main">
+                <span className="branch-item-name">
+                  {branch.name}
+                  {inRange === true && <span className="branch-tag branch-tag-near">Delivers to you</span>}
+                  {inRange === false && <span className="branch-tag branch-tag-far">Pickup only</span>}
+                </span>
+                <span className="branch-item-area">{branch.area}{km != null ? ` · ${km.toFixed(1)} km` : ''}</span>
+              </span>
             </button>
           </li>
         ))}

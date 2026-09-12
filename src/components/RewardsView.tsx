@@ -147,7 +147,7 @@ export default function RewardsView() {
         </motion.div>
         <motion.div className="rwx-math-media" {...fadeUp}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/bondok/home/fav-bondok-meal.webp" alt="Bondok meal" />
+          <img src="/bondok/menu/meals/bondok-meal.webp" alt="Bondok meal" />
           <span className="rwx-math-tag">⚡ Points Credited on Checkout</span>
         </motion.div>
       </section>

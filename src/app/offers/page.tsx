@@ -14,7 +14,7 @@ export default function Page() {
     <div className="offers-page">
       <LocationBar />
 
-      <div className="offers-body">
+      <div className="offers-body u-container">
         {/* sign-up promo banner */}
         <div className="offers-signup">
           <div className="offers-signup-top">

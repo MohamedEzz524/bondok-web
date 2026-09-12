@@ -21,7 +21,7 @@ export default function Footer() {
   if (pathname === '/catering') return null;
   return (
     <footer className="site-footer">
-      <div className="footer-inner">
+      <div className="footer-inner u-container">
         <ul className="footer-links">
           {footerLinks.map((l) => (
             <li key={l.label}>
@@ -41,7 +41,8 @@ export default function Footer() {
         </div>
 
         <div className="footer-social">
-          <span className="footer-logo">Bondok</span>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img className="footer-logo-img" src="/bondok/logo.webp" alt="Bondok Fried Chicken" />
           <div className="social-icons">
             <a href="#" aria-label="Instagram">
               <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
