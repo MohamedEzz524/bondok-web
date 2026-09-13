@@ -503,6 +503,23 @@ main.page { flex: 1 0 auto; }
 .mw-price { font-size: 28px; font-weight: 600; line-height: 1; color: var(--orange); white-space: nowrap; }
 .mw-price span { font-size: 12px; }
 .mw-price em { font-size: 12px; font-weight: 700; color: var(--text-muted); font-style: normal; }
+
+/* ---- Hot Deal pricing: sale price in deal-red, gray custom strike, %-off pill ---- */
+.mw-price.is-deal, .product-price.is-deal, .pmodal-price.is-deal, .pd-price strong.is-deal { color: #e23b2e; }
+.mw-price.is-deal { font-size: 30px; }
+.pcx-sm .mw-price.is-deal { font-size: 21px; }
+.product-price.is-deal { font-size: 16px; }
+.pd-price strong.is-deal { font-size: 30px; }
+.price-was { position: relative; margin-left: 8px; font-weight: 600; color: var(--text-muted); white-space: nowrap; text-decoration: none; }
+.price-was::after { content: ''; position: absolute; left: -1px; right: -1px; top: 50%; height: 2px; border-radius: 2px; background: currentColor; transform: translateY(-50%) rotate(-8deg); }
+.mw-price .price-was { font-size: .55em; }
+.product-price .price-was { font-size: .82em; }
+.pmodal-price .price-was { font-size: 15px; }
+.pd-price .price-was { font-size: 18px; margin-left: 10px; }
+.price-off { display: inline-block; margin-left: 8px; font-size: 12px; font-weight: 800; color: #fff; background: #e23b2e; border-radius: 999px; padding: 2px 8px; vertical-align: middle; letter-spacing: .02em; }
+/* .pd-price span / .pmodal-price span are display:block for "All taxes included";
+   keep the %-off pill inline so it doesn't stretch full-width */
+.pd-price .price-off, .pmodal-price .price-off { display: inline-block; font-size: 13px; }
 .mw-add { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 800; color: #fff; background: var(--orange); border: 1.5px solid var(--orange); border-radius: 999px; padding: 8px 20px; cursor: pointer; white-space: nowrap; transition: filter .12s ease; }
 .mw-add:hover { filter: brightness(1.05); }
 .mw-add:hover { background: var(--orange); color: #fff; }
@@ -519,6 +536,7 @@ main.page { flex: 1 0 auto; }
   .mw-grid { gap: 10px; }
   .mw-name { font-size: 16px; }
   .mw-price { font-size: 20px; }
+  .mw-price.is-deal { font-size: 22px; }
   .mw-price span { font-size: 12px; }
   .mw-add { padding: 7px 12px; font-size: 12px; }
   /* title takes full width above the subtitle + button */
@@ -3038,7 +3056,7 @@ main.page { flex: 1 0 auto; }
 .pd-oow-row::before, .pd-oow-row::after { content: ''; flex: 0 0 8px; }   /* + the 12px flex gap ≈ 20px gutter */
 .pd-oow-row::-webkit-scrollbar { display: none; }
 .pd-oow-row.is-dragging { cursor: grabbing; }
-.pd-oow-card { position: relative; flex: 0 0 45%; scroll-snap-align: start; background: var(--white); border: 1.5px solid transparent; border-radius: 14px; box-shadow: var(--shadow-card); padding: 12px 12px 14px; display: flex; flex-direction: column; }
+.pd-oow-card { position: relative; flex: 0 0 33%; scroll-snap-align: start; background: var(--white); border: 1.5px solid transparent; border-radius: 14px; box-shadow: var(--shadow-card); padding: 12px 12px 14px; display: flex; flex-direction: column; }
 .pd-oow-card.is-picked { border-color: var(--orange); }
 .pd-oow-media { position: relative; }
 .pd-oow-media img { width: 100%; aspect-ratio: 4 / 3; object-fit: contain; }
@@ -3073,11 +3091,11 @@ main.page { flex: 1 0 auto; }
 }
 /* mobile: always open, wider cards per view */
 @media (max-width: 640px) {
-  .pd-oow { padding: 16px 14px; }
+  .pd-oow { padding: 16px 0; }
   .pd-oow-head { cursor: default; }
   .pd-oow-toggle { display: none; }
   .pd-oow-row { gap: 10px; }
-  .pd-oow-card { flex: 0 0 46%; padding: 10px 10px 12px; }
+  .pd-oow-card { flex: 0 0 40%; padding: 10px 10px 12px; }
   .pd-oow-name { font-size: 12.5px; }
   .pd-oow-price { font-size: 13px; }
 }
@@ -3278,7 +3296,7 @@ main.page { flex: 1 0 auto; }
 .subnav a:not(.btn) { font-size: 14px; font-weight: 700; color: var(--text); padding-block: 6px; }
 .subnav a:not(.btn):hover { color: var(--orange); }
 .subnav-cta { font-size: 13px; padding: 8px 18px; }
-.cat-subnav { top: 72px; }   /* sits below the 72px catering header */
+.cat-subnav { top: var(--header-h); }   /* sits below the global header */
 
 /* ============ OFFERS PAGE (reference geometry @1440) ============ */
 /* Unified page container — matches the homepage sections (.home-sec).
@@ -3754,7 +3772,7 @@ main.page { flex: 1 0 auto; }
   .offers-signup-btn { order: 3; flex: 1 1 100%; height: 44px; }
 
   /* catering floaters: smaller on mobile so they don't cover text */
-  .cf-f0 { width: 300px; }
+  .cf-f0 { width: 200px; }
   .cf-f5 { width: 100px; }
   .cf-f2 { width: 66px; }
   .cf-f3 { width: 56px; }

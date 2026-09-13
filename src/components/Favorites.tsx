@@ -7,6 +7,8 @@ import Link from 'next/link';
 import { useCatalog } from './catalog-context';
 import { useCart } from './cart-context';
 import FavButton from './FavButton';
+import { compareAtOf } from '@/lib/deal';
+import { findProduct } from '@/lib/upsell';
 
 const wanted = [
   { slug: 'bondok-meal', name: 'Bondok Meal', image: '/bondok/menu/meals/bondok-meal.webp', href: '/menu/meals/bondok-meal' },
@@ -33,6 +35,7 @@ export default function Favorites() {
       <div className="mw-grid">
         {wanted.map((p) => {
           const price = priceOf(p.slug);
+          const was = compareAtOf(price, findProduct(p.slug)?.product.tags);
           return (
             <article key={p.slug} className="mw-card">
               <FavButton slug={p.slug} className="mw-fav" />
@@ -43,7 +46,7 @@ export default function Favorites() {
               <div className="mw-body">
                 <Link href={p.href} className="mw-name">{p.name}</Link>
                 <div className="mw-foot">
-                  <span className="mw-price">{price != null ? <><span>EGP</span> {price}</> : <em>Select branch</em>}</span>
+                  <span className={`mw-price${was != null ? ' is-deal' : ''}`}>{price != null ? <><span>EGP</span> {price}{was != null && <s className="price-was">EGP {was}</s>}</> : <em>Select branch</em>}</span>
                   <button
                     className="mw-add"
                     onClick={() => add({ slug: p.slug, name: p.name, image: p.image, price }, 'home-most-wanted')}

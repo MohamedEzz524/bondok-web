@@ -12,6 +12,7 @@ import { useRouter } from 'next/navigation';
 import type { MenuCategory, Product } from '@/lib/menu-data';
 import { optionsFor } from '@/lib/product-options';
 import { suggestFor, findProduct } from '@/lib/upsell';
+import { compareAtOf, dealPct } from '@/lib/deal';
 import { useCart } from './cart-context';
 import { useCatalog } from './catalog-context';
 import { usePrefs } from './prefs-context';
@@ -311,7 +312,10 @@ export default function ProductView({ category, product, variants }: Props) {
             </p>
             <div className="pd-pricerow">
               <p className="pd-price">
-                {orderTotal != null ? <strong>EGP {orderTotal}</strong> : <strong className="pd-price-pending">Price with menu data</strong>}
+                {orderTotal != null ? (() => {
+                  const was = compareAtOf(orderTotal, product.tags);
+                  return <strong className={was != null ? 'is-deal' : undefined}>EGP {orderTotal}{was != null && <><s className="price-was">EGP {was}</s><span className="price-off">-{dealPct(orderTotal, was)}%</span></>}</strong>;
+                })() : <strong className="pd-price-pending">Price with menu data</strong>}
                 <span>All taxes included</span>
               </p>
               <span className="co-qty">

@@ -9,6 +9,7 @@ import ProductBadges from './ProductBadges';
 import FavButton from './FavButton';
 import { findProduct } from '@/lib/upsell';
 import { optionsFor } from '@/lib/product-options';
+import { compareAtOf, dealPct } from '@/lib/deal';
 
 interface Props {
   product: Product;
@@ -163,9 +164,12 @@ export default function ProductModal({ product, onClose }: Props) {
               <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="var(--orange)" d="m12 17.3 6.2 3.7-1.6-7 5.4-4.7-7.1-.6L12 2 9.1 8.7 2 9.3l5.4 4.7-1.6 7z" /></svg>
               <strong>4.8</strong> <span>(1.2k reviews)</span>
             </p>
-            {branchPrice !== undefined && (
-              <p className="pmodal-price">EGP {branchPrice} <span>All taxes included</span></p>
-            )}
+            {branchPrice !== undefined && (() => {
+              const was = compareAtOf(branchPrice, product.tags);
+              return (
+                <p className={`pmodal-price${was != null ? ' is-deal' : ''}`}>EGP {branchPrice}{was != null && <><s className="price-was">EGP {was}</s><span className="price-off">-{dealPct(branchPrice, was)}%</span></>} <span>All taxes included</span></p>
+              );
+            })()}
             <div className="pmodal-desc">
               <p>{product.description ?? 'Massive crispy fried chicken fillet, fresh garden lettuce and our signature Bondok glaze tucked inside a toasted buttered brioche bun.'}</p>
             </div>

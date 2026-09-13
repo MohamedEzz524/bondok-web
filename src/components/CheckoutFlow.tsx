@@ -298,15 +298,6 @@ export default function CheckoutFlow() {
               </div>
 
               <aside className="co-side">
-                <div className="co-card co-coverage">
-                  <div className="co-card-head">
-                    <h3>Live Coverage Hub</h3>
-                    <span className="co-zone-chip">Within zone</span>
-                  </div>
-                  <div className="co-map-mini">
-                    <span className="co-map-tag"><span className="pg-dot" aria-hidden="true" />Bondok Kitchen: nearest branch</span>
-                  </div>
-                </div>
                 <div className="co-card co-eta">
                   <div className="co-card-head">
                     <p className="ct-label ct-caps">Estimated arrival</p>

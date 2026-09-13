@@ -10,6 +10,7 @@ import { usePricedCategories } from './catalog-context';
 import ProductBadges from './ProductBadges';
 import LocationBar from './LocationBar';
 import { EVENTS, publish } from '@/lib/pubsub';
+import { compareAtOf } from '@/lib/deal';
 import type { MenuCategory, Product, Protein, Size } from '@/lib/menu-data';
 import CloseIcon from './CloseIcon';
 import ProductModal from './ProductModal';
@@ -647,7 +648,7 @@ export default function MenuBrowser({ categories: baseCategories, initialCategor
                       <div className="pcard-info">
                         <h3>{p.name}</h3>
                         <p>{p.description ?? shown.blurb}</p>
-                        {p.price !== undefined && <span className="product-price">EGP {p.price}</span>}
+                        {p.price !== undefined && (() => { const w = compareAtOf(p.price, p.tags); return <span className={`product-price${w != null ? ' is-deal' : ''}`}>EGP {p.price}{w != null && <s className="price-was">EGP {w}</s>}</span>; })()}
                         <button
                           className="btn btn-solid pcard-add"
                           onClick={(e) => {

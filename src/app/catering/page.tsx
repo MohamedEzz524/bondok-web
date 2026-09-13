@@ -14,20 +14,7 @@ export const metadata: Metadata = {
 export default function Page() {
   return (
     <div className="catering-page">
-      {/* landing header (reference: logo + anchors + Order Now pill) */}
-      <header className="cat-header">
-        <div className="cat-header-inner">
-          <Link href="/" aria-label="Bondok Home">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img className="logo-img" src="/bondok/logo.jpg" alt="Bondok Fried Chicken" />
-          </Link>
-          <nav className="cat-header-nav" aria-label="Catering">
-            <Link href="/menu" className="btn btn-solid cat-header-cta">Order Now</Link>
-          </nav>
-        </div>
-      </header>
-
-      {/* sticky anchor strip below the header (matches the rewards sub-nav) */}
+      {/* sticky anchor strip below the global header (matches the rewards sub-nav) */}
       <nav className="subnav cat-subnav" aria-label="Catering sections">
         <a href="#benefits">Benefits</a>
         <a href="#events">Event Types</a>
@@ -142,28 +129,6 @@ export default function Page() {
           <Link href="/menu" className="btn btn-solid cat-cta-xl">Order Catering</Link>
         </div>
       </section>
-
-      {/* landing footer (reference: compact dark bar) */}
-      <footer className="cat-footer">
-        <div className="cat-footer-inner">
-          <span className="cat-footer-logo">Bondok</span>
-          <nav className="cat-footer-links" aria-label="Footer">
-            <Link href="/complaints">Contact Us</Link>
-            <Link href="/terms">Terms of Service</Link>
-            <Link href="/privacy">Privacy Policy</Link>
-            <Link href="/faq">FAQs</Link>
-            <Link href="/branches">Branches</Link>
-            <Link href="/delivery-terms">Delivery Terms</Link>
-            <Link href="/offer-terms">Offer Terms</Link>
-                      </nav>
-          <div className="cat-footer-social">
-            <a href="#" aria-label="Instagram"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true"><path d="M12 2.2c3.2 0 3.6 0 4.8.1 1.2.1 1.8.2 2.2.4.6.2 1 .5 1.4.9.4.4.7.8.9 1.4.2.4.4 1 .4 2.2.1 1.2.1 1.6.1 4.8s0 3.6-.1 4.8c-.1 1.2-.2 1.8-.4 2.2-.2.6-.5 1-.9 1.4-.4.4-.8.7-1.4.9-.4.2-1 .4-2.2.4-1.2.1-1.6.1-4.8.1s-3.6 0-4.8-.1c-1.2-.1-1.8-.2-2.2-.4-.6-.2-1-.5-1.4-.9-.4-.4-.7-.8-.9-1.4-.2-.4-.4-1-.4-2.2C2.2 15.6 2.2 15.2 2.2 12s0-3.6.1-4.8c.1-1.2.2-1.8.4-2.2.2-.6.5-1 .9-1.4.4-.4.8-.7 1.4-.9.4-.2 1-.4 2.2-.4C8.4 2.2 8.8 2.2 12 2.2zm0 1.8c-3.1 0-3.5 0-4.7.1-1.1.1-1.5.2-1.8.3-.5.2-.8.4-1.1.7-.3.3-.5.6-.7 1.1-.1.3-.3.8-.3 1.8-.1 1.2-.1 1.6-.1 4.7s0 3.5.1 4.7c.1 1.1.2 1.5.3 1.8.2.5.4.8.7 1.1.3.3.6.5 1.1.7.3.1.8.3 1.8.3 1.2.1 1.6.1 4.7.1s3.5 0 4.7-.1c1.1-.1 1.5-.2 1.8-.3.5-.2.8-.4 1.1-.7.3-.3.5-.6.7-1.1.1-.3.3-.8.3-1.8.1-1.2.1-1.6.1-4.7s0-3.5-.1-4.7c-.1-1.1-.2-1.5-.3-1.8-.2-.5-.4-.8-.7-1.1-.3-.3-.6-.5-1.1-.7-.3-.1-.8-.3-1.8-.3-1.2-.1-1.6-.1-4.7-.1zm0 3.1a4.9 4.9 0 1 1 0 9.8 4.9 4.9 0 0 1 0-9.8zm0 8.1a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4zm6.2-8.3a1.1 1.1 0 1 1-2.3 0 1.1 1.1 0 0 1 2.3 0z" /></svg></a>
-            <a href="#" aria-label="Facebook"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true"><path d="M22 12a10 10 0 1 0-11.6 9.9v-7H7.9V12h2.5V9.8c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.2.2 2.2.2v2.5h-1.3c-1.2 0-1.6.8-1.6 1.6V12h2.8l-.4 2.9h-2.4v7A10 10 0 0 0 22 12z" /></svg></a>
-            <a href="#" aria-label="YouTube"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2 31.3 31.3 0 0 0 0 12c0 1.9.2 3.9.5 5.8a3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1c.3-1.9.5-3.9.5-5.8s-.2-3.9-.5-5.8zM9.5 15.6V8.4l6.3 3.6-6.3 3.6z" /></svg></a>
-          </div>
-        </div>
-        <p className="cat-footer-bottom">TM &amp; &copy; 2026 Bondok Fried Chicken.</p>
-      </footer>
     </div>
   );
 }
