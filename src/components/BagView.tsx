@@ -161,7 +161,7 @@ export default function BagView() {
             <p className="co-total-num">{fmt(total)}</p>
           </div>
           <Link href="/checkout" className="btn btn-solid co-cta">
-            Proceed to Shipping
+            Proceed to Checkout
             <svg viewBox="0 0 54 54" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M40.4 29.8H0v-6.6h40.4L21.8 4.6 26.5 0l26.6 26.5-26.6 26.5-4.7-4.6 18.6-18.6z" /></svg>
           </Link>
           <p className="co-infobar">Delivery in 25-40 min to your doorstep</p>

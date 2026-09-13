@@ -43,14 +43,18 @@ export default function OrderModal() {
 
   const rows = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return branches
+    const list = branches
       .filter((b) => !q || b.name.toLowerCase().includes(q) || b.area.toLowerCase().includes(q))
       .map((b) => {
         const cov = pos ? coverageOf(pos, b.id) : null;
         return { branch: b, km: cov?.km ?? null, inRange: cov?.inRange ?? null };
       })
       .sort((a, b) => (a.km ?? Infinity) - (b.km ?? Infinity));
-  }, [branches, query, pos]);
+    /* once located in delivery mode, only surface branches that actually deliver
+       to the user (valid/in-domain) — matches the checkout branch picker */
+    if (isDelivery && pos) return list.filter((r) => r.inRange === true);
+    return list;
+  }, [branches, query, pos, isDelivery]);
 
   const mapPoints = branches.map((b) => ({
     id: b.id, name: b.name, coords: branchSamples[b.id].coords,
@@ -67,7 +71,7 @@ export default function OrderModal() {
         const here: [number, number] = [p.coords.latitude, p.coords.longitude];
         setPos(here); setLocating(false);
         selectBranch(nearestBranchId(here));   // your nearest branch (always deliverable in the demo)
-        setNote('Nearest branches to you, closest first:');
+        setNote(isDelivery ? 'Branches that deliver to your location, closest first:' : 'Nearest branches to you, closest first:');
       },
       () => { setLocating(false); setNote('Couldn’t get your location — pick a branch below.'); },
       { timeout: 8000 },
@@ -155,6 +159,13 @@ export default function OrderModal() {
               </li>
             ))}
           </ul>
+          {rows.length === 0 && (
+            <p className="omodal-note-sm">
+              {isDelivery && pos
+                ? 'No branch delivers to that spot — clear the search or switch to pickup.'
+                : 'No branch matches your search.'}
+            </p>
+          )}
 
           <p className="omodal-note">
             Prices and item availability may vary per branch.{' '}

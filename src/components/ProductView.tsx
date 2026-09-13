@@ -197,20 +197,20 @@ export default function ProductView({ category, product, variants }: Props) {
                   <div className="pd-oow-media">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={p.image} alt={p.name} loading="lazy" draggable={false} />
+                    {q === 0 ? (
+                      <button className="pd-oow-add" aria-label={`Add ${p.name}`} onClick={() => setOowQty((s) => ({ ...s, [p.slug]: 1 }))}>
+                        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" d="M12 5v14M5 12h14" /></svg>
+                      </button>
+                    ) : (
+                      <span className="qstep qstep-sm pd-oow-step">
+                        <button className="qstep-dec" aria-label={`Decrease ${p.name}`} onClick={() => setOowQty((s) => ({ ...s, [p.slug]: Math.max(0, q - 1) }))}>−</button>
+                        <b key={q}>{q}</b>
+                        <button className="qstep-inc" aria-label={`Increase ${p.name}`} onClick={() => setOowQty((s) => ({ ...s, [p.slug]: q + 1 }))}>+</button>
+                      </span>
+                    )}
                   </div>
                   <p className="pd-oow-name">{p.name}</p>
                   <p className="pd-oow-price">{p.price != null ? `EGP ${p.price}` : '—'}</p>
-                  {q === 0 ? (
-                    <button className="pd-oow-add" aria-label={`Add ${p.name}`} onClick={() => setOowQty((s) => ({ ...s, [p.slug]: 1 }))}>
-                      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" d="M12 5v14M5 12h14" /></svg>
-                    </button>
-                  ) : (
-                    <span className="qstep qstep-sm pd-oow-step">
-                      <button className="qstep-dec" aria-label={`Decrease ${p.name}`} onClick={() => setOowQty((s) => ({ ...s, [p.slug]: Math.max(0, q - 1) }))}>−</button>
-                      <b key={q}>{q}</b>
-                      <button className="qstep-inc" aria-label={`Increase ${p.name}`} onClick={() => setOowQty((s) => ({ ...s, [p.slug]: q + 1 }))}>+</button>
-                    </span>
-                  )}
                 </div>
               );
             })}
@@ -255,8 +255,10 @@ export default function ProductView({ category, product, variants }: Props) {
         <div className="pd-left">
           <div className="pd-gallery">
             <div className="pd-stage">
-              <ProductBadges tags={product.tags} className="pd-badges" />
-              {config.badge && <span className="pd-badge">{config.badge}</span>}
+              <div className="pd-stage-tags">
+                <ProductBadges tags={product.tags} className="pd-badges" />
+                {config.badge && <span className="pd-badge">{config.badge}</span>}
+              </div>
               <button className="pd-share" aria-label="Share this product" onClick={share}>
                 {shared ? <span className="pd-shared">Link copied!</span> : (
                   /* eslint-disable-next-line @next/next/no-img-element */

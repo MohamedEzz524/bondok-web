@@ -31,6 +31,7 @@ interface Shipping {
   name: string;
   phone: string;
   address: string;
+  governorate: string;
   city: string;
   building: string;
   notes: string;
@@ -51,10 +52,13 @@ export default function CheckoutFlow() {
   const { selected } = useBranch();
   const { user, spendPoints } = useAuth();
   const [step, setStep] = useState<Step>('shipping');
-  const [ship, setShip] = useState<Shipping>({
+  const [ship, setShip] = useState<Shipping>(() => ({
     mode: 'delivery', location: 'Home', name: '', phone: '',
-    address: '', city: 'Cairo', building: '', notes: '', branch: '',
-  });
+    address: '',
+    governorate: selected?.governorate ?? 'Cairo',
+    city: selected?.city ?? 'Nasr City',
+    building: '', notes: '', branch: '',
+  }));
   const [pay, setPay] = useState<'card' | 'cod' | 'wallet'>('card');
   const [saveCard, setSaveCard] = useState(true);
   const [error, setError] = useState('');
@@ -108,7 +112,8 @@ export default function CheckoutFlow() {
     if (!EG_PHONE.test(ship.phone)) { setError('Please enter a valid Egyptian mobile number (01X XXXX XXXX).'); return; }
     if (ship.mode === 'delivery') {
       if (!ship.address.trim() || !ship.building.trim()) { setError('Please fill your address and building details.'); return; }
-      if (coverage === false) { setError('This location is outside the selected branch’s delivery area — switch branch or choose pickup.'); return; }
+      if (coverage === false) { setError('No Bondok branch covers the selected area — choose a covered governorate and city.'); return; }
+      if (coverage !== true) { setError('Please choose a delivery branch for your area.'); return; }
     } else if (!ship.branch) { setError('Please choose a pickup branch.'); return; }
     try { localStorage.setItem('bondok-shipping-v1', JSON.stringify(ship)); } catch { /* ignore */ }
     go('payment');
@@ -122,7 +127,7 @@ export default function CheckoutFlow() {
       mode: ship.mode,
       name: ship.name,
       phone: ship.phone,
-      address: ship.mode === 'delivery' ? [ship.building, ship.address, ship.city].filter(Boolean).join(', ') : undefined,
+      address: ship.mode === 'delivery' ? [ship.building, ship.address, ship.city, ship.governorate].filter(Boolean).join(', ') : undefined,
       branch: ship.branch || selected?.id || undefined,
       payment: pay,
       items: items.map((i) => ({ slug: i.slug, name: i.name, image: i.image, qty: i.qty, price: i.price, isGift: i.isGift, options: i.options })),
@@ -243,25 +248,22 @@ export default function CheckoutFlow() {
 
                 {ship.mode === 'delivery' ? (
                   <div className="ct-anim">
-                    <div className="ct-row">
-                      <div className="ct-field">
-                        <label className="ct-label" htmlFor="co-addr">Delivery Address <span className="ct-req">*</span></label>
-                        <span className="co-inpwrap">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src="/icons/Icon-location.svg" alt="" width="13" />
-                          <input id="co-addr" placeholder="Street, area" value={ship.address} onChange={(e) => setShip({ ...ship, address: e.target.value })} />
-                        </span>
-                      </div>
-                      <div className="ct-field">
-                        <label className="ct-label">City <span className="ct-req">*</span></label>
-                        <Select
-                          ariaLabel="City"
-                          value={ship.city}
-                          onChange={(v) => setShip({ ...ship, city: v })}
-                          options={['Cairo', 'Giza', 'Alexandria', 'Mansoura'].map((c) => ({ value: c, label: c }))}
-                        />
-                      </div>
+                    <div className="ct-field">
+                      <label className="ct-label" htmlFor="co-addr">Delivery Address <span className="ct-req">*</span></label>
+                      <span className="co-inpwrap">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src="/icons/Icon-location.svg" alt="" width="13" />
+                        <input id="co-addr" placeholder="Street, area" value={ship.address} onChange={(e) => setShip({ ...ship, address: e.target.value })} />
+                      </span>
                     </div>
+
+                    <DeliveryCoverage
+                      governorate={ship.governorate}
+                      city={ship.city}
+                      onArea={(governorate, city) => setShip((s) => ({ ...s, governorate, city }))}
+                      onStatus={setCoverage}
+                    />
+
                     <div className="ct-field">
                       <label className="ct-label" htmlFor="co-bldg">Building / Apartment / Floor <span className="ct-req">*</span></label>
                       <span className="co-inpwrap">
@@ -286,8 +288,6 @@ export default function CheckoutFlow() {
                     />
                   </div>
                 )}
-
-                {ship.mode === 'delivery' && <DeliveryCoverage onStatus={setCoverage} />}
 
                 {error && <p className="ct-error" role="alert">{error}</p>}
                 <button className="btn btn-solid co-cta" onClick={submitShipping}>
