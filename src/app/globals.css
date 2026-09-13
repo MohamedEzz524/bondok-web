@@ -491,12 +491,15 @@ main.page { flex: 1 0 auto; }
 .pd-also-row, .recent-row, .pd-oow-row, .menu-cats-bar { user-select: none; -webkit-user-select: none; }
 .pd-also-row *, .recent-row *, .pd-oow-row * { -webkit-user-drag: none; }
 .mw-fav { position: absolute; top: 12px; right: 12px; z-index: 2; }
-.mw-media { display: block; aspect-ratio: 4 / 3; }
-.mw-media img { width: 100%; height: 100%; object-fit: contain; }
-.mw-body { margin-top: 8px; display: flex; flex-direction: column; gap: 5px; }
+/* fixed-ratio media box (padding-hack) so every card's image occupies the SAME
+   height regardless of the source image's intrinsic aspect — keeps names + the
+   price/button row aligned across a row/carousel of cards */
+.mw-media { position: relative; display: block; width: 100%; height: 0; padding-bottom: 75%; overflow: hidden; }
+.mw-media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+.mw-body { margin-top: 8px; display: flex; flex-direction: column; gap: 5px; flex: 1 1 auto; }
 .mw-name { font-size: 19px; font-weight: 800; color: var(--text); line-height: 1.25; }
 .mw-name:hover { color: var(--orange); }
-.mw-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.mw-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: auto; }
 .mw-price { font-size: 28px; font-weight: 600; line-height: 1; color: var(--orange); white-space: nowrap; }
 .mw-price span { font-size: 12px; }
 .mw-price em { font-size: 12px; font-weight: 700; color: var(--text-muted); font-style: normal; }
