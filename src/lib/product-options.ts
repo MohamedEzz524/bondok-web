@@ -38,12 +38,10 @@ const HEAT: OptionGroup = {
   key: 'heat',
   label: 'Spicy Level',
   type: 'single',
-  defaultIdx: 1,
+  defaultIdx: 0,
   choices: [
-    { label: 'Mild', delta: 0 },
-    { label: 'Medium', delta: 0 },
-    { label: 'Hot', delta: 0 },
-    { label: 'Extra Hot', delta: 0 },
+    { label: 'Normal', delta: 0 },
+    { label: 'Spicy', delta: 0 },
   ],
 };
 

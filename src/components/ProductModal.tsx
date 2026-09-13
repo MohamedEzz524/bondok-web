@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { Product } from '@/lib/menu-data';
 import { useCart } from './cart-context';
 import { useCatalog } from './catalog-context';
@@ -18,6 +18,9 @@ interface Props {
   onClose: () => void;
 }
 
+/* one ordered unit's option selections (each unit can differ) */
+type UnitState = { single: Record<string, number>; multi: Record<string, Record<number, number>>; combo: boolean };
+
 /* right-column hints (reference copy) */
 const HINTS: Record<string, string> = {
   size: 'Free upgrade on combos',
@@ -31,24 +34,27 @@ export default function ProductModal({ product, onClose }: Props) {
   const catSlug = findProduct(product.slug)?.catSlug ?? '';
   const config = useMemo(() => optionsFor(product, catSlug), [product, catSlug]);
 
-  const [qty, setQty] = useState(1);
+  const [units, setUnits] = useState<UnitState[]>([]);
+  const [activeUnit, setActiveUnit] = useState(0);
   const [closing, setClosing] = useState(false);
-  const [combo, setCombo] = useState(false);
-  const [singles, setSingles] = useState<Record<string, number>>({});
-  const [multis, setMultis] = useState<Record<string, Set<number>>>({});
   const [note, setNote] = useState('');
+
+  const defaultUnit = useCallback((): UnitState => {
+    const single: Record<string, number> = {};
+    const multi: Record<string, Record<number, number>> = {};
+    for (const g of config.groups) { if (g.type === 'single') single[g.key] = g.defaultIdx ?? 0; else multi[g.key] = {}; }
+    return { single, multi, combo: false };
+  }, [config]);
 
   /* (re)seed selections when the product changes */
   useEffect(() => {
-    const s: Record<string, number> = {};
-    const m: Record<string, Set<number>> = {};
-    for (const g of config.groups) {
-      if (g.type === 'single') s[g.key] = g.defaultIdx ?? 0;
-      else m[g.key] = new Set();
-    }
-    setSingles(s); setMultis(m); setCombo(false); setQty(1); setNote('');
+    setUnits([defaultUnit()]); setActiveUnit(0); setNote('');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [product.slug]);
+
+  const qty = Math.max(1, units.length);
+  const cur: UnitState = units[activeUnit] ?? units[0] ?? { single: {}, multi: {}, combo: false };
+  const singles = cur.single, multis = cur.multi, combo = cur.combo;
 
   const close = () => { setClosing(true); setTimeout(onClose, 220); };
 
@@ -60,71 +66,76 @@ export default function ProductModal({ product, onClose }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const setSingle = (key: string, idx: number) => setSingles((p) => ({ ...p, [key]: idx }));
-  const toggleMulti = (key: string, idx: number) =>
-    setMultis((p) => {
-      const s = new Set(p[key]); s.has(idx) ? s.delete(idx) : s.add(idx);
-      return { ...p, [key]: s };
-    });
+  const patchActive = (fn: (u: UnitState) => UnitState) => setUnits((arr) => arr.map((u, i) => (i === activeUnit ? fn(u) : u)));
+  const setQty = (n: number) => {
+    const next = Math.max(1, n);
+    setUnits((arr) => (next <= arr.length ? arr.slice(0, next) : [...arr, ...Array.from({ length: next - arr.length }, () => defaultUnit())]));
+    setActiveUnit((a) => Math.min(a, next - 1));
+  };
+  const setSingle = (key: string, idx: number) => patchActive((u) => ({ ...u, single: { ...u.single, [key]: idx } }));
+  const setCombo = (v: boolean) => patchActive((u) => ({ ...u, combo: v }));
+  const toggleMulti = (key: string, idx: number) => patchActive((u) => {
+    const g = { ...(u.multi[key] ?? {}) };
+    if (g[idx] > 0) delete g[idx]; else g[idx] = 1;
+    return { ...u, multi: { ...u.multi, [key]: g } };
+  });
+  const setMultiQty = (key: string, idx: number, q: number) => patchActive((u) => {
+    const g = { ...(u.multi[key] ?? {}) };
+    if (q <= 0) delete g[idx]; else g[idx] = q;
+    return { ...u, multi: { ...u.multi, [key]: g } };
+  });
 
   const base = branchPrice ?? 0;
-  const unitExtra = useMemo(() => {
-    let x = combo && config.combo ? config.combo.delta : 0;
+  const unitInfo = useCallback((u: UnitState) => {
+    let d = u.combo && config.combo ? config.combo.delta : 0;
+    const opts: string[] = [];
     for (const g of config.groups) {
-      if (g.type === 'single') x += g.choices[singles[g.key] ?? g.defaultIdx ?? 0]?.delta ?? 0;
-      else for (const idx of multis[g.key] ?? []) x += g.choices[idx]?.delta ?? 0;
+      if (g.type === 'single') {
+        const c = g.choices[u.single[g.key] ?? g.defaultIdx ?? 0];
+        if (c) { d += c.delta; if (!(g.key === 'size' && c.label === 'Regular')) opts.push(c.label); }
+      } else {
+        for (const [idxStr, q] of Object.entries(u.multi[g.key] ?? {})) { const c = g.choices[Number(idxStr)]; if (c && q > 0) { d += c.delta * q; opts.push(`${c.label}${q > 1 ? ` ×${q}` : ''}`); } }
+      }
     }
-    return x;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [combo, config, singles, multis]);
+    if (u.combo && config.combo) opts.push(`Combo (${config.combo.includes})`);
+    return { delta: d, opts };
+  }, [config]);
+  const unitExtra = unitInfo(cur).delta;
   const unit = base + unitExtra;
-  const total = unit * qty;
+  const orderTotal = units.reduce((s, u) => s + base + unitInfo(u).delta, 0);
 
   /* short summary for the sticky bar: size · heat · combo */
   const barBits = useMemo(() => {
     const bits: string[] = [];
     const sizeG = config.groups.find((g) => g.key === 'size');
-    if (sizeG) bits.push(sizeG.choices[singles.size ?? 0]?.label);
+    if (sizeG) bits.push(sizeG.choices[cur.single.size ?? 0]?.label);
     const heatG = config.groups.find((g) => g.key === 'heat');
-    if (heatG) bits.push(heatG.choices[singles.heat ?? heatG.defaultIdx ?? 0]?.label);
-    if (combo) bits.push('Combo');
+    if (heatG) bits.push(heatG.choices[cur.single.heat ?? heatG.defaultIdx ?? 0]?.label);
+    if (cur.combo) bits.push('Combo');
     return bits.filter(Boolean);
-  }, [config, singles, combo]);
-
-  /* full option list stored on the cart line */
-  const buildOptions = () => {
-    const opts: string[] = [];
-    for (const g of config.groups) {
-      if (g.type === 'single') {
-        const c = g.choices[singles[g.key] ?? g.defaultIdx ?? 0];
-        if (!c) continue;
-        if (g.key === 'size' && c.label === 'Regular') continue;
-        opts.push(c.label);
-      } else {
-        for (const idx of multis[g.key] ?? []) opts.push(g.choices[idx].label);
-      }
-    }
-    if (combo && config.combo) opts.push(`Combo (${config.combo.includes})`);
-    return opts;
-  };
+  }, [config, cur]);
 
   const addToBag = () => {
-    const opts = buildOptions();
-    add(
-      {
+    const groups = new Map<string, { u: UnitState; count: number }>();
+    for (const u of units) {
+      const hash = `${unitInfo(u).opts.join(',')}#${note.trim()}`;
+      const g = groups.get(hash);
+      if (g) g.count += 1; else groups.set(hash, { u, count: 1 });
+    }
+    for (const { u, count } of groups.values()) {
+      const { opts, delta: d } = unitInfo(u);
+      add({
         slug: product.slug,
         key: `${product.slug}#${opts.join(',')}#${note.trim()}`,
         name: product.name,
         image: product.image,
-        price: branchPrice != null ? unit : undefined,
+        price: branchPrice != null ? base + d : undefined,
         basePrice: branchPrice,
-        optionsDelta: unitExtra,
+        optionsDelta: d,
         options: opts.length ? opts : undefined,
         note: note.trim() || undefined,
-      },
-      'product-modal',
-      qty,
-    );
+      }, 'product-modal', count);
+    }
     close();
   };
 
@@ -167,8 +178,22 @@ export default function ProductModal({ product, onClose }: Props) {
               <p>Personalize options before sliding this into your bag.</p>
             </header>
 
+            {qty > 1 && (config.groups.length > 0 || config.combo) && (
+              <div className="pm-units">
+                <p className="pm-units-label">Customize each item separately</p>
+                <div className="pd-units-tabs" role="tablist">
+                  {units.map((_, i) => (
+                    <button key={i} type="button" role="tab" aria-selected={i === activeUnit}
+                      className={`pd-unit-tab${i === activeUnit ? ' is-on' : ''}`} onClick={() => setActiveUnit(i)}>
+                      Item {i + 1}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {config.combo && (
-              <button className={`pm-combo${combo ? ' is-on' : ''}`} onClick={() => setCombo((c) => !c)} aria-pressed={combo}>
+              <button className={`pm-combo${combo ? ' is-on' : ''}`} onClick={() => setCombo(!combo)} aria-pressed={combo}>
                 <span className="pm-combo-ic" aria-hidden="true">
                   {config.combo.items?.length
                     ? config.combo.items.flatMap((it, i) => [
@@ -211,7 +236,7 @@ export default function ProductModal({ product, onClose }: Props) {
                 );
               }
               // multi = add-ons card
-              const set = multis[g.key] ?? new Set<number>();
+              const set = multis[g.key] ?? {};
               return (
                 <div className="pm-group" key={g.key}>
                   <div className="pm-group-head">
@@ -220,15 +245,26 @@ export default function ProductModal({ product, onClose }: Props) {
                   </div>
                   <div className="pm-addons">
                     {g.choices.map((c, i) => {
-                      const on = set.has(i);
+                      const q = set[i] ?? 0;
+                      const on = q > 0;
                       return (
-                        <button key={c.label} className={`pm-addon${on ? ' is-on' : ''}`} onClick={() => toggleMulti(g.key, i)} role="checkbox" aria-checked={on}>
-                          <span className="pm-check" aria-hidden="true">{on && '✓'}</span>
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          {c.image && <img className="pm-addon-img" src={c.image} alt="" />}
-                          <span className="pm-addon-name">{c.label}</span>
-                          <span className="pm-addon-price">+ EGP {c.delta}</span>
-                        </button>
+                        <div key={c.label} className={`pm-addon${on ? ' is-on' : ''}`}>
+                          <button type="button" className="pm-addon-hit" onClick={() => toggleMulti(g.key, i)} role="checkbox" aria-checked={on}>
+                            <span className="pm-check" aria-hidden="true">{on && '✓'}</span>
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            {c.image && <img className="pm-addon-img" src={c.image} alt="" />}
+                            <span className="pm-addon-name">{c.label}</span>
+                          </button>
+                          {on ? (
+                            <div className="pd-check-step">
+                              <button type="button" aria-label={`Decrease ${c.label}`} onClick={() => setMultiQty(g.key, i, q - 1)}>−</button>
+                              <b>{q}</b>
+                              <button type="button" aria-label={`Increase ${c.label}`} onClick={() => setMultiQty(g.key, i, q + 1)}>+</button>
+                            </div>
+                          ) : (
+                            <span className="pm-addon-price">+ EGP {c.delta}</span>
+                          )}
+                        </div>
                       );
                     })}
                   </div>
@@ -255,9 +291,9 @@ export default function ProductModal({ product, onClose }: Props) {
         <div className="pmodal-bar">
           <div className="pm-qty" aria-label="Quantity">
             <span className="pm-qty-label">QTY:</span>
-            <button aria-label="Decrease quantity" onClick={() => setQty((n) => Math.max(1, n - 1))}>−</button>
+            <button aria-label="Decrease quantity" onClick={() => setQty(qty - 1)}>−</button>
             <span className="pm-qty-num">{qty}</span>
-            <button aria-label="Increase quantity" onClick={() => setQty((n) => n + 1)}>+</button>
+            <button aria-label="Increase quantity" onClick={() => setQty(qty + 1)}>+</button>
           </div>
           <p className="pm-bar-summary">
             <strong>{product.name}</strong>
@@ -265,7 +301,7 @@ export default function ProductModal({ product, onClose }: Props) {
           </p>
           <button className="btn btn-solid pm-add" onClick={addToBag}>
             <img src="/icons/icon-cart.svg" alt="" width="18" aria-hidden="true" />
-            Add to Cart{branchPrice !== undefined ? ` — EGP ${total}` : ''}
+            Add to Cart{branchPrice !== undefined ? ` — EGP ${orderTotal}` : ''}
           </button>
         </div>
       </div>

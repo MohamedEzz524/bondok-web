@@ -21,14 +21,18 @@ export default function Page() {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img className="logo-img" src="/bondok/logo.jpg" alt="Bondok Fried Chicken" />
           </Link>
-          <nav className="cat-header-nav" aria-label="Catering sections">
-            <a href="#benefits">Benefits</a>
-            <a href="#events">Event Types</a>
-            <a href="#catering-faq">FAQ</a>
+          <nav className="cat-header-nav" aria-label="Catering">
             <Link href="/menu" className="btn btn-solid cat-header-cta">Order Now</Link>
           </nav>
         </div>
       </header>
+
+      {/* sticky anchor strip below the header (matches the rewards sub-nav) */}
+      <nav className="subnav cat-subnav" aria-label="Catering sections">
+        <a href="#benefits">Benefits</a>
+        <a href="#events">Event Types</a>
+        <a href="#catering-faq">FAQ</a>
+      </nav>
 
       {/* hero: accent-orange with floating food (reference Frame 38) */}
       <section className="cat-hero">

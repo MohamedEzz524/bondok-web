@@ -1,22 +1,32 @@
-import Link from 'next/link';
+'use client';
 
-/* Mobile sticky tab bar - icons from the approved asset set */
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+
+/* Mobile sticky tab bar - icons from the approved asset set.
+   Active tab follows the current route (trailingSlash-safe). */
 export default function BottomTabs() {
+  const raw = usePathname();
+  const path = raw.replace(/\/+$/, '') || '/';
+  const active = (href: string) =>
+    href === '/' ? path === '/' : path === href || path.startsWith(`${href}/`);
+  const cls = (href: string) => `tab${active(href) ? ' tab-active' : ''}`;
+
   return (
     <nav className="bottom-tabs" aria-label="Primary">
-      <Link href="/" className="tab tab-active">
+      <Link href="/" className={cls('/')} aria-current={active('/') ? 'page' : undefined}>
         <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true">
           <path d="M13.6.8c0 .3.4.5.1.7H13c-.4 0-1.1.4-1.2.9 0 .3.7.7.2.8-.5 0-.9-.6-1.1 0l-.4.6-.1.7-.8.3-.2.8q-.1 1-.8 1.6-.3.1-.5.4 0 .4.3.6l-.2.4-.4.2q-.2.2-.3.8l-.2.8q.1.3.4.5c.1.7-.7.8-.9 1.3q0 .3.3.4h.5q.3 0 .4.3l-.2.4-.4.6v.7l.2.3q0 .3-.3.5L6 17c-.3.3-.6 1-1.1.8l-1.2-.4q-.7 0-1.2.6v1q.1 1.1.7 2l.2.4.1.2-.1.8.1.6q.4.8 1.2 1 1.7.2 2.2-1.2.2-.6 0-1.1t0-.9l1.4-2.4s.4-.7.3-.9q-.5 0-.9.5l-.9 1.2-.8 1.1c-.8-.6-1.3 0-2 .5a3 3 0 0 1-.4-2q0-.5.6-.4l.6.4q.5 0 .6-.4l1-.8 1-1L8 16q.1-.4.4-.6 0-.2.3 0l.1.5c0 .7.2 1.6 1 1.4.4 0 .6-.4.9-.4.4-.2.5-.1.8-.6q0-.5.6-.7.4.2.6 0l.3.1.3.4q.4 0 .6-.2l.6-.4.2-.5c.5-1.1 2-.2 2.5-1l.5-.5q.4-.2.4-.5c.1-.5.2 0 .5-.2v-.3h.3l.5-.6q.2-.3.8-.5.3 0 .2-.6l-.5-.2q-.2 0 0-.2t.2-.7v-.2q.4 0 .5-.4h.1q.2 0 .3-.2l-.2-.5q-.1-.4.2-.5t.5-.3c.2-.4-.3-.6-.5-.7l-.5-.6.1-.4.5-.6q-.1-.5-.4-.8c-.3-.3.5-.6.4-.9q-.2-.4-.8-.4l-.3-.4-.5-.4-1-.5q0-.3-.3-.3l-.3-.3V.7l-.2-.2h-1l-.3-.5q-.4 0-.6.2l-.4.5q-.4.1-.6-.2c-.3 0-1.2 0-1.2.3M4.3 21.2q.4-.8 1.2-.3.6.3.4 1 .2.3 0 .5-.4.1-.7-.1-.6-.4-1-1.1m1.1 2q-1 0-1.3-1zm3-9.4q-.3.4-.4.1 0-.4.4-.6l.1.2zm2 2.5h-.4c.2-.6.5 0 .3 0m-.2-1.7v-.3c0-.2.6 0 .4.2l-.1.2zm1.8.3q-.2-.1-.2-.4h.1l.4.3v.1zm-1.3-6.1c0-.4.5-.2.3.1q-.2.2-.3-.1m1.2 3.2q.1.5-.2.2c-.3-.2 0-.6.2-.2m2.3 3.2q-.3 0-.3-.2.1-.2.5-.3v.2zm-.5-2.4q-.6.3-.3-.3h.1zm-2.7-6-.3-.1q0-.3.2-.5l.2.1.1.2v.2m3.4 4.6q-.1.6-.5.4v-.4l-.3-.5-.2-.2q0-.2.2-.2l.3.2zm-.7-4.6q0 .4-.5.6-.3.1-.4-.1c-.3-.7 1.1-1.2 1-.5m4 5.9q-.1.3-.4 0 .2-.5.4 0m-1-2.5c0 .3-.7 0-.5-.4s.5.1.4.4m-3.3-8q-.1.5-.5.3c-.3-.3.4-.8.5-.4M19 3.3c0-.3.5 0 .4.2q-.4.2-.4-.2M17.4 6c0-.3.5-.4.4 0 0 .3-.5.3-.4 0m.4 2.3q-.3.6-.6.1c0-.5.7-.6.6 0" />
         </svg>
         <span>Home</span>
       </Link>
-      <Link href="/offers" className="tab">
+      <Link href="/offers" className={cls('/offers')} aria-current={active('/offers') ? 'page' : undefined}>
         <svg viewBox="0 0 240 240" width="24" height="24" fill="currentColor" aria-hidden="true">
           <path d="m214 116-90-90c-3-4-8-6-14-6H40c-11 0-20 9-20 20v70c0 6 2 11 6 14l90 90c3 4 8 6 14 6s11-2 14-6l70-70c4-3 6-8 6-14s-2-11-6-14M55 70a1 1 0 0 1 0-30 1 1 0 0 1 0 30" />
         </svg>
         <span>Offers</span>
       </Link>
-      <Link href="/menu" className="tab">
+      <Link href="/menu" className={cls('/menu')} aria-current={active('/menu') ? 'page' : undefined}>
         <svg viewBox="0 0 240 240" width="24" height="24" fill="currentColor" aria-hidden="true">
           <path d="M168 28c1-10 4-26-1-26-4 0-6 10-14 10s-6-10-10-10h-1c-4-1-5 10-13 10-9 0-10-11-14-11h-2c-3-1-7 11-15 11S92 1 88 0h-3c-4 0-7 13-15 13-11 0-5-8-9-12-3-2-6 2-8 15l-5 22-28 178v3l4 2h110c3 0 5-2 5-5l29-186zm-68 128s-1 0 0-1v-1l1 1zm-4-5v7h-5v-7h-1c-6-2-11-5-13-10-2-2-3-6-2-11 1-4 4-10 0-14-3-3-7 2-7 2l-6-7c10-11 20-11 23-7 5 3 3 9 2 14-2 6-1 9 2 10 2 0 5-2 7-6a40 40 90 0 0 3-15l2-13h-5c-1 0-4-2-3-5 0-3 3-4 5-3 2 0 2 2 2 2s1-2 4-2 4 3 4 3l8-3-2 5 3 1-3 2c3 2 2 5 0 6l6 21c3 20-13 30-24 30m5 4v1z" />
           <path d="M101 154v1h1zm9-62-1 2 1 1c1 0 2-1 1-2 0 0 0-1-2 0zm78 103a6 6 90 0 0-8 0l-28 23 1 2h58s1-1 0-2z" />
@@ -24,13 +34,13 @@ export default function BottomTabs() {
         </svg>
         <span>Menu</span>
       </Link>
-      <Link href="/rewards" className="tab">
+      <Link href="/rewards" className={cls('/rewards')} aria-current={active('/rewards') ? 'page' : undefined}>
         <svg viewBox="-12 -12 24 24" width="24" height="24" fill="currentColor" aria-hidden="true">
           <path d="M-8 8h3v2h-5V5h2ZM8-8v3h2v-5H5v2ZM8 8V5h2v5H5V8ZM-8-8v3h-2v-5h5v2zm1 1h6v6h-6Zm0 8v6h6V1Zm8-2h6v-6H1Zm0 2h1.5v3h3v3H7V5.5H4v-3H1Zm3 0h1.5v3H7V2.5H4ZM1 4h1.5v3H4V5.5H1Zm1.5-9.5h3v3h-3Zm-8 0v3h3v-3Zm0 8h3v3h-3Z" />
         </svg>
         <span>Rewards</span>
       </Link>
-      <Link href="/bag" className="tab">
+      <Link href="/bag" className={cls('/bag')} aria-current={active('/bag') ? 'page' : undefined}>
         <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
           <path fill="currentColor" d="M7 7V6a5 5 0 0 1 10 0v1h3v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7z" />
         </svg>

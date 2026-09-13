@@ -17,8 +17,9 @@ const DOC_KEYS: Record<string, string> = {
 export default function Footer() {
   const { openDoc } = useUI();
   const pathname = usePathname();
-  /* /catering is a standalone landing with its own chrome (reference behavior) */
-  if (pathname === '/catering') return null;
+  /* /catering is a standalone landing with its own chrome (reference behavior).
+     trailingSlash:true means the path is "/catering/" on export — normalize it. */
+  if (pathname.replace(/\/+$/, '') === '/catering') return null;
   return (
     <footer className="site-footer">
       <div className="footer-inner u-container">
@@ -34,15 +35,16 @@ export default function Footer() {
           ))}
         </ul>
 
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img className="footer-logo-img footer-logo-top" src="/bondok/logo.webp" alt="Bondok Fried Chicken" />
+
         <div className="footer-legal">
           <p>All pictures are shown for illustrative purposes only. Actual product may vary.</p>
-          <p>&copy; 2026 Bondok Fried Chicken. All rights reserved.</p>
           <p>Prices may vary per branch</p>
         </div>
 
-        <div className="footer-social">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img className="footer-logo-img" src="/bondok/logo.webp" alt="Bondok Fried Chicken" />
+        <div className="footer-bottom">
+          <p className="footer-copy">&copy; 2026 Bondok Fried Chicken. All rights reserved.</p>
           <div className="social-icons">
             <a href="#" aria-label="Instagram">
               <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">

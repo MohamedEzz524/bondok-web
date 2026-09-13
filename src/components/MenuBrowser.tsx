@@ -142,6 +142,7 @@ export default function MenuBrowser({ categories: baseCategories, initialCategor
   const [sort, setSort] = useState<'default' | 'name-asc' | 'name-desc' | 'price-asc' | 'price-desc'>('default');
   const [activeCat, setActiveCat] = useState<string>(() => initialCategory ?? searchParams.get('cat') ?? categories[0]?.slug ?? '');
   const [subTab, setSubTab] = useState<SubTab>('All Items');
+  const [searchFocus, setSearchFocus] = useState(false);   // reveal "Popular Searches" only while the input is focused
   const [hotOnly, setHotOnly] = useState(false);   // "Today's Hot Deals" toggle
   const [selected, setSelected] = useState<{ cat: string; slug: string } | null>(null);
   const [favOnly, setFavOnly] = useState(() => searchParams.get('fav') === '1');
@@ -463,6 +464,8 @@ export default function MenuBrowser({ categories: baseCategories, initialCategor
         <input
           type="search" placeholder="Search the menu..." aria-label="Search the menu"
           value={query}
+          onFocus={() => setSearchFocus(true)}
+          onBlur={() => setSearchFocus(false)}
           onChange={(e) => { const v = e.target.value; if (v) setView('browse'); withFlip(() => setQuery(v)); }}
         />
         {query && (
@@ -550,7 +553,7 @@ export default function MenuBrowser({ categories: baseCategories, initialCategor
               onClick={() => withFlip(() => setFavOnlySynced(!favOnly))}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img className="cat-emoji cat-emoji-img" src="/icons/heart-fill.webp" alt="" aria-hidden="true" />
+              <img className="cat-emoji cat-row-img" src="/icons/fav-chicken.webp" alt="" aria-hidden="true" />
               <span className="cat-name">My Favorites</span>
               <span className="cat-count">{favorites.length}</span>
             </button>
@@ -558,7 +561,8 @@ export default function MenuBrowser({ categories: baseCategories, initialCategor
               const on = !favOnly && !searching && activeCat === c.slug;
               return (
                 <button key={c.slug} className={`cat-row${on ? ' is-active' : ''}`} onClick={() => selectCategory(c.slug)}>
-                  <span className="cat-emoji" aria-hidden="true">{CAT_EMOJI[c.slug] ?? '🍽️'}</span>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img className="cat-emoji cat-row-img" src={c.cover} alt="" aria-hidden="true" loading="lazy" />
                   <span className="cat-name">{c.name}</span>
                   <span className="cat-count">{c.products.length}</span>
                 </button>
@@ -587,7 +591,7 @@ export default function MenuBrowser({ categories: baseCategories, initialCategor
                   onClick={() => withFlip(() => setFavOnlySynced(!favOnly))}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <span className="mcat-ic"><img src="/icons/heart-fill.webp" alt="" /></span>
+                  <span className="mcat-ic"><img src="/icons/fav-chicken.webp" alt="" /></span>
                   <span className="mcat-name">Favorites</span>
                 </button>
                 {categories.map((c) => {
@@ -603,23 +607,19 @@ export default function MenuBrowser({ categories: baseCategories, initialCategor
               </div>
             </div>
 
-            {/* search card: search + popular searches + quick filters */}
+            {/* search card: search + (focus-revealed) popular searches */}
             <div className="menu-searchcard">
               {searchBar}
-              <div className="menu-popular" ref={popularDrag.ref} {...popularDrag.dragProps}>
-                <span className="menu-popular-label">Popular Searches:</span>
-                {POPULAR_TAGS.map((t) => (
-                  <button key={t} className="menu-poptag" onClick={() => { setView('browse'); withFlip(() => setQuery(t)); }}>{t}</button>
-                ))}
-              </div>
-              {shown.catMode && (
-                <div className="menu-popular menu-qfrow" ref={subtabsDrag.ref} {...subtabsDrag.dragProps}>
-                  <span className="menu-popular-label">Quick Filters:</span>
-                  {SUB_TABS.map((t) => (
-                    <button key={t} className={`menu-poptag${subTab === t ? ' is-on' : ''}`} onClick={() => withFlip(() => setSubTab(t))}>{t}</button>
+              {/* keep chips clickable: preventDefault on mousedown so the input
+                  doesn't blur (and collapse the row) before the click lands */}
+              <div className={`menu-popwrap${searchFocus ? ' is-open' : ''}`} onMouseDown={(e) => e.preventDefault()}>
+                <div className="menu-popular" ref={popularDrag.ref} {...popularDrag.dragProps}>
+                  <span className="menu-popular-label">Popular Searches:</span>
+                  {POPULAR_TAGS.map((t) => (
+                    <button key={t} className="menu-poptag" onClick={() => { setView('browse'); withFlip(() => setQuery(t)); }}>{t}</button>
                   ))}
                 </div>
-              )}
+              </div>
             </div>
 
             {resultCount === 0 ? (
@@ -640,7 +640,7 @@ export default function MenuBrowser({ categories: baseCategories, initialCategor
                       key={p.slug}
                       className={`pcard${(p.margin ?? 0) >= 5 ? ' is-featured' : ''}`}
                       style={flipBudget.has(p.slug) ? { viewTransitionName: `p-${catSlug}-${p.slug}` } : undefined}
-                      onClick={() => { recordView(p.slug); setSelected({ cat: catSlug, slug: p.slug }); }}
+                      onClick={() => { recordView(p.slug); router.push(`/menu/${catSlug}/${p.slug}`); }}
                     >
                       <ProductBadges tags={p.tags} variant="ribbon" className="pcard-ribbon" />
                       <FavButton slug={p.slug} className="pcard-fav" />
@@ -652,7 +652,8 @@ export default function MenuBrowser({ categories: baseCategories, initialCategor
                           className="btn btn-solid pcard-add"
                           onClick={(e) => {
                             e.stopPropagation();
-                            add({ slug: p.slug, name: p.name, image: p.image, price: p.price }, 'menu-page');
+                            recordView(p.slug);
+                            setSelected({ cat: catSlug, slug: p.slug });
                           }}
                         >
                           Add to Bag

@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { offers } from '@/lib/offers';
 import LocationBar from '@/components/LocationBar';
+import AuthButton from '@/components/AuthButton';
 
 export const metadata: Metadata = { title: 'Offers — Bondok Fried Chicken' };
 
@@ -23,12 +24,12 @@ export default function Page() {
           </div>
           <div className="offers-signup-card">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/bondok/fav-tenders.webp" alt="" />
+            <img src="/bondok/menu/kids-tenders/12-pcs-tenders.webp" alt="" />
             <div className="offers-signup-text">
               <strong>Your first deal is on us</strong>
               <span>Members get exclusive offers and early access to new meals.</span>
             </div>
-            <button className="btn btn-solid offers-signup-btn">Sign Up</button>
+            <AuthButton className="btn btn-solid offers-signup-btn">Sign Up</AuthButton>
           </div>
         </div>
 

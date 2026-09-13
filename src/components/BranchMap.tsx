@@ -22,6 +22,7 @@ interface Props {
   selectedId?: string | null;
   userPos?: [number, number] | null;
   onSelect?: (id: string) => void;
+  onPick?: (coords: [number, number]) => void;   // tap the map to drop a location
   radiusKm?: number;          // draw a coverage ring around `center`
   center?: [number, number];  // coverage centre (defaults to the selected point)
   fitRadiusKm?: number;       // zoom the viewport to ~this many km around `center`
@@ -30,7 +31,7 @@ interface Props {
 
 const PAD = 0.14;
 
-export default function BranchMap({ points, selectedId, userPos, onSelect, radiusKm, center, fitRadiusKm, className = '' }: Props) {
+export default function BranchMap({ points, selectedId, userPos, onSelect, onPick, radiusKm, center, fitRadiusKm, className = '' }: Props) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const [dims, setDims] = useState({ w: 640, h: 400 });
 
@@ -114,19 +115,34 @@ export default function BranchMap({ points, selectedId, userPos, onSelect, radiu
     const clampX = (v: number) => Math.max(PAD * W, Math.min(W - PAD * W, v));
     const clampY = (v: number) => Math.max(PAD * H + 26, Math.min(H - PAD * H, v));
 
+    const unproject = (x: number, y: number): [number, number] => {
+      const fx = (x - padX) / (W - 2 * padX);
+      const fy = 1 - (y - padY) / (H - 2 * padY);
+      return [minLat + fy * (maxLat - minLat), minLng + fx * (maxLng - minLng)];
+    };
+
     return {
       pins: points.map((p, i) => ({ ...p, xy: [clampX(xy[i][0]), clampY(xy[i][1])] as [number, number] })),
       user: userPos ? proj(userPos) : null,
       ring,
+      unproject,
     };
   }, [points, selectedId, userPos, radiusKm, center, fitRadiusKm, W, H]);
+
+  const pickAt = (e: React.MouseEvent<SVGElement>) => {
+    if (!onPick) return;
+    const svg = e.currentTarget.ownerSVGElement ?? (e.currentTarget as unknown as SVGSVGElement);
+    const r = svg.getBoundingClientRect();
+    onPick(geo.unproject(((e.clientX - r.left) / r.width) * W, ((e.clientY - r.top) / r.height) * H));
+  };
 
   /* proportional decorative "roads" */
   const road = (pts: [number, number][]) => 'M' + pts.map(([fx, fy]) => `${(fx * W).toFixed(1)} ${(fy * H).toFixed(1)}`).join(' L');
 
   return (
     <div className={`bmap ${className}`.trim()} ref={wrapRef}>
-      <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" className="bmap-svg" role="img" aria-label="Branch locations map">
+      <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" className="bmap-svg" role="img" aria-label="Branch locations map"
+        onClick={pickAt} style={onPick ? { cursor: 'crosshair' } : undefined}>
         <rect x="0" y="0" width={W} height={H} fill="#eef3ec" />
         <g stroke="#dfe7db" strokeWidth="1">
           {Array.from({ length: 7 }, (_, i) => <line key={`v${i}`} x1={(i + 1) * (W / 8)} y1="0" x2={(i + 1) * (W / 8)} y2={H} />)}
@@ -156,7 +172,7 @@ export default function BranchMap({ points, selectedId, userPos, onSelect, radiu
           return (
             <g key={p.id} transform={`translate(${p.xy[0]} ${p.xy[1]})`} className="bmap-pin"
               style={{ cursor: onSelect ? 'pointer' : 'default' }}
-              onClick={() => onSelect?.(p.id)}>
+              onClick={(e) => { e.stopPropagation(); onSelect?.(p.id); }}>
               <title>{p.name}</title>
               <path d="M0 0 C-9 -12 -14 -18 -14 -26 A14 14 0 1 1 14 -26 C14 -18 9 -12 0 0 Z"
                 fill={isSel ? color : '#fff'} stroke={color} strokeWidth={isSel ? 3 : 2.5}
@@ -166,6 +182,15 @@ export default function BranchMap({ points, selectedId, userPos, onSelect, radiu
           );
         })}
       </svg>
+      {(() => {
+        const sel = points.find((p) => p.id === selectedId);
+        return sel ? (
+          <span className="bmap-label">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor" aria-hidden="true"><path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5z" /></svg>
+            {sel.name}
+          </span>
+        ) : null;
+      })()}
     </div>
   );
 }

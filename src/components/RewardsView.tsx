@@ -162,13 +162,15 @@ export default function RewardsView() {
         <div className="rwx-tier-row">
           {TIERS.map((t) => (
             <motion.article key={t.name} className={`rwx-tier is-${t.state}`} {...fadeUp}>
-              <span className="rwx-tier-badge">
-                {t.state === 'current' ? 'Current Goal' : t.state === 'done' ? 'Unlocked' : 'Locked'}
-              </span>
               <span className="rwx-tier-mark" aria-hidden="true">
                 {t.state === 'locked'
                   ? <svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M6 10V7a6 6 0 0 1 12 0v3h1v11H5V10zm2 0h8V7a4 4 0 0 0-8 0z" /></svg>
-                  : <svg viewBox="0 0 24 24" width="19" height="19"><path fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" d="M20 6.5 9.5 17 4 11.5" /></svg>}
+                  : t.state === 'current'
+                    ? <svg viewBox="0 0 24 24" width="17" height="17"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" strokeWidth="2.4" /><circle cx="12" cy="12" r="2.6" fill="currentColor" /></svg>
+                    : <svg viewBox="0 0 24 24" width="17" height="17"><path fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" d="m5 12.5 4.5 4.5L19 7" /></svg>}
+              </span>
+              <span className="rwx-tier-badge">
+                {t.state === 'current' ? 'Current Goal' : t.state === 'done' ? 'Unlocked' : 'Locked'}
               </span>
               {t.state === 'current' && <span className="rwx-tier-status">In Progress</span>}
               <h3>{t.name}</h3>

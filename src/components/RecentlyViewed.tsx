@@ -1,13 +1,12 @@
 'use client';
 
-/* Horizontal strip of recently viewed products.
-   Shown on the menu launcher and the bag page; hides itself when empty.
-   Mouse users can drag-to-scroll (with momentum); touch uses native scroll. */
+/* Horizontal strip of recently viewed products (menu launcher + bag page).
+   Uses the shared ProductCard so it matches product cards elsewhere. */
 
-import Link from 'next/link';
 import { usePrefs } from './prefs-context';
+import { useCatalog } from './catalog-context';
 import { useCarousel, CarouselArrows } from './Carousel';
-import ProductBadges from './ProductBadges';
+import ProductCard from './ProductCard';
 import { menuCategories } from '@/lib/menu-data';
 import type { MenuCategory, Product } from '@/lib/menu-data';
 
@@ -19,6 +18,7 @@ for (const cat of menuCategories) {
 
 export default function RecentlyViewed({ title = 'Recently viewed' }: { title?: string }) {
   const { recent } = usePrefs();
+  const { priceOf } = useCatalog();
   const cr = useCarousel<HTMLDivElement>();
   const items = recent
     .map((slug) => lookup.get(slug))
@@ -33,12 +33,14 @@ export default function RecentlyViewed({ title = 'Recently viewed' }: { title?: 
         <CarouselArrows nav={cr.nav} onNav={cr.scrollByPage} />
         <div className="recent-row" ref={cr.ref} {...cr.dragProps}>
           {items.map(({ cat, p }) => (
-            <Link key={p.slug} href={`/menu/${cat.slug}/${p.slug}`} className="recent-card" draggable={false}>
-              <ProductBadges tags={p.tags} variant="ribbon" className="recent-ribbon" />
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={p.image} alt={p.name} loading="lazy" draggable={false} />
-              <span>{p.name}</span>
-            </Link>
+            <ProductCard
+              key={p.slug}
+              product={{ ...p, price: priceOf(p.slug) }}
+              href={`/menu/${cat.slug}/${p.slug}`}
+              variant="vertical"
+              size="sm"
+              source="recently-viewed"
+            />
           ))}
         </div>
       </div>

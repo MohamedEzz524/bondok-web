@@ -79,7 +79,7 @@ export default function BagView() {
               transition={{ duration: 0.28, ease: 'easeOut' }}
             >
               <span className="co-item-media">
-                <ProductBadges tags={tags} variant="ribbon" className="co-item-ribbon" />
+                <ProductBadges tags={tags} variant="pills" className="co-item-badges" />
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img className="co-item-img" src={it.image} alt="" />
               </span>
@@ -201,11 +201,16 @@ export default function BagView() {
             </Link>
           </div>
           <div className="co-upsell-grid">
-            {suggestions.map((p) => (
+            {suggestions.map((p) => {
+              const loc = findProduct(p.slug);
+              const href = loc ? `/menu/${loc.catSlug}/${p.slug}` : '/menu';
+              return (
               <article key={p.slug} className="co-upsell-card">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={p.image} alt={p.name} loading="lazy" />
-                <h4>{p.name}</h4>
+                <Link href={href} className="co-upsell-link">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={p.image} alt={p.name} loading="lazy" />
+                  <h4>{p.name}</h4>
+                </Link>
                 <div className="co-upsell-foot">
                   <strong>{p.price != null ? `EGP ${p.price}` : '—'}</strong>
                   <button
@@ -217,7 +222,8 @@ export default function BagView() {
                   </button>
                 </div>
               </article>
-            ))}
+              );
+            })}
           </div>
         </section>
       )}

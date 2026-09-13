@@ -17,6 +17,7 @@ import Toaster from '@/components/Toaster';
 import FloatingContact from '@/components/FloatingContact';
 import DocModal from '@/components/DocModal';
 import AuthModal from '@/components/AuthModal';
+import QuickView from '@/components/QuickView';
 
 export const metadata: Metadata = {
   title: 'Bondok Fried Chicken',
@@ -45,6 +46,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <DocModal />
             <AuthModal />
             <BranchModal />
+            <QuickView />
           </PrefsProvider>
           </CartProvider>
           </CatalogProvider>

@@ -24,8 +24,9 @@ export default function Header() {
     router.push(q ? `/menu?q=${encodeURIComponent(q)}` : '/menu');
   };
 
-  /* /catering is a standalone landing with its own chrome (reference behavior) */
-  if (pathname === '/catering') return null;
+  /* /catering is a standalone landing with its own chrome (reference behavior).
+     trailingSlash:true means the path is "/catering/" on export — normalize it. */
+  if (pathname.replace(/\/+$/, '') === '/catering') return null;
 
   return (
     <header className="site-header">

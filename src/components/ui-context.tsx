@@ -10,6 +10,9 @@ interface UIState {
   orderClosing: boolean;
   docKey: string | null;            // FAQ / legal doc popup (reference pattern)
   authOpen: boolean;                // Sign Up / Log In popup
+  quickView: string | null;         // product slug for the global quick-add popup
+  openQuickView: (slug: string) => void;
+  closeQuickView: () => void;
   openDrawer: () => void;
   closeDrawer: () => void;
   openOrder: (mode: OrderMode) => void;
@@ -29,7 +32,10 @@ export function UIProvider({ children }: { children: ReactNode }) {
   const [orderClosing, setOrderClosing] = useState(false);
   const [docKey, setDocKey] = useState<string | null>(null);
   const [authOpen, setAuthOpen] = useState(false);
+  const [quickView, setQuickView] = useState<string | null>(null);
 
+  const openQuickView = useCallback((slug: string) => setQuickView(slug), []);
+  const closeQuickView = useCallback(() => setQuickView(null), []);
   const openAuth = useCallback(() => setAuthOpen(true), []);
   const closeAuth = useCallback(() => setAuthOpen(false), []);
   const openDrawer = useCallback(() => setDrawerOpen(true), []);
@@ -54,7 +60,7 @@ export function UIProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <UIContext.Provider value={{ drawerOpen, orderMode, orderClosing, docKey, authOpen, openDrawer, closeDrawer, openOrder, switchOrder, closeOrder, openDoc, closeDoc, openAuth, closeAuth }}>
+    <UIContext.Provider value={{ drawerOpen, orderMode, orderClosing, docKey, authOpen, quickView, openQuickView, closeQuickView, openDrawer, closeDrawer, openOrder, switchOrder, closeOrder, openDoc, closeDoc, openAuth, closeAuth }}>
       {children}
     </UIContext.Provider>
   );

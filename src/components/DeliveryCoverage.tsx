@@ -48,6 +48,15 @@ export default function DeliveryCoverage({ onStatus }: { onStatus?: (inRange: bo
 
   return (
     <div className="cov">
+      <div className="cov-intro">
+        <p className="cov-intro-title">
+          <span className="cov-intro-pin" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5z" /></svg>
+          </span>
+          Delivering from <strong>{selected.name}</strong>
+        </p>
+        <p className="cov-intro-text"><strong>1.</strong> Tap a branch pin to pick it &nbsp;·&nbsp; <strong>2.</strong> Tap anywhere on the map (or use your location) to drop your spot — we’ll confirm the branch reaches you or suggest a nearer one.</p>
+      </div>
       <BranchMap
         className="cov-map"
         points={points}
@@ -57,6 +66,7 @@ export default function DeliveryCoverage({ onStatus }: { onStatus?: (inRange: bo
         center={selCoords}
         fitRadiusKm={pos ? effRadius * 1.5 : DELIVERY_RADIUS_KM * 1.7}
         onSelect={selectBranch}
+        onPick={(coords) => { setPos(coords); setNote(''); }}
       />
       <div className="cov-body">
         <button type="button" className="btn btn-outline cov-loc" onClick={useLocation} disabled={locating}>
